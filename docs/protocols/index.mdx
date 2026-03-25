@@ -1,0 +1,52 @@
+---
+title: "Payment Protocols"
+description: "Understand agent payment protocols, how ProtocolRouter unifies verification, and when to use Visa TAP, Google AP2, or Mastercard VI."
+---
+
+# Payment Protocols
+
+Agent payment protocols let autonomous systems prove intent, permissions, and constraints before money moves.
+
+## Why Protocols Matter
+
+## Supported Standards
+
+## Supported Protocols
+
+- Visa TAP with RFC 9421
+- Google AP2 mandates
+- Mastercard VI SD-JWT
+
+## ProtocolRouter
+
+ProtocolRouter gives you a unified entry point for payment verification so each protocol can be normalized behind one decision surface.
+
+```ts title="protocol-router.ts"
+const verification = await protocolRouter.verify({
+  protocol: request.protocol,
+  headers: request.headers,
+  body: request.body,
+  featureFlags: {
+    visaTap: true,
+    googleAp2: true,
+    mastercardVi: true,
+  },
+  fallback: "deny",
+});
+```
+
+## Quick Comparison
+
+| Protocol      | Primary Primitive        | Best Fit                       | Delegation Model              |
+| ------------- | ------------------------ | ------------------------------ | ----------------------------- |
+| Visa TAP      | HTTP signatures + nonces | Real-time API authorization    | Key-based agent identity      |
+| Google AP2    | Mandates + capabilities  | Checkout and shopping tasks    | Multi-hop narrowing chain     |
+| Mastercard VI | SD-JWT credentials       | Constrained delegated payments | L1 → L2 → L3 credential chain |
+
+> **Note:** Recommendation: normalize all protocol outputs into one internal policy schema so fraud and limit engines stay protocol-agnostic.
+
+## Explore by Protocol
+
+- visa-tap
+- ap2
+- mastercard-vi

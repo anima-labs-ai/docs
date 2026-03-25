@@ -1,0 +1,77 @@
+---
+title: "Security"
+description: "Learn about Anima security controls, dual-layer scanning, policy engine rules, and operational best practices."
+---
+
+# Security
+
+Built-in safeguards to protect your agents, users, and outbound communications.
+
+### API Keys
+
+Two types: Master Keys (full admin access) and Agent Keys (scoped to a single mailbox).
+
+### Dual-Layer Content Scanning
+
+Scans with both deterministic regex heuristics and AI classification.
+
+## API Key Types
+
+| Type | Prefix | Permissions | Best Practice |
+|---|---|---|---|
+| Master Key | `mk_` | Full access. Create agents, manage billing, view logs. | Store in server-only environment variables and rotate on schedule. |
+| Agent Key | `ak_` | Scoped access. Send/receive for one specific agent. | Issue least-privilege keys per service and revoke unused keys. |
+
+## Content Scanning Overview (Regex + AI)
+
+- **Regex Layer:** Fast checks for known injection markers, secret patterns, and risky payload signatures.
+- **AI Layer:** GPT-4o-mini classification into `SAFE`, `SUSPICIOUS`, or `BLOCKED`.
+- **Fallback Safety:** If AI credentials are missing, scanning gracefully continues in regex-only mode.
+
+> **Note:** Use `low`, `medium` (default), or `high` sensitivity depending on risk tolerance and expected message variability.
+
+## Content Policy Configuration
+
+The policy engine applies layered rules to outbound content and can combine deterministic and model-based checks.
+
+- **Regex rules:** Match known dangerous patterns.
+- **AI rules:** Enforce decisions based on model classification.
+- **Domain rules:** Whitelist or blacklist domains in message content.
+- **Keyword rules:** Detect finance, attachment, and social engineering signals.
+
+```ts
+const policies = [
+  {
+    id: "block-injection",
+    name: "Block Injection",
+    action: "block",
+    priority: 100,
+    rules: [
+      { type: "regex", value: "ignore\\s+previous\\s+instructions", description: "Prompt injection" },
+      { type: "ai", value: ["BLOCKED"], description: "AI high-risk verdict" }
+    ]
+  }
+];
+```
+
+## Rate Limiting for AI Scanning
+
+AI scanning is rate limited to 100 req/min, uses an LRU cache with 1000 entries and a 5min TTL, and falls back to regex scanning when needed.
+
+## Webhook Security (HMAC Verification)
+
+Webhook payloads are protected with HMAC verification and freshness checks to prevent tampering and replay attacks.
+
+- Use a dedicated webhook secret.
+- Verify the HMAC signature on every request.
+- Compare signatures using constant-time comparison.
+- Reject requests that fail timestamp freshness checks.
+
+> **Warning:** If content is blocked by policy, the API returns a denial response with a reason code so you can audit and tune policy behavior safely.
+
+## Operational Best Practices
+
+- Rotate keys on a regular schedule.
+- Store master keys only in server-side environments.
+- Use least-privilege agent keys per service.
+- Review blocked events and adjust policies carefully.

@@ -1,0 +1,42 @@
+---
+title: "MCP Server"
+description: "Connect Anima to Claude Desktop via Model Context Protocol."
+---
+
+# MCP Server
+
+Anima exposes over 77 specialized tools via the Model Context Protocol (MCP).
+
+## Installation
+
+```bash
+npx @anima/mcp-server --api-key=mk_live_...
+```
+
+## Configuration for Claude Desktop
+
+Add the following configuration to Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "anima": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anima/mcp-server",
+        "--api-key=mk_live_..."
+      ]
+    }
+  }
+}
+```
+
+## Available Tools
+
+- **Mail Operations:** Send, receive, search, and manage emails.
+- **Agent Management:** Create and list sub-agents dynamically.
+- **Drafts & Templates:** Prepare emails for review.
+- **Contacts:** Manage address books.
+
+> **Tip:** Anima tools are designed to be composable. An agent can search for an email, summarize it, draft a reply, and send it—all in one session.

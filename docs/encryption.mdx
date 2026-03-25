@@ -1,0 +1,98 @@
+---
+title: "Encryption & Security"
+description: "Learn how Anima uses AES-256-GCM field-level encryption, envelope encryption, and key rotation to protect sensitive data."
+---
+
+# Encryption & Security
+
+Anima protects sensitive integration secrets with field-level encryption built on AES-256-GCM and envelope key management.
+
+### AES-256-GCM by Default
+
+Field-level encryption uses AES-256-GCM for secure secret storage.
+
+### Envelope Encryption
+
+Org data encryption keys are wrapped and managed through envelope encryption.
+
+## Field-Level Encryption Model
+
+Sensitive values are encrypted at the field level before persistence, keeping secrets protected while preserving application-level access controls.
+
+- **Algorithm:** AES-256-GCM.
+- **Scope:** Encrypt sensitive secret fields individually.
+- **Integrity:** Authenticated encryption provides tamper detection.
+- **Tenant isolation:** Each organization uses isolated encryption context.
+
+## Envelope Encryption (KEK → DEK)
+
+Envelope encryption separates key encryption from data encryption so secrets can be protected with layered key management.
+
+```text
+1. Create org DEK
+2. Wrap DEK with KEK (stored in KMS/HSM boundary)
+3. Encrypt secret field with org DEK (AES-256-GCM)
+4. Persist ciphertext + iv + authTag + keyVersion
+5. On read, unwrap DEK and decrypt if access policy allows
+```
+
+## Encrypted Fields
+
+- API keys
+- Webhook secrets
+- Email provider credentials
+
+## Key Rotation
+
+Key rotation is versioned so encrypted data can move to newer key material over time without breaking existing records.
+
+> **Note:** Rotation is non-breaking: reads support legacy key versions until migration is complete.
+
+## Prisma Encryption Extension Example
+
+This Prisma extension encrypts secrets on write and decrypts them on read.
+
+```ts title="prisma/encryption-extension.ts"
+import { PrismaClient } from "@prisma/client";
+import { encryptField, decryptField } from "@/lib/crypto/field-encryption";
+
+const prisma = new PrismaClient().$extends({
+  query: {
+    integrationCredential: {
+      async create({ args, query }) {
+        const organizationId = args.data.organizationId;
+
+        return query({
+          ...args,
+          data: {
+            ...args.data,
+            secretCiphertext: encryptField({
+              organizationId,
+              plaintext: args.data.secretPlaintext,
+              field: "secretPlaintext",
+            }),
+          },
+        });
+      },
+
+      async findUnique({ args, query }) {
+        const record = await query(args);
+        if (!record) return null;
+
+        return {
+          ...record,
+          secretPlaintext: decryptField({
+            organizationId: record.organizationId,
+            ciphertext: record.secretCiphertext,
+            field: "secretPlaintext",
+          }),
+        };
+      },
+    },
+  },
+});
+
+export { prisma };
+```
+
+> **Warning:** Never log decrypted secrets, and never render plaintext credentials in client-side UI.

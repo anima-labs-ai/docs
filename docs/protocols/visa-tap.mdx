@@ -1,0 +1,63 @@
+---
+title: "Visa TAP"
+description: "Implement Visa TAP with RFC 9421 HTTP Message Signatures, agent registry key management, and nonce-based replay protection."
+---
+
+# Visa TAP
+
+Visa TAP secures agent-initiated payment requests with HTTP Message Signatures and registry-verifiable agent keys.
+
+## RFC 9421 Signatures
+
+## Registry-Based Trust
+
+## Agent Registry API
+
+- `GET /api/agents/:id`
+- `POST /api/agents/:id/keys`
+- `POST /api/agents/:id/revoke`
+
+## Replay Protection (Nonce + Freshness)
+
+Replay protection relies on a unique nonce, a tight freshness window, and a short-lived nonce cache to reject captured requests before they can be reused.
+
+| Field            | Requirement          | Purpose                                        |
+| ---------------- | -------------------- | ---------------------------------------------- |
+| Nonce            | 64-byte base64 value | Prevent duplicate request replay.              |
+| Freshness window | 8 minutes max skew   | Reject stale captured requests.                |
+| Nonce cache      | TTL ≥ 8 minutes      | Guarantee one-time use within validity window. |
+
+## Supported Algorithms
+
+- Ed25519
+- rsa-pss-sha256
+
+## Signing Example
+
+```ts title="visa-tap-sign.ts"
+import { createHash, randomBytes, sign } from "crypto";
+
+const body = JSON.stringify({ amount: 1250, currency: "USD" });
+const nonce = randomBytes(64).toString("base64");
+const created = Math.floor(Date.now() / 1000);
+const digest = createHash("sha-256").update(body).digest("base64");
+
+const signatureBase = [
+  '"@method": post',
+  '"@path": /payments/authorize',
+  '"x-agent-nonce": ' + nonce,
+  '"x-agent-created": ' + created,
+  '"digest": sha-256=:' + digest + ":",
+].join("\n");
+
+const signature = sign(null, Buffer.from(signatureBase), privateKey).toString(
+  "base64",
+);
+
+const signatureInput =
+  'sig1=("@method" "@path" "@x-agent-nonce" "@x-agent-created" "digest");alg="ed25519"';
+```
+
+> **Note:** Persist nonce + signature input hashes for short-term forensic replay analysis.
+
+> **Tip:** Validate signature, timestamp, nonce uniqueness, and key status in a single atomic verification transaction.

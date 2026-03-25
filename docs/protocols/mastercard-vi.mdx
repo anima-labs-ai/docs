@@ -1,0 +1,72 @@
+---
+title: "Mastercard VI"
+description: "Validate Mastercard Verifiable Intelligence credential chains using SD-JWT, ES256 signatures, and constraint-aware delegation rules."
+---
+
+# Mastercard VI
+
+Mastercard VI uses SD-JWT credential chains to delegate payment authority from issuers to agents with explicit time and policy constraints.
+
+## Layered Credentials
+
+## Strong Signatures
+
+## Credential Chain Model
+
+- L1
+- L2 Immediate
+- L2 Autonomous
+- L3a/L3b
+
+## Algorithm Requirements
+
+- JWS: ES256
+- Curve: P-256
+- Hash: SHA-256
+
+## Constraint Types
+
+| Constraint       | Intent                                                     |
+| ---------------- | ---------------------------------------------------------- |
+| allowed_merchant | Permit transactions only for specific merchant identities. |
+| line_items       | Constrain purchasable SKUs/items and quantities.           |
+| allowed_payee    | Restrict destination beneficiary/payee account.            |
+| amount           | Set max/min transaction amount boundaries.                 |
+| budget           | Enforce cumulative spending ceiling over period.           |
+| recurrence       | Define schedule rules for recurring charges.               |
+| agent_recurrence | Limit autonomous repeated actions by agent identity.       |
+| reference        | Require transaction metadata/reference matching policy.    |
+
+## Credential Chain Validation Example
+
+```ts title="mastercard-vi-validate.ts"
+const result = await verifyViChain({
+  algorithm: "ES256",
+  credentials: {
+    l1,
+    l2,
+    l3,
+  },
+  now: Date.now(),
+});
+
+if (!result.signaturesValid) throw new Error("Invalid signature chain");
+if (!result.hashLinksValid) throw new Error("sd_hash mismatch");
+if (!result.timeWindowsValid)
+  throw new Error("Credential expired or not yet valid");
+
+const policyDecision = evaluateConstraints({
+  constraints: result.constraints,
+  paymentRequest,
+});
+
+if (!policyDecision.allowed) {
+  throw new Error("Constraint violation:" + policyDecision.reason);
+}
+```
+
+> **Warning:** Never skip L3 terminal validation even when L1/L2 are valid. L3 binds the delegated chain to the immediate transaction context.
+
+> **Tip:** Cache verified L1 trust anchors, but always recompute L2/L3 validity and constraint checks per authorization request.
+
+> **Note:** Feed normalized constraint results into your shared decision engine to keep Mastercard VI aligned with Visa TAP and AP2 policy outputs.

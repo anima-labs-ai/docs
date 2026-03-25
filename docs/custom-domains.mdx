@@ -1,0 +1,182 @@
+---
+title: Custom Domains
+description: Set up branded sending domains in Anima with DNS records, verification guidance, and troubleshooting tips.
+---
+
+# Custom Domains
+
+Use your own domain for branded agent email. Anima generates the required DNS records, shows what still needs to propagate, and lets you verify once your provider publishes the changes.
+
+---
+
+### Why use a custom domain?
+
+Send from your own brand, improve trust with recipients, and separate production sending from shared or testing domains.
+
+### What you need first
+
+A domain you control plus access to its DNS provider — for example Cloudflare, Route 53, Namecheap, GoDaddy, or another registrar.
+
+### How long does it take?
+
+Many DNS changes appear within minutes, but some providers take up to 48 hours to fully propagate.
+
+---
+
+## How Anima handles email under the hood
+
+Anima uses a **hybrid architecture** — two specialized systems work together so your agents can both send and receive mail reliably.
+
+| Component | Role | What it does |
+|---|---|---|
+| **Stalwart mail server** | Inbound | Receives incoming mail via SMTP, stores it in agent mailboxes, and exposes messages over JMAP so agents can read, search, and reply. |
+| **AWS SES** | Outbound | Sends outgoing mail with proper DKIM signatures and SPF alignment, manages delivery reputation, and reports bounces and complaints. |
+| **Anima app** | Storage & search | Persists every message (inbound and outbound) in its own database, indexes content for keyword and semantic search, and serves the dashboard UI. |
+
+### Why two systems?
+
+Running a single server for both directions is possible but comes with trade-offs. Inbound mail needs persistent mailboxes, JMAP/IMAP protocol support, and real-time webhooks — Stalwart excels at this. Outbound mail needs high deliverability, automatic IP warm-up, DKIM key management, and feedback loops — SES excels at this. By combining both, Anima gets best-in-class reliability for each direction.
+
+### What this means for DNS
+
+Your MX record points to the **Stalwart mail server** so incoming mail arrives at agent mailboxes. Your SPF and DKIM records reference **AWS SES** so outgoing mail passes authentication checks at recipient mailbox providers.
+
+| DNS record | Points to | Direction |
+|---|---|---|
+| MX | Stalwart (`mail.useanima.sh`) | Inbound |
+| SPF TXT | `include:amazonses.com` | Outbound |
+| MAIL FROM MX/TXT | `mail.<domain>` → SES feedback + SPF | Outbound bounce handling |
+| DKIM CNAME | SES-managed keys | Outbound |
+
+---
+
+## 1. Create the domain in Anima
+
+Go to **Dashboard → Domains**, click **Add domain**, and enter the root domain you want to send from — for example `example.com`. Once created, Anima opens the DNS setup surface immediately so you can copy the required records without hunting through the table.
+
+## 2. Copy the required DNS records
+
+Anima generates the ownership TXT, dedicated MAIL FROM MX/TXT, DKIM CNAME, inbound MX, SPF TXT, and DMARC TXT records for you. The product shows both the full record name and the shorter host value most DNS providers expect.
+
+| Record | Host example | Why it matters |
+|---|---|---|
+| TXT | `@` | Verifies that you control the domain. |
+| MX | `mail` | Sends SES bounce and return-path traffic to the correct regional feedback endpoint. |
+| TXT | `mail` | Publishes SPF for the dedicated MAIL FROM subdomain used by SES. |
+| CNAME | `token-a._domainkey` | Publishes DKIM keys so mailbox providers trust mail signed for your domain. |
+| MX | `@` | Routes inbound agent mail and replies for the domain. |
+| TXT | `@` or merge | Authorizes Anima to send mail through SPF. Merge into an existing SPF record if you already have one. |
+| TXT | `_dmarc` | Tells inbox providers how to handle failed authentication and where to send aggregate reports. |
+
+## 3. Use the right host format in your DNS provider
+
+This is the most common source of mistakes. Many DNS providers automatically append your root domain, so the safe default is to paste the **Host** column values from Anima instead of manually reconstructing the full record name.
+
+> **Warning:** Avoid entering `_dmarc.example.com` into a provider that automatically appends `example.com`, which creates `_dmarc.example.com.example.com`.
+
+### Provider-specific notes
+
+**Cloudflare** — Usually appends the root domain automatically. Paste the Host column, not the full name.
+
+**Route 53** — Supports manual entry and zone imports, but review long TXT values carefully if you paste them manually.
+
+**Namecheap** — Uses Host and Value fields. Prefer `@`, `mail`, and `_dmarc` instead of full FQDNs where possible.
+
+> **Important:** The `mail` host in Anima is reserved for SES custom MAIL FROM and bounce handling. Leave your apex MX pointed at Stalwart for inbound agent mail.
+
+**GoDaddy** — Treat the UI as relative hostnames unless the screen explicitly asks for the full record name.
+
+## 4. Download the zone file if your provider supports imports
+
+The DNS setup surface includes a **Download zone file** action. Use it when your DNS provider accepts BIND-style imports — it's the fastest way to publish all records at once. If your provider does not support imports, copy each record individually from the setup table.
+
+## 5. Verify and troubleshoot
+
+When you click **Verify records**, Anima checks each required DNS record and marks it as **Valid**, **Missing**, or **Invalid**. Fix only the rows that fail — if a record already matches, leave it alone and allow DNS time to propagate.
+
+### Verification statuses
+
+**Missing** — The provider has not published the record yet, or propagation is still in progress.
+
+**Invalid** — A record exists, but the value or host is wrong. Compare the row in Anima against what your provider shows.
+
+**Valid** — That record is correct and does not need changes.
+
+### SPF merge rule
+
+A domain should publish only one SPF TXT record at the root. If you already use SPF elsewhere, keep the existing record and add `include:amazonses.com` inside it rather than creating a second SPF TXT record.
+
+## 6. Test changes locally
+
+Yes — you can test **most** of the custom-domain workflow locally.
+
+### Start the local stack
+
+From the repository root:
+
+```bash
+./start.sh
+```
+
+This starts Postgres, Redis, Stalwart, and Vaultwarden, then runs the API and web app.
+
+### What you can test locally
+
+- Add a domain in **Dashboard → Domains**
+- Inspect generated TXT / MX / SPF / DKIM / DMARC records, including the SES MAIL FROM `mail.<domain>` records
+- Download the generated zone file
+- Run the verification UI against published records
+- Provision agent mailboxes in Stalwart
+- Exercise the inbound pipeline handled by Stalwart and Anima
+
+### What still requires AWS
+
+Real outbound delivery through SES requires:
+
+- valid `AWS_SES_REGION`, `AWS_SES_ACCESS_KEY_ID`, and `AWS_SES_SECRET_ACCESS_KEY`
+- a verified SES domain identity
+- SES Easy DKIM records published in DNS
+- an SES account out of sandbox for production sending
+
+Without those pieces, you can still test the local product flow, but not final outbound delivery to external recipients.
+
+## 7. AWS SES setup for outbound mail
+
+Anima uses SES **only for outbound mail**. Do **not** point your MX record to SES.
+
+### Minimum AWS SES checklist
+
+1. Pick the SES region you want to send from.
+2. Create an SES **domain identity** for the sending domain or subdomain.
+3. Publish the **SES Easy DKIM** CNAME records in your DNS provider.
+4. Configure SES custom **MAIL FROM** for `mail.<domain>` and publish its SES feedback MX + SPF TXT records.
+5. Publish or merge the root **SPF** TXT record so it contains `include:amazonses.com`.
+6. Create an IAM user or role with `ses:SendEmail` and `ses:SendRawEmail` permissions.
+7. Store credentials in your runtime environment:
+   - `AWS_SES_REGION`
+   - `AWS_SES_ACCESS_KEY_ID`
+   - `AWS_SES_SECRET_ACCESS_KEY`
+8. Configure **SNS bounce and complaint notifications** so your app can react to delivery failures.
+9. Request **SES production access** in the same AWS region so you can send to non-verified recipients.
+
+### What must stay manual
+
+- Adding SES DKIM records in your DNS provider
+- Approving or waiting for SES production-access review
+- Managing the AWS account, billing, and IAM boundaries
+
+### What Anima automates once SES is ready
+
+- DNS record display in the dashboard
+- Custom-domain verification checks
+- Outbound send calls through SES
+- Storage of inbound and outbound messages in the Anima app
+
+For the full AWS-side runbook, see [AWS SES Setup](/docs/aws-ses-setup).
+
+## Ready to configure your domain?
+
+Open the Domains page to create a domain, copy records, and verify the setup in one place.
+
+- [Open domains](/dashboard/domains)
+- [Reference comparison](https://docs.agentmail.to/custom-domains)

@@ -1,0 +1,20 @@
+{
+	"pages": [
+		"---Core---",
+		"getting-started",
+		"custom-domains",
+		"sdks",
+		"mcp",
+		"---Security---",
+		"security",
+		"encryption",
+		"webhooks",
+		"---Card Issuing---",
+		"kyb",
+		"...(cards)",
+		"---Protocols---",
+		"...(protocols)",
+		"---Support---",
+		"faq"
+	]
+}

@@ -1,0 +1,49 @@
+---
+title: "Webhooks"
+description: "Configure webhooks to receive real-time updates for email events."
+---
+
+# Webhooks
+
+Subscribe to real-time events like incoming emails or delivery failures.
+
+## Configuration
+
+Configure webhooks in the dashboard to receive event payloads in real time.
+
+```json
+{
+  "event": "message.received",
+  "data": {
+    "id": "msg_12345",
+    "agent_id": "agent_abc",
+    "from": "user@example.com",
+    "subject": "Hello",
+    "body": "Hi there...",
+    "timestamp": "2023-10-01T12:00:00Z"
+  }
+}
+```
+
+## Event Types
+
+| Event Name | Description |
+|---|---|
+| `message.received` | Triggered when an agent receives a new email. |
+| `message.sent` | Triggered when an email is successfully sent. |
+| `message.failed` | Triggered when an email fails to send or bounces. |
+| `agent.created` | Triggered when a new agent mailbox is created. |
+
+## Verification
+
+Verify webhook requests using the `X-Anima-Signature` header.
+
+```ts
+import crypto from "crypto";
+
+function verifyWebhook(payload: string, signature: string, secret: string) {
+  const hmac = crypto.createHmac("sha256", secret);
+  const digest = hmac.update(payload).digest("hex");
+  return signature === digest;
+}
+```

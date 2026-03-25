@@ -1,0 +1,58 @@
+---
+title: "Official SDKs"
+description: "Official TypeScript and Python SDKs for Anima."
+---
+
+# Official SDKs
+
+Seamlessly integrate Anima into your Python and TypeScript applications.
+
+## TypeScript / Node.js
+
+The TypeScript SDK provides full type safety and works with Node.js, Bun, and Deno.
+
+### Installation
+
+```bash
+npm install @anima/sdk
+```
+
+### Usage
+
+```ts
+import { AnimaClient } from "@anima/sdk";
+
+const client = new AnimaClient({
+  apiKey: "mk_live_...",
+});
+
+// List all agents
+const agents = await client.agents.list();
+console.log(agents);
+```
+
+## Python
+
+The Python SDK is fully typed and supports sync and async operations.
+
+### Installation
+
+```bash
+pip install anima
+```
+
+### Usage
+
+```python
+from anima import AnimaClient
+
+client = AnimaClient(api_key="mk_live_...")
+
+# Create an agent
+agent = client.agents.create(
+    name="Researcher",
+    email_prefix="research"
+)
+
+print(f"Agent email: {agent.email}")
+```

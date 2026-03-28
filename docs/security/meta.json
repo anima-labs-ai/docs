@@ -1,0 +1,4 @@
+{
+	"title": "Security Operations",
+	"pages": ["audit-log", "anomaly-detection"]
+}

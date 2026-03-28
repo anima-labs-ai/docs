@@ -1,0 +1,167 @@
+---
+title: "Multi-Tenancy Pods"
+description: "Isolate agent environments with pods. API key scoping, resource isolation, and cross-pod policies."
+---
+
+# Multi-Tenancy Pods
+
+Pods provide logical isolation for groups of agents within your Anima organization. Each pod has its own agents, API keys, budgets, and security policies, enabling multi-tenant architectures and environment separation.
+
+## Core Concepts
+
+- **Pod** -- An isolated namespace containing agents, keys, and resources
+- **API Key Scoping** -- Keys are scoped to a specific pod and cannot access resources in other pods
+- **Resource Isolation** -- Agents in one pod cannot interact with agents in another unless explicitly allowed
+- **Cross-Pod Policies** -- Configure controlled communication between pods when needed
+
+## Creating Pods
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." }); // org-level key
+
+// Create a pod for a specific tenant or environment
+const pod = await anima.pods.create({
+  name: "production",
+  description: "Production agent environment",
+  settings: {
+    maxAgents: 50,
+    maxApiKeys: 10,
+    allowCrossPodCommunication: false,
+  },
+});
+
+console.log(`Pod: ${pod.id}, Name: ${pod.name}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+pod = anima.pods.create(
+    name="production",
+    description="Production agent environment",
+    settings={
+        "max_agents": 50,
+        "max_api_keys": 10,
+        "allow_cross_pod_communication": False,
+    },
+)
+
+print(f"Pod: {pod.id}, Name: {pod.name}")
+```
+</Tab>
+<Tab value="Go">
+```go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+pod, err := client.Pods.Create(ctx, &anima.CreatePodParams{
+    Name:        "production",
+    Description: "Production agent environment",
+    Settings: &anima.PodSettings{
+        MaxAgents:                   50,
+        MaxAPIKeys:                  10,
+        AllowCrossPodCommunication:  false,
+    },
+})
+```
+</Tab>
+</Tabs>
+
+## API Key Scoping
+
+API keys are scoped to a single pod. An agent created with a pod-scoped key automatically belongs to that pod.
+
+```ts
+// Create a pod-scoped API key
+const key = await anima.pods.createApiKey(pod.id, {
+  name: "prod-backend",
+  permissions: ["agents:read", "agents:write", "messages:send"],
+  expiresAt: "2027-01-01T00:00:00Z",
+});
+
+console.log(`Key: ${key.apiKey}`); // ak_pod_...
+
+// Use the pod-scoped key -- all operations are isolated to the pod
+const podClient = new Anima({ apiKey: key.apiKey });
+const agent = await podClient.agents.create({ name: "Pod Agent" });
+// This agent is automatically scoped to the pod
+```
+
+## Resource Isolation
+
+Each pod maintains isolation for:
+
+| Resource       | Isolation Behavior                                    |
+| -------------- | ----------------------------------------------------- |
+| Agents         | Agents only exist within their pod                   |
+| API Keys       | Keys only access resources in their pod              |
+| Email Domains  | Domains are assigned per pod                          |
+| Vault Secrets  | Secrets are encrypted per-pod with separate keys     |
+| Cards          | Card programs are scoped to pods                      |
+| Webhooks       | Webhook subscriptions are per-pod                    |
+| Audit Logs     | Logs are tagged with pod ID for filtering            |
+
+## Cross-Pod Communication
+
+When you need agents in different pods to communicate:
+
+```ts
+// Enable cross-pod communication between two pods
+await anima.pods.createBridge({
+  sourcePodId: "pod_prod",
+  targetPodId: "pod_analytics",
+  permissions: ["a2a:send", "a2a:receive"],
+  allowedCapabilities: ["data-export"],
+});
+```
+
+## Listing and Managing Pods
+
+```ts
+// List all pods
+const pods = await anima.pods.list();
+
+// Get pod usage statistics
+const stats = await anima.pods.getStats("pod_prod");
+console.log(`Agents: ${stats.agentCount}, API Keys: ${stats.apiKeyCount}`);
+console.log(`Monthly spend: $${(stats.monthlySpendCents / 100).toFixed(2)}`);
+
+// Delete a pod (must be empty)
+await anima.pods.delete("pod_staging");
+```
+
+## API Reference
+
+| Endpoint                              | Method | Description                     |
+| ------------------------------------- | ------ | ------------------------------- |
+| `/api/pods`                           | POST   | Create a pod                    |
+| `/api/pods`                           | GET    | List all pods                   |
+| `/api/pods/:id`                       | GET    | Get pod details                 |
+| `/api/pods/:id`                       | PUT    | Update pod settings             |
+| `/api/pods/:id`                       | DELETE | Delete a pod                    |
+| `/api/pods/:id/api-keys`              | POST   | Create a pod-scoped API key     |
+| `/api/pods/:id/api-keys`              | GET    | List pod API keys               |
+| `/api/pods/:id/stats`                 | GET    | Get pod usage statistics        |
+| `/api/pods/bridges`                   | POST   | Create a cross-pod bridge       |
+
+## Configuration
+
+| Variable                           | Default  | Description                              |
+| ---------------------------------- | -------- | ---------------------------------------- |
+| `ANIMA_PODS_MAX_PER_ORG`          | `20`     | Maximum pods per organization            |
+| `ANIMA_PODS_DEFAULT_MAX_AGENTS`   | `100`    | Default max agents per pod               |
+| `ANIMA_PODS_CROSS_POD_DEFAULT`    | `false`  | Allow cross-pod communication by default |
+
+## Next Steps
+
+- [Security](/docs/security) -- Pod-level security policies
+- [Audit Log](/docs/security/audit-log) -- Filter audit events by pod
+- [Agent Registry](/docs/registry/overview) -- Register agents with pod context

@@ -1,0 +1,141 @@
+---
+title: "Agent Registry"
+description: "Discover, search, and register AI agents in the Anima Agent Registry. Public and private registry modes."
+---
+
+# Agent Registry
+
+The Anima Agent Registry is a searchable directory of agents and their capabilities. It enables agent discovery, facilitates A2A communication, and provides a trust layer through verified identity records.
+
+## How It Works
+
+1. **Register** -- Agents publish their identity, capabilities, and endpoints to the registry
+2. **Discover** -- Other agents or services search the registry by capability, domain, or name
+3. **Verify** -- Registry entries are linked to DIDs and Agent Cards for cryptographic verification
+4. **Connect** -- Use discovered endpoints to initiate A2A communication
+
+## Registering an Agent
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+const entry = await anima.registry.register({
+  agentId: "ag_8f3k2m9x1n4p7q6r",
+  visibility: "public",
+  tags: ["procurement", "invoicing", "payments"],
+  description: "Handles procurement workflows for Acme Corp",
+});
+
+console.log(`Registered: ${entry.id}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+entry = anima.registry.register(
+    agent_id="ag_8f3k2m9x1n4p7q6r",
+    visibility="public",
+    tags=["procurement", "invoicing", "payments"],
+    description="Handles procurement workflows for Acme Corp",
+)
+
+print(f"Registered: {entry.id}")
+```
+</Tab>
+<Tab value="Go">
+```go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+entry, err := client.Registry.Register(ctx, &anima.RegisterAgentParams{
+    AgentID:     "ag_8f3k2m9x1n4p7q6r",
+    Visibility:  "public",
+    Tags:        []string{"procurement", "invoicing", "payments"},
+    Description: "Handles procurement workflows for Acme Corp",
+})
+```
+</Tab>
+</Tabs>
+
+## Searching the Registry
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+// Search by capability
+const results = await anima.registry.search({
+  query: "invoice processing",
+  tags: ["payments"],
+  limit: 10,
+});
+
+for (const agent of results.data) {
+  console.log(`${agent.name} -- ${agent.did}`);
+  console.log(`  Capabilities: ${agent.capabilities.map(c => c.name).join(", ")}`);
+  console.log(`  Endpoint: ${agent.endpoints.a2a}`);
+}
+```
+</Tab>
+<Tab value="Python">
+```python
+results = anima.registry.search(
+    query="invoice processing",
+    tags=["payments"],
+    limit=10,
+)
+
+for agent in results.data:
+    print(f"{agent.name} -- {agent.did}")
+    print(f"  Capabilities: {', '.join(c.name for c in agent.capabilities)}")
+```
+</Tab>
+</Tabs>
+
+## Visibility Modes
+
+| Mode       | Description                                                     |
+| ---------- | --------------------------------------------------------------- |
+| `public`   | Visible to all registry users. Searchable by anyone.           |
+| `private`  | Only visible within your organization's pod.                   |
+| `unlisted` | Not searchable, but accessible via direct DID or agent ID.     |
+
+## API Reference
+
+| Endpoint                          | Method | Description                        |
+| --------------------------------- | ------ | ---------------------------------- |
+| `/api/registry/agents`            | POST   | Register an agent                  |
+| `/api/registry/agents/:id`        | GET    | Get a registry entry               |
+| `/api/registry/agents/:id`        | PUT    | Update a registry entry            |
+| `/api/registry/agents/:id`        | DELETE | Deregister an agent                |
+| `/api/registry/search`            | GET    | Search the registry                |
+
+### Search Parameters
+
+| Parameter      | Type     | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `query`        | string   | Free-text search across name and description |
+| `tags`         | string[] | Filter by capability tags                |
+| `visibility`   | string   | Filter by visibility mode                |
+| `limit`        | number   | Max results (default 20, max 100)        |
+| `cursor`       | string   | Pagination cursor                        |
+
+## Configuration
+
+| Variable                        | Default   | Description                             |
+| ------------------------------- | --------- | --------------------------------------- |
+| `ANIMA_REGISTRY_DEFAULT_VIS`   | `private` | Default visibility for new registrations |
+| `ANIMA_REGISTRY_SEARCH_LIMIT`  | `20`      | Default search result limit              |
+
+## Next Steps
+
+- [Agent Cards](/docs/identity/agent-cards) -- Publish detailed agent metadata
+- [A2A Protocol](/docs/a2a/overview) -- Communicate with discovered agents
+- [Verifiable Credentials](/docs/identity/verifiable-credentials) -- Prove agent capabilities

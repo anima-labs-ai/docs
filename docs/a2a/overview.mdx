@@ -1,0 +1,199 @@
+---
+title: "A2A Protocol"
+description: "Agent-to-Agent communication protocol for task delegation, capability negotiation, and structured message exchange between AI agents."
+---
+
+# A2A Protocol
+
+The Anima A2A (Agent-to-Agent) protocol enables structured communication and task delegation between AI agents. Built on top of Agent Cards and DIDs, A2A provides authenticated, capability-aware messaging between agents regardless of their hosting platform.
+
+## How A2A Works
+
+1. **Discovery** -- Agent A resolves Agent B's Agent Card to find its A2A endpoint and capabilities
+2. **Authentication** -- Agent A authenticates using DID-based credentials
+3. **Task Delegation** -- Agent A sends a structured task request describing what it needs
+4. **Execution** -- Agent B processes the task and streams progress updates
+5. **Completion** -- Agent B returns the result to Agent A
+
+## Sending a Task
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Delegate a task to another agent
+const task = await anima.a2a.sendTask({
+  fromAgentId: "ag_sender123",
+  toAgentDid: "did:anima:ag_receiver456",
+  capability: "purchase-order",
+  input: {
+    vendor: "Office Supplies Inc",
+    items: [
+      { name: "Printer paper", quantity: 10, unitPrice: 8.99 },
+      { name: "Ink cartridges", quantity: 4, unitPrice: 24.99 },
+    ],
+    budget: 200,
+  },
+  timeout: 300_000, // 5 minutes
+});
+
+console.log(`Task ID: ${task.id}`);
+console.log(`Status: ${task.status}`); // "pending" | "in_progress" | "completed" | "failed"
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+task = anima.a2a.send_task(
+    from_agent_id="ag_sender123",
+    to_agent_did="did:anima:ag_receiver456",
+    capability="purchase-order",
+    input={
+        "vendor": "Office Supplies Inc",
+        "items": [
+            {"name": "Printer paper", "quantity": 10, "unitPrice": 8.99},
+            {"name": "Ink cartridges", "quantity": 4, "unitPrice": 24.99},
+        ],
+        "budget": 200,
+    },
+    timeout=300_000,
+)
+
+print(f"Task ID: {task.id}")
+print(f"Status: {task.status}")
+```
+</Tab>
+<Tab value="Go">
+```go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+task, err := client.A2A.SendTask(ctx, &anima.SendTaskParams{
+    FromAgentID:  "ag_sender123",
+    ToAgentDID:   "did:anima:ag_receiver456",
+    Capability:   "purchase-order",
+    Input: map[string]any{
+        "vendor": "Office Supplies Inc",
+        "items": []map[string]any{
+            {"name": "Printer paper", "quantity": 10, "unitPrice": 8.99},
+        },
+        "budget": 200,
+    },
+    TimeoutMs: 300000,
+})
+```
+</Tab>
+</Tabs>
+
+## Receiving Tasks
+
+Register a handler for incoming A2A tasks:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+// Register a task handler for a capability
+anima.a2a.onTask("ag_receiver456", "purchase-order", async (task) => {
+  console.log(`Received task from: ${task.fromDid}`);
+  console.log(`Input: ${JSON.stringify(task.input)}`);
+
+  // Update progress
+  await task.updateStatus("in_progress", { message: "Processing order..." });
+
+  // Do the work...
+  const result = await processOrder(task.input);
+
+  // Complete the task
+  await task.complete({
+    orderId: result.orderId,
+    totalCost: result.totalCost,
+    status: "confirmed",
+  });
+});
+```
+</Tab>
+<Tab value="Python">
+```python
+@anima.a2a.on_task("ag_receiver456", "purchase-order")
+async def handle_purchase_order(task):
+    print(f"Received task from: {task.from_did}")
+
+    await task.update_status("in_progress", message="Processing order...")
+
+    result = await process_order(task.input)
+
+    await task.complete({
+        "orderId": result.order_id,
+        "totalCost": result.total_cost,
+        "status": "confirmed",
+    })
+```
+</Tab>
+</Tabs>
+
+## Streaming Task Progress
+
+For long-running tasks, stream progress updates back to the caller:
+
+```ts
+const task = await anima.a2a.sendTask({
+  fromAgentId: "ag_sender123",
+  toAgentDid: "did:anima:ag_receiver456",
+  capability: "data-analysis",
+  input: { dataset: "sales-2026-q1" },
+  stream: true,
+});
+
+for await (const update of task.stream()) {
+  console.log(`[${update.status}] ${update.message}`);
+  if (update.progress) {
+    console.log(`Progress: ${update.progress}%`);
+  }
+}
+
+console.log(`Result: ${JSON.stringify(task.result)}`);
+```
+
+## Task Lifecycle
+
+| Status        | Description                                |
+| ------------- | ------------------------------------------ |
+| `pending`     | Task submitted, awaiting processing        |
+| `in_progress` | Handler is actively working on the task    |
+| `completed`   | Task finished successfully with a result   |
+| `failed`      | Task encountered an error                  |
+| `cancelled`   | Task was cancelled by the sender           |
+| `timeout`     | Task exceeded the configured timeout       |
+
+## API Reference
+
+| Endpoint                          | Method | Description                      |
+| --------------------------------- | ------ | -------------------------------- |
+| `/api/a2a/tasks`                  | POST   | Send a task to another agent     |
+| `/api/a2a/tasks/:id`              | GET    | Get task status and result       |
+| `/api/a2a/tasks/:id/cancel`       | POST   | Cancel a pending/in-progress task|
+| `/api/a2a/tasks`                  | GET    | List tasks (sent and received)   |
+| `/api/a2a/handlers`               | POST   | Register a task handler          |
+| `/api/a2a/handlers`               | GET    | List registered handlers         |
+
+## Configuration
+
+| Variable                       | Default  | Description                              |
+| ------------------------------ | -------- | ---------------------------------------- |
+| `ANIMA_A2A_DEFAULT_TIMEOUT`    | `300000` | Default task timeout in ms (5 min)       |
+| `ANIMA_A2A_MAX_PAYLOAD_KB`     | `1024`   | Maximum task input/output size           |
+| `ANIMA_A2A_REQUIRE_DID_AUTH`   | `true`   | Require DID authentication for tasks     |
+| `ANIMA_A2A_STREAM_ENABLED`     | `true`   | Enable streaming task updates            |
+
+## Next Steps
+
+- [Agent Cards](/docs/identity/agent-cards) -- Publish capabilities for discovery
+- [Agent Registry](/docs/registry/overview) -- Find agents to delegate tasks to
+- [Agent Wallet](/docs/wallet/overview) -- Attach payments to task delegations

@@ -1,0 +1,186 @@
+---
+title: "Agent Cards"
+description: "Publish machine-readable Agent Cards at .well-known/agent.json for agent discovery, capability declaration, and interoperability."
+---
+
+# Agent Cards
+
+Agent Cards are machine-readable JSON documents that describe an agent's identity, capabilities, and communication endpoints. Published at a well-known URL, they enable other agents and services to discover and interact with your agents.
+
+## Agent Card Format
+
+An Agent Card follows the Agent Card specification and is served at:
+
+```
+https://<domain>/.well-known/agent.json
+```
+
+### Example Agent Card
+
+```json
+{
+  "name": "Acme Purchasing Agent",
+  "description": "Handles procurement and vendor payments for Acme Corp.",
+  "url": "https://purchasing.acme.com",
+  "did": "did:anima:ag_8f3k2m9x1n4p7q6r",
+  "version": "1.0.0",
+  "capabilities": [
+    {
+      "name": "purchase-order",
+      "description": "Create and manage purchase orders",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vendor": { "type": "string" },
+          "items": { "type": "array" },
+          "budget": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "invoice-processing",
+      "description": "Process and approve vendor invoices"
+    }
+  ],
+  "endpoints": {
+    "a2a": "https://api.useanima.sh/a2a/ag_8f3k2m9x1n4p7q6r",
+    "email": "purchasing@acme.com"
+  },
+  "authentication": {
+    "schemes": ["did-auth", "bearer"]
+  },
+  "provider": {
+    "organization": "Acme Corp",
+    "url": "https://acme.com"
+  }
+}
+```
+
+## Publishing Agent Cards
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Generate and publish an Agent Card
+const card = await anima.identity.agentCards.publish({
+  agentId: "ag_8f3k2m9x1n4p7q6r",
+  domain: "purchasing.acme.com",
+  capabilities: [
+    {
+      name: "purchase-order",
+      description: "Create and manage purchase orders",
+      inputSchema: {
+        type: "object",
+        properties: {
+          vendor: { type: "string" },
+          items: { type: "array" },
+          budget: { type: "number" },
+        },
+      },
+    },
+  ],
+});
+
+console.log(`Published at: ${card.url}`);
+// => https://purchasing.acme.com/.well-known/agent.json
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+card = anima.identity.agent_cards.publish(
+    agent_id="ag_8f3k2m9x1n4p7q6r",
+    domain="purchasing.acme.com",
+    capabilities=[
+        {
+            "name": "purchase-order",
+            "description": "Create and manage purchase orders",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "vendor": {"type": "string"},
+                    "items": {"type": "array"},
+                    "budget": {"type": "number"},
+                },
+            },
+        },
+    ],
+)
+
+print(f"Published at: {card.url}")
+```
+</Tab>
+<Tab value="Go">
+```go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+card, err := client.Identity.AgentCards.Publish(ctx, &anima.PublishAgentCardParams{
+    AgentID: "ag_8f3k2m9x1n4p7q6r",
+    Domain:  "purchasing.acme.com",
+    Capabilities: []anima.Capability{
+        {
+            Name:        "purchase-order",
+            Description: "Create and manage purchase orders",
+        },
+    },
+})
+```
+</Tab>
+</Tabs>
+
+## Resolving Agent Cards
+
+Fetch another agent's card to discover its capabilities before initiating communication:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+const card = await anima.identity.agentCards.resolve("purchasing.acme.com");
+
+console.log(card.name);          // "Acme Purchasing Agent"
+console.log(card.capabilities);  // [{ name: "purchase-order", ... }]
+console.log(card.endpoints.a2a); // A2A endpoint URL
+```
+</Tab>
+<Tab value="Python">
+```python
+card = anima.identity.agent_cards.resolve("purchasing.acme.com")
+
+print(card.name)
+print(card.capabilities)
+print(card.endpoints["a2a"])
+```
+</Tab>
+</Tabs>
+
+## API Reference
+
+| Endpoint                                   | Method | Description                    |
+| ------------------------------------------ | ------ | ------------------------------ |
+| `/api/identity/agent-cards`                | POST   | Publish an Agent Card          |
+| `/api/identity/agent-cards/:agentId`       | GET    | Get an agent's card            |
+| `/api/identity/agent-cards/:agentId`       | PUT    | Update an Agent Card           |
+| `/api/identity/agent-cards/:agentId`       | DELETE | Unpublish an Agent Card        |
+| `/api/identity/agent-cards/resolve`        | GET    | Resolve a card by domain       |
+
+## Configuration
+
+| Variable                         | Default | Description                              |
+| -------------------------------- | ------- | ---------------------------------------- |
+| `ANIMA_AGENT_CARD_AUTO_PUBLISH`  | `true`  | Auto-publish cards on agent creation     |
+| `ANIMA_AGENT_CARD_CACHE_TTL`    | `600`   | Cache TTL for resolved cards in seconds  |
+
+## Next Steps
+
+- [DID Method](/docs/identity/did-method) -- Understand agent DIDs
+- [Agent Registry](/docs/registry/overview) -- Register for public discovery
+- [A2A Protocol](/docs/a2a/overview) -- Communicate between agents

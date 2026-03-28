@@ -1,0 +1,202 @@
+---
+title: "Compliance Reporting"
+description: "Generate compliance reports, handle DSAR requests, and monitor compliance posture through dashboards and templates."
+---
+
+# Compliance Reporting
+
+Anima provides built-in reporting tools for compliance workflows including SOC 2 audit preparation, DSAR (Data Subject Access Request) fulfillment, and executive compliance dashboards.
+
+## Report Templates
+
+Generate pre-built reports for common compliance needs:
+
+<Tabs items={["Node.js", "Python", "Go"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Generate a SOC 2 audit readiness report
+const report = await anima.compliance.reports.generate({
+  template: "soc2-readiness",
+  period: {
+    startDate: "2026-01-01",
+    endDate: "2026-03-31",
+  },
+  format: "pdf",  // "pdf" | "html" | "json"
+  includeEvidence: true,
+});
+
+console.log(`Report: ${report.id}`);
+console.log(`Download: ${report.downloadUrl}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+report = anima.compliance.reports.generate(
+    template="soc2-readiness",
+    period={
+        "start_date": "2026-01-01",
+        "end_date": "2026-03-31",
+    },
+    format="pdf",
+    include_evidence=True,
+)
+
+print(f"Report: {report.id}")
+print(f"Download: {report.download_url}")
+```
+</Tab>
+<Tab value="Go">
+```go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+report, err := client.Compliance.Reports.Generate(ctx, &anima.GenerateReportParams{
+    Template: "soc2-readiness",
+    Period: anima.ReportPeriod{
+        StartDate: "2026-01-01",
+        EndDate:   "2026-03-31",
+    },
+    Format:          "pdf",
+    IncludeEvidence: true,
+})
+```
+</Tab>
+</Tabs>
+
+### Available Templates
+
+| Template              | Description                                                    |
+| --------------------- | -------------------------------------------------------------- |
+| `soc2-readiness`      | SOC 2 Type II audit readiness with control status and evidence|
+| `agent-activity`      | Summary of agent actions, emails sent, transactions processed  |
+| `security-posture`    | Anomaly detection results, quarantine events, key rotations   |
+| `access-review`       | API key usage, permission changes, pod access                  |
+| `spending-summary`    | Wallet and card spending by agent, pod, and time period       |
+| `data-inventory`      | Inventory of data stored across vault, email, and attachments  |
+
+## DSAR (Data Subject Access Requests)
+
+Handle GDPR and CCPA data subject access requests:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+// Initiate a DSAR
+const dsar = await anima.compliance.dsar.create({
+  subjectEmail: "user@example.com",
+  requestType: "access",  // "access" | "deletion" | "portability"
+  notes: "GDPR Article 15 request received via support ticket #4521",
+});
+
+console.log(`DSAR ID: ${dsar.id}`);
+console.log(`Status: ${dsar.status}`);  // "processing" | "ready" | "completed"
+console.log(`Estimated completion: ${dsar.estimatedCompletionAt}`);
+
+// Check DSAR status and download results
+const result = await anima.compliance.dsar.get(dsar.id);
+if (result.status === "ready") {
+  console.log(`Download: ${result.downloadUrl}`);
+  console.log(`Records found: ${result.recordCount}`);
+  console.log(`Data categories: ${result.categories.join(", ")}`);
+}
+```
+</Tab>
+<Tab value="Python">
+```python
+dsar = anima.compliance.dsar.create(
+    subject_email="user@example.com",
+    request_type="access",
+    notes="GDPR Article 15 request received via support ticket #4521",
+)
+
+print(f"DSAR ID: {dsar.id}")
+print(f"Status: {dsar.status}")
+
+# Check status and download
+result = anima.compliance.dsar.get(dsar.id)
+if result.status == "ready":
+    print(f"Download: {result.download_url}")
+    print(f"Records found: {result.record_count}")
+```
+</Tab>
+</Tabs>
+
+### DSAR Data Categories
+
+When a DSAR is processed, data is collected across these categories:
+
+| Category           | Data Included                                           |
+| ------------------ | ------------------------------------------------------- |
+| `email_messages`   | Emails sent to or from the subject                     |
+| `card_transactions`| Transactions where the subject is the merchant/payee   |
+| `a2a_interactions` | A2A tasks involving the subject's agents               |
+| `audit_events`     | Audit log entries referencing the subject              |
+| `agent_metadata`   | Agent profiles associated with the subject             |
+
+## Compliance Dashboard
+
+Get a real-time view of your compliance posture:
+
+```ts
+const dashboard = await anima.compliance.dashboard.get();
+
+console.log("--- Compliance Dashboard ---");
+console.log(`SOC 2 Controls: ${dashboard.soc2.passing}/${dashboard.soc2.total} passing`);
+console.log(`Readiness Score: ${dashboard.soc2.readinessScore}%`);
+console.log(`Open DSARs: ${dashboard.dsar.openCount}`);
+console.log(`Avg DSAR Resolution: ${dashboard.dsar.avgResolutionDays} days`);
+console.log(`Anomalies (30d): ${dashboard.anomalies.last30Days}`);
+console.log(`Quarantined Agents: ${dashboard.anomalies.quarantinedCount}`);
+console.log(`Last Audit Report: ${dashboard.lastReport.generatedAt}`);
+```
+
+## Scheduled Reports
+
+Automate report generation on a schedule:
+
+```ts
+await anima.compliance.reports.schedule({
+  template: "security-posture",
+  frequency: "weekly",          // "daily" | "weekly" | "monthly" | "quarterly"
+  format: "pdf",
+  recipients: ["compliance@acme.com", "ciso@acme.com"],
+  dayOfWeek: "monday",          // for weekly reports
+});
+```
+
+## API Reference
+
+| Endpoint                                | Method | Description                          |
+| --------------------------------------- | ------ | ------------------------------------ |
+| `/api/compliance/reports`               | POST   | Generate a report                    |
+| `/api/compliance/reports`               | GET    | List generated reports               |
+| `/api/compliance/reports/:id`           | GET    | Get report status and download URL   |
+| `/api/compliance/reports/schedule`      | POST   | Schedule recurring reports           |
+| `/api/compliance/reports/schedule`      | GET    | List scheduled reports               |
+| `/api/compliance/dsar`                  | POST   | Create a DSAR request                |
+| `/api/compliance/dsar`                  | GET    | List DSARs                           |
+| `/api/compliance/dsar/:id`              | GET    | Get DSAR status and results          |
+| `/api/compliance/dashboard`             | GET    | Get compliance dashboard             |
+
+## Configuration
+
+| Variable                              | Default  | Description                              |
+| ------------------------------------- | -------- | ---------------------------------------- |
+| `ANIMA_COMPLIANCE_DSAR_SLA_DAYS`      | `30`     | DSAR completion SLA in days              |
+| `ANIMA_COMPLIANCE_REPORT_RETENTION`   | `730`    | Report retention in days (2 years)       |
+| `ANIMA_COMPLIANCE_REPORT_STORAGE`     | `s3`     | Storage backend for generated reports    |
+
+## Next Steps
+
+- [SOC 2 Controls](/docs/compliance/soc2-controls) -- Detailed control mappings
+- [Audit Log](/docs/security/audit-log) -- Underlying data for reports
+- [Anomaly Detection](/docs/security/anomaly-detection) -- Security posture data

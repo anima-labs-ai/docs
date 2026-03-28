@@ -1,0 +1,284 @@
+---
+title: "Go SDK"
+description: "Quickstart and reference for the Anima Go SDK. Manage agents, email, cards, vault, identity, and A2A from Go applications."
+---
+
+# Go SDK
+
+The official Anima Go SDK provides idiomatic Go access to the full Anima platform: agents, email, cards, vault, identity, wallet, registry, and A2A.
+
+## Installation
+
+```bash
+go get github.com/anima-labs/anima-go
+```
+
+Requires Go 1.21 or later.
+
+## Quickstart
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/anima-labs/anima-go"
+)
+
+func main() {
+    ctx := context.Background()
+    client := anima.NewClient("ak_...")
+
+    // Create an agent
+    agent, err := client.Agents.Create(ctx, &anima.CreateAgentParams{
+        Name: "Go Agent",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Agent: %s\n", agent.ID)
+
+    // Send an email
+    _, err = client.Messages.SendEmail(ctx, &anima.SendEmailParams{
+        AgentID: agent.ID,
+        To:      "user@example.com",
+        Subject: "Hello from Go",
+        Body:    "This email was sent by an AI agent using the Go SDK.",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Email sent!")
+}
+```
+
+## Client Configuration
+
+```go
+// Basic client
+client := anima.NewClient("ak_...")
+
+// Client with options
+client := anima.NewClient("ak_...",
+    anima.WithBaseURL("https://api.useanima.sh"),
+    anima.WithTimeout(30 * time.Second),
+    anima.WithRetries(3),
+    anima.WithPodID("pod_prod"),
+)
+```
+
+### Configuration Options
+
+| Option            | Default                        | Description                    |
+| ----------------- | ------------------------------ | ------------------------------ |
+| `WithBaseURL`     | `https://api.useanima.sh`      | API base URL                   |
+| `WithTimeout`     | `30s`                          | HTTP request timeout           |
+| `WithRetries`     | `2`                            | Max retry attempts on failure  |
+| `WithPodID`       | none                           | Scope all requests to a pod    |
+| `WithHTTPClient`  | `http.DefaultClient`           | Custom HTTP client             |
+| `WithUserAgent`   | `anima-go/<version>`           | Custom User-Agent header       |
+
+## Resource Reference
+
+### Agents
+
+```go
+// Create
+agent, err := client.Agents.Create(ctx, &anima.CreateAgentParams{
+    Name: "Research Bot",
+})
+
+// Get
+agent, err := client.Agents.Get(ctx, "ag_abc123")
+
+// List
+agents, err := client.Agents.List(ctx, &anima.ListAgentsParams{
+    Limit: 20,
+})
+
+// Update
+agent, err := client.Agents.Update(ctx, "ag_abc123", &anima.UpdateAgentParams{
+    Name: "Updated Bot",
+})
+
+// Delete
+err := client.Agents.Delete(ctx, "ag_abc123")
+```
+
+### Email
+
+```go
+// Send email
+msg, err := client.Messages.SendEmail(ctx, &anima.SendEmailParams{
+    AgentID: "ag_abc123",
+    To:      "user@example.com",
+    Subject: "Hello",
+    Body:    "Sent from Go",
+})
+
+// List messages
+messages, err := client.Messages.List(ctx, &anima.ListMessagesParams{
+    AgentID: "ag_abc123",
+    Limit:   50,
+})
+
+// Get a message
+msg, err := client.Messages.Get(ctx, "msg_xyz789")
+```
+
+### Cards
+
+```go
+// Issue a card
+card, err := client.Cards.Create(ctx, &anima.CreateCardParams{
+    AgentID:        "ag_abc123",
+    Label:          "SaaS Subscriptions",
+    Currency:       "usd",
+    SpendLimitDaily: 50000, // cents
+})
+
+// Get card details
+card, err := client.Cards.Get(ctx, "card_abc123")
+
+// List transactions
+txns, err := client.Cards.ListTransactions(ctx, "card_abc123", &anima.ListTransactionsParams{
+    Limit: 20,
+})
+
+// Close a card
+err := client.Cards.Close(ctx, "card_abc123")
+```
+
+### Vault
+
+```go
+// Store a secret
+secret, err := client.Vault.Store(ctx, &anima.StoreSecretParams{
+    AgentID: "ag_abc123",
+    Key:     "openai_key",
+    Value:   "sk-...",
+    Tags:    []string{"llm", "production"},
+})
+
+// Retrieve a secret
+secret, err := client.Vault.Get(ctx, "ag_abc123", "openai_key")
+fmt.Println(secret.Value)
+
+// List secrets (metadata only)
+secrets, err := client.Vault.List(ctx, &anima.ListSecretsParams{
+    AgentID: "ag_abc123",
+})
+```
+
+### Identity
+
+```go
+// Resolve DID
+doc, err := client.Identity.ResolveDID(ctx, "did:anima:ag_abc123")
+
+// Issue a credential
+cred, err := client.Identity.Credentials.Issue(ctx, &anima.IssueCredentialParams{
+    AgentID: "ag_abc123",
+    Type:    "AgentAuthorization",
+    Claims:  map[string]any{"role": "purchasing-agent"},
+})
+
+// Publish Agent Card
+card, err := client.Identity.AgentCards.Publish(ctx, &anima.PublishAgentCardParams{
+    AgentID: "ag_abc123",
+    Domain:  "agent.acme.com",
+})
+```
+
+### A2A
+
+```go
+// Send a task
+task, err := client.A2A.SendTask(ctx, &anima.SendTaskParams{
+    FromAgentID: "ag_sender",
+    ToAgentDID:  "did:anima:ag_receiver",
+    Capability:  "data-analysis",
+    Input:       map[string]any{"dataset": "q1-sales"},
+    TimeoutMs:   300000,
+})
+
+// Get task result
+task, err := client.A2A.GetTask(ctx, task.ID)
+fmt.Printf("Status: %s, Result: %v\n", task.Status, task.Result)
+```
+
+### Wallet
+
+```go
+// Create a wallet
+wallet, err := client.Wallet.Create(ctx, &anima.CreateWalletParams{
+    AgentID:  "ag_abc123",
+    Currency: "usd",
+    BudgetGuards: &anima.BudgetGuards{
+        DailyLimitCents: 50000,
+    },
+})
+
+// Check balance
+balance, err := client.Wallet.GetBalance(ctx, wallet.ID)
+fmt.Printf("Available: %d cents\n", balance.AvailableCents)
+```
+
+## Error Handling
+
+The SDK uses typed errors for common failure cases:
+
+```go
+agent, err := client.Agents.Get(ctx, "ag_nonexistent")
+if err != nil {
+    var apiErr *anima.APIError
+    if errors.As(err, &apiErr) {
+        fmt.Printf("API error: %d %s\n", apiErr.StatusCode, apiErr.Message)
+        fmt.Printf("Request ID: %s\n", apiErr.RequestID)
+    }
+    log.Fatal(err)
+}
+```
+
+| Error Type          | Description                              |
+| ------------------- | ---------------------------------------- |
+| `*APIError`         | API returned an error response           |
+| `*AuthError`        | Invalid or expired API key               |
+| `*RateLimitError`   | Rate limit exceeded (includes retry-after)|
+| `*ValidationError`  | Invalid request parameters               |
+| `*NotFoundError`    | Resource not found                       |
+
+## Pagination
+
+All list endpoints support cursor-based pagination:
+
+```go
+var allAgents []anima.Agent
+cursor := ""
+
+for {
+    result, err := client.Agents.List(ctx, &anima.ListAgentsParams{
+        Limit:  100,
+        Cursor: cursor,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    allAgents = append(allAgents, result.Data...)
+
+    if !result.HasMore {
+        break
+    }
+    cursor = result.NextCursor
+}
+```
+
+## Next Steps
+
+- [Official SDKs](/docs/sdks) -- TypeScript and Python SDK documentation
+- [Getting Started](/docs/getting-started) -- Platform quickstart guide
+- [Examples](/docs/examples) -- Complete runnable examples

@@ -1,0 +1,178 @@
+---
+title: "Anomaly Detection"
+description: "Behavioral baselines, detection rules, and automated quarantine for AI agent activity. Protect against compromised or misbehaving agents."
+---
+
+# Anomaly Detection
+
+Anima continuously monitors agent behavior and compares it against learned baselines to detect unusual activity. When anomalies are detected, agents can be automatically quarantined to prevent damage while alerts are sent for human review.
+
+## How It Works
+
+1. **Baseline Learning** -- Anima observes agent behavior over a configurable window to establish normal patterns
+2. **Real-Time Monitoring** -- Every action is compared against the baseline in real time
+3. **Detection Rules** -- Built-in and custom rules flag deviations
+4. **Response Actions** -- Anomalies trigger alerts, require approval, or quarantine the agent
+
+## Behavioral Baselines
+
+Baselines are computed per-agent across multiple dimensions:
+
+| Dimension              | What It Tracks                                        |
+| ---------------------- | ----------------------------------------------------- |
+| **Email volume**       | Emails sent/received per hour, day                   |
+| **Recipient patterns** | Typical recipients and new-contact frequency          |
+| **Spending velocity**  | Transaction frequency and amount patterns            |
+| **API call rate**      | Requests per minute by endpoint                      |
+| **Active hours**       | Typical hours of activity                             |
+| **Data access**        | Vault secret access patterns                         |
+| **A2A communication**  | Task delegation frequency and partner agents         |
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// View an agent's current behavioral baseline
+const baseline = await anima.anomalyDetection.getBaseline("ag_8f3k2m9x1n4p7q6r");
+
+console.log(`Baseline period: ${baseline.windowDays} days`);
+console.log(`Avg emails/day: ${baseline.emailVolume.avgPerDay}`);
+console.log(`Avg spend/day: $${(baseline.spending.avgDailyCents / 100).toFixed(2)}`);
+console.log(`Active hours: ${baseline.activeHours.start}-${baseline.activeHours.end}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+baseline = anima.anomaly_detection.get_baseline("ag_8f3k2m9x1n4p7q6r")
+
+print(f"Baseline period: {baseline.window_days} days")
+print(f"Avg emails/day: {baseline.email_volume.avg_per_day}")
+print(f"Avg spend/day: ${baseline.spending.avg_daily_cents / 100:.2f}")
+```
+</Tab>
+</Tabs>
+
+## Detection Rules
+
+### Built-In Rules
+
+| Rule                          | Trigger                                             | Default Action |
+| ----------------------------- | --------------------------------------------------- | -------------- |
+| `email_volume_spike`          | Emails sent exceed 3x baseline in 1 hour           | Alert          |
+| `new_recipient_burst`         | 10+ new recipients in 1 hour                       | Alert          |
+| `spending_spike`              | Spend exceeds 5x daily baseline                    | Quarantine     |
+| `off_hours_activity`          | Activity outside established active hours          | Alert          |
+| `vault_mass_access`           | 5+ vault secrets accessed in 1 minute              | Quarantine     |
+| `api_rate_anomaly`            | API calls exceed 10x per-minute baseline           | Throttle       |
+| `a2a_unknown_agent`           | Task sent to never-before-seen agent               | Approval       |
+
+### Custom Rules
+
+Define custom detection rules for your specific use case:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+await anima.anomalyDetection.rules.create({
+  name: "large-purchase-new-vendor",
+  description: "Flag large purchases from vendors never used before",
+  conditions: [
+    { field: "category", operator: "eq", value: "cards.authorize" },
+    { field: "metadata.amountCents", operator: "gt", value: 10000 },
+    { field: "metadata.merchantName", operator: "not_in_baseline", value: true },
+  ],
+  action: "require_approval",
+  severity: "high",
+  enabled: true,
+});
+```
+</Tab>
+<Tab value="Python">
+```python
+anima.anomaly_detection.rules.create(
+    name="large-purchase-new-vendor",
+    description="Flag large purchases from vendors never used before",
+    conditions=[
+        {"field": "category", "operator": "eq", "value": "cards.authorize"},
+        {"field": "metadata.amountCents", "operator": "gt", "value": 10000},
+        {"field": "metadata.merchantName", "operator": "not_in_baseline", "value": True},
+    ],
+    action="require_approval",
+    severity="high",
+    enabled=True,
+)
+```
+</Tab>
+</Tabs>
+
+## Quarantine
+
+When an agent is quarantined, all its outbound actions are suspended until a human reviews the flagged activity.
+
+```ts
+// Manually quarantine an agent
+await anima.anomalyDetection.quarantine("ag_8f3k2m9x1n4p7q6r", {
+  reason: "Unusual spending pattern detected",
+});
+
+// Release an agent from quarantine
+await anima.anomalyDetection.release("ag_8f3k2m9x1n4p7q6r", {
+  reviewedBy: "admin@acme.com",
+  notes: "Confirmed legitimate activity -- budget increase approved",
+});
+
+// List quarantined agents
+const quarantined = await anima.anomalyDetection.listQuarantined();
+```
+
+## Anomaly Alerts
+
+Configure how anomaly alerts are delivered:
+
+```ts
+await anima.anomalyDetection.configureAlerts({
+  channels: [
+    { type: "webhook", url: "https://acme.com/webhooks/anomaly" },
+    { type: "email", address: "security@acme.com" },
+    { type: "slack", webhookUrl: "https://hooks.slack.com/..." },
+  ],
+  minSeverity: "medium", // "low" | "medium" | "high" | "critical"
+});
+```
+
+## API Reference
+
+| Endpoint                                    | Method | Description                     |
+| ------------------------------------------- | ------ | ------------------------------- |
+| `/api/anomaly-detection/baselines/:agentId` | GET    | Get agent behavioral baseline   |
+| `/api/anomaly-detection/rules`              | POST   | Create a detection rule         |
+| `/api/anomaly-detection/rules`              | GET    | List detection rules            |
+| `/api/anomaly-detection/rules/:id`          | PUT    | Update a detection rule         |
+| `/api/anomaly-detection/rules/:id`          | DELETE | Delete a detection rule         |
+| `/api/anomaly-detection/alerts`             | GET    | List recent anomaly alerts      |
+| `/api/anomaly-detection/quarantine`         | POST   | Quarantine an agent             |
+| `/api/anomaly-detection/quarantine`         | GET    | List quarantined agents         |
+| `/api/anomaly-detection/release`            | POST   | Release from quarantine         |
+| `/api/anomaly-detection/alerts/config`      | PUT    | Configure alert channels        |
+
+## Configuration
+
+| Variable                              | Default | Description                                 |
+| ------------------------------------- | ------- | ------------------------------------------- |
+| `ANIMA_ANOMALY_BASELINE_WINDOW_DAYS`  | `14`    | Days of data used to compute baselines      |
+| `ANIMA_ANOMALY_SENSITIVITY`           | `medium`| Detection sensitivity (low/medium/high)     |
+| `ANIMA_ANOMALY_AUTO_QUARANTINE`       | `true`  | Auto-quarantine on critical anomalies       |
+| `ANIMA_ANOMALY_COOLDOWN_MINUTES`      | `30`    | Cooldown between repeated alerts            |
+
+## Next Steps
+
+- [Audit Log](/docs/security/audit-log) -- Review the events that triggered anomalies
+- [SOC 2 Controls](/docs/compliance/soc2-controls) -- Map anomaly detection to compliance
+- [Compliance Reporting](/docs/compliance/reporting) -- Include anomaly metrics in reports

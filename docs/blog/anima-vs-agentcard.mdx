@@ -1,0 +1,190 @@
+---
+title: "Anima vs AgentCard: Virtual Cards Are Just the Beginning"
+description: "AgentCard issues virtual cards for AI agents. Anima includes cards plus email, phone, vault, identity, and a policy engine. Here is the comparison."
+date: "2026-03-28"
+author: "Anima Team"
+tags: ["comparison", "agentcard", "cards", "payments"]
+---
+
+# Anima vs AgentCard: Virtual Cards Are Just the Beginning
+
+AgentCard focuses on one important problem: issuing virtual cards for AI agents with spending controls. It is a clean product for a real need. But cards alone do not make an agent production-ready.
+
+## Why Cards Are Not Enough
+
+An agent that makes purchases also needs to:
+
+- **Receive invoices and receipts** via email
+- **Confirm orders** via SMS
+- **Store merchant credentials** securely for repeat purchases
+- **Prove its identity** to vendors and compliance systems
+- **Pay via HTTP** when APIs use the x402 protocol instead of card rails
+
+AgentCard handles the card. Everything else is your problem.
+
+## Feature Comparison
+
+| Capability | AgentCard | Anima |
+|---|---|---|
+| Virtual card issuing | Yes | Yes |
+| Per-transaction limits | Yes | Yes |
+| Daily/monthly spending caps | Yes | Yes |
+| MCC category restrictions | Limited | Yes |
+| Card freeze/unfreeze | Yes | Yes |
+| AML monitoring | Basic | Yes (anomaly detection + policy engine) |
+| Email inboxes | No | Yes |
+| Phone numbers (SMS/voice) | No | Yes |
+| Encrypted credential vault | No | Yes (Bitwarden-backed) |
+| x402 HTTP payments | No | Yes |
+| DID-based identity | No | Yes (did:anima) |
+| Verifiable Credentials | No | Yes (W3C VC) |
+| Agent discovery (Agent Cards) | No | Yes |
+| A2A protocol | No | Yes |
+| Policy engine (cross-capability) | Card-only | Unified across all capabilities |
+| MCP server | No | Yes (160+ tools) |
+| KYB onboarding | Yes | Yes |
+
+## Policy Engine: The Real Difference
+
+Both platforms let you set spending limits on cards. But Anima's policy engine operates across the entire agent identity, not just card transactions.
+
+### AgentCard policy
+
+```ts
+// AgentCard — card-scoped policies only
+const card = await agentcard.create({
+  spendLimit: 5000,
+  allowedMerchants: ["amazon.com"],
+});
+```
+
+### Anima policy
+
+```ts
+// Anima — cross-capability policy engine
+const agent = await anima.agents.create({ name: "Purchasing Agent" });
+
+// Card with spending controls
+const card = await anima.cards.create({
+  agentId: agent.id,
+  label: "Procurement",
+  currency: "usd",
+  spendLimitDaily: 500_00,
+  spendLimitPerAuth: 100_00,
+  allowedMerchantCategories: ["5411", "5412", "5944"],
+});
+
+// Wallet with budget guards for x402 payments
+const wallet = await anima.wallet.create({
+  agentId: agent.id,
+  currency: "usd",
+  budgetGuards: {
+    dailyLimitCents: 500_00,
+    monthlyLimitCents: 5000_00,
+    perTransactionLimitCents: 100_00,
+    requireApprovalAboveCents: 50_00,
+  },
+});
+```
+
+With Anima, the same agent has spending controls on both card transactions and x402 HTTP payments, enforced by a single policy engine with unified audit logs.
+
+## AML and Compliance
+
+AgentCard provides basic transaction monitoring. Anima layers on:
+
+- **Anomaly detection** — ML-based spending pattern analysis across all payment channels
+- **Dual-layer content scanning** — Regex and AI classification on all outbound communications
+- **Full audit trail** — Every action across email, phone, cards, and payments in one log
+- **SOC 2 controls** — API key scoping, encrypted storage, policy enforcement
+
+When your compliance team asks "show me every action this agent took that involved money," Anima returns card transactions, x402 payments, and related email/SMS communications in a single query.
+
+## The Procurement Agent Example
+
+Here is what a real procurement workflow looks like on each platform.
+
+### AgentCard approach (cards only, rest is DIY)
+
+```ts
+// Issue a card
+const card = await agentcard.create({ spendLimit: 10000 });
+
+// Everything else requires separate integrations:
+// - Email: integrate SendGrid or AgentMail
+// - Credentials: build your own secrets manager
+// - Identity: hope for the best
+// - Phone: integrate Twilio separately
+```
+
+### Anima approach (unified)
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+const agent = await anima.agents.create({ name: "Procurement Agent" });
+
+// Issue a card for purchases
+const card = await anima.cards.create({
+  agentId: agent.id,
+  label: "Office Supplies Q1",
+  currency: "usd",
+  spendLimitDaily: 200_00,
+  spendLimitPerAuth: 75_00,
+  allowedMerchantCategories: ["5943", "5944", "5111"],
+});
+
+// Store vendor portal credentials
+await anima.vault.provision({ agentId: agent.id });
+await anima.vault.createCredential({
+  agentId: agent.id,
+  type: "login",
+  name: "Office Supply Vendor",
+  username: "procurement@acme.com",
+  password: "rotated-quarterly",
+  uris: ["https://vendor.example.com"],
+});
+
+// Send purchase confirmation via email
+await anima.messages.send_email({
+  agentId: agent.id,
+  to: "finance@acme.com",
+  subject: "PO #2048 — Office supplies ordered",
+  body: `Ordered office supplies using card ending ${card.last4}. Daily limit: $200.00.`,
+});
+
+// SMS notification to the requester
+await anima.phone.sendSms({
+  agentId: agent.id,
+  to: "+15551234567",
+  body: "Your office supply order has been placed. PO #2048.",
+});
+```
+
+One SDK. One agent identity. One audit log. One policy engine.
+
+## When to Use AgentCard
+
+AgentCard works if:
+
+- Your agent only needs to make card-based purchases
+- You do not need email, phone, or identity capabilities
+- You already have other integrations for communications and credentials
+- Card issuing is the only capability you are evaluating
+
+## When to Use Anima
+
+Anima is the right choice when:
+
+- Your agent needs cards AND email, phone, vault, or identity
+- You want a unified policy engine across all spending channels
+- Compliance requires a single audit trail across agent actions
+- You are building agents that interact with other agents (A2A protocol, DIDs)
+- You want one vendor, one SDK, one bill
+
+## Bottom Line
+
+AgentCard solves card issuing. Anima solves agent identity. Cards are one piece of that identity — alongside email, phone, credentials, and cryptographic trust. If your agents need to operate in the real world, they need more than a card number.
+
+[Get started with Anima Cards](/docs/quickstart-cards) | [See the full platform](/docs/getting-started)

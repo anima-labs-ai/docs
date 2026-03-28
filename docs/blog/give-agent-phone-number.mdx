@@ -1,0 +1,319 @@
+---
+title: "Give Your AI Agent a Phone Number in 5 Minutes"
+description: "Step-by-step tutorial: provision a US phone number for your AI agent, send SMS, handle inbound calls, and stay 10DLC compliant with Anima and Telnyx."
+date: "2026-03-28"
+author: "Anima Team"
+tags: ["tutorial", "phone", "sms", "telnyx", "10dlc"]
+---
+
+# Give Your AI Agent a Phone Number in 5 Minutes
+
+Your AI agent can send emails and make purchases. But sometimes it needs to send a text message or receive a phone call. Customer support agents need to follow up via SMS. Scheduling agents need to confirm appointments. Verification flows need to receive 2FA codes.
+
+This tutorial walks through provisioning a phone number, sending SMS, handling inbound messages, and staying compliant — all in under 5 minutes.
+
+## Prerequisites
+
+- An Anima API key from [console.anima.email](https://console.anima.email)
+- Python 3.10+ or Node.js 18+
+- An agent already created (or we will create one below)
+
+## Step 1: Install the SDK
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```bash
+npm install @anima-labs/sdk
+```
+</Tab>
+<Tab value="Python">
+```bash
+pip install anima-labs
+```
+</Tab>
+</Tabs>
+
+## Step 2: Create an Agent
+
+If you do not already have an agent, create one:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+const agent = await anima.agents.create({
+  name: "Support Agent",
+});
+console.log(`Agent created: ${agent.id}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+agent = anima.agents.create(name="Support Agent")
+print(f"Agent created: {agent.id}")
+```
+</Tab>
+</Tabs>
+
+## Step 3: Search for Available Numbers
+
+Find phone numbers by country and area code:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+const numbers = await anima.phone.search({
+  country: "US",
+  areaCode: "415", // San Francisco
+});
+
+for (const n of numbers) {
+  console.log(`${n.number} — ${n.region}`);
+}
+// +14155550101 — San Francisco, CA
+// +14155550102 — San Francisco, CA
+// +14155550103 — San Francisco, CA
+```
+</Tab>
+<Tab value="Python">
+```python
+numbers = anima.phone.search(country="US", area_code="415")
+
+for n in numbers:
+    print(f"{n.number} — {n.region}")
+# +14155550101 — San Francisco, CA
+# +14155550102 — San Francisco, CA
+```
+</Tab>
+</Tabs>
+
+## Step 4: Provision the Number
+
+Assign a number to your agent:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+const phone = await anima.phone.provision({
+  agentId: agent.id,
+  number: "+14155550101",
+});
+console.log(`Provisioned: ${phone.number}`);
+// Provisioned: +14155550101
+```
+</Tab>
+<Tab value="Python">
+```python
+phone = anima.phone.provision(
+    agent_id=agent.id,
+    number="+14155550101",
+)
+print(f"Provisioned: {phone.number}")
+```
+</Tab>
+</Tabs>
+
+That is it. Your agent now has a phone number. The number is linked to the agent's unified identity — same `agent_id` used for email, cards, vault, and DID.
+
+## Step 5: Send an SMS
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+const message = await anima.phone.sendSms({
+  agentId: agent.id,
+  to: "+15551234567",
+  body: "Your appointment is confirmed for tomorrow at 2 PM. Reply CANCEL to reschedule.",
+});
+console.log(`SMS sent: ${message.id}`);
+```
+</Tab>
+<Tab value="Python">
+```python
+message = anima.phone.send_sms(
+    agent_id=agent.id,
+    to="+15551234567",
+    body="Your appointment is confirmed for tomorrow at 2 PM. Reply CANCEL to reschedule.",
+)
+print(f"SMS sent: {message.id}")
+```
+</Tab>
+</Tabs>
+
+## Step 6: Handle Inbound Messages with Webhooks
+
+Configure a webhook to receive inbound SMS and call events:
+
+<Tabs items={["Node.js", "Python"]}>
+<Tab value="Node.js">
+```ts
+// Register a webhook for phone events
+await anima.webhooks.create({
+  agentId: agent.id,
+  url: "https://your-app.com/webhooks/phone",
+  events: ["phone.sms.received", "phone.call.incoming"],
+});
+```
+
+Your webhook endpoint receives payloads like this:
+
+```ts
+// Express webhook handler
+app.post("/webhooks/phone", (req, res) => {
+  const event = req.body;
+
+  if (event.type === "phone.sms.received") {
+    console.log(`From: ${event.data.from}`);
+    console.log(`Body: ${event.data.body}`);
+    // "CANCEL" → trigger rescheduling logic
+  }
+
+  if (event.type === "phone.call.incoming") {
+    console.log(`Incoming call from: ${event.data.from}`);
+    // Route to your voice handling logic
+  }
+
+  res.status(200).send("ok");
+});
+```
+</Tab>
+<Tab value="Python">
+```python
+# Register a webhook for phone events
+anima.webhooks.create(
+    agent_id=agent.id,
+    url="https://your-app.com/webhooks/phone",
+    events=["phone.sms.received", "phone.call.incoming"],
+)
+```
+
+Your webhook endpoint receives payloads like this:
+
+```python
+# FastAPI webhook handler
+@app.post("/webhooks/phone")
+async def phone_webhook(event: dict):
+    if event["type"] == "phone.sms.received":
+        print(f"From: {event['data']['from']}")
+        print(f"Body: {event['data']['body']}")
+
+    if event["type"] == "phone.call.incoming":
+        print(f"Incoming call from: {event['data']['from']}")
+
+    return {"status": "ok"}
+```
+</Tab>
+</Tabs>
+
+## The Full Script
+
+Here is the complete flow in one file:
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// 1. Create agent
+const agent = await anima.agents.create({ name: "Scheduling Agent" });
+
+// 2. Search for numbers
+const numbers = await anima.phone.search({ country: "US", areaCode: "415" });
+
+// 3. Provision
+const phone = await anima.phone.provision({
+  agentId: agent.id,
+  number: numbers[0].number,
+});
+
+// 4. Set up webhook for inbound
+await anima.webhooks.create({
+  agentId: agent.id,
+  url: "https://your-app.com/webhooks/phone",
+  events: ["phone.sms.received", "phone.call.incoming"],
+});
+
+// 5. Send first SMS
+await anima.phone.sendSms({
+  agentId: agent.id,
+  to: "+15551234567",
+  body: "Hi! I'm your new scheduling assistant. Text me anytime to book or change appointments.",
+});
+
+console.log(`Agent ${agent.id} is live at ${phone.number}`);
+```
+
+## Telnyx Under the Hood
+
+Anima's phone infrastructure is powered by Telnyx. You get:
+
+- **US and international numbers** with local presence
+- **SMS and MMS** with delivery receipts
+- **Programmable voice** for inbound and outbound calls
+- **Number portability** if you are migrating from another provider
+
+You do not need a separate Telnyx account — Anima manages the Telnyx integration, number provisioning, and message routing. Your agent interacts with the Anima SDK; Telnyx handles the telephony.
+
+## 10DLC Compliance
+
+If your agent sends SMS to US numbers at any meaningful volume, you need 10DLC registration. 10DLC (10-Digit Long Code) is the carrier-mandated system for business SMS over standard phone numbers.
+
+Anima handles 10DLC registration as part of the onboarding flow:
+
+1. **Brand registration** — Your organization is registered with The Campaign Registry (TCR)
+2. **Campaign registration** — Each use case (appointment reminders, support notifications, etc.) is registered as a campaign
+3. **Number assignment** — Your provisioned numbers are associated with approved campaigns
+
+Without 10DLC registration, carriers will throttle or block your messages. Anima manages this so you do not have to navigate TCR directly.
+
+### What you need to provide:
+
+- Business name and EIN
+- Contact information
+- Description of your SMS use cases
+- Sample messages
+
+Anima submits the registration and tracks approval status. You can check status via the API:
+
+```ts
+const status = await anima.phone.complianceStatus({ agentId: agent.id });
+console.log(status.tenDlc); // "approved" | "pending" | "action_required"
+```
+
+## Real-World Use Cases
+
+### Customer Support Agent
+
+Receives support tickets via email, resolves them, and sends SMS confirmations to customers. The phone number gives the agent a direct channel for urgent follow-ups.
+
+### Scheduling Agent
+
+Sends appointment reminders via SMS, handles rescheduling via inbound text ("CANCEL" or "RESCHEDULE"), and falls back to email for detailed confirmations.
+
+### Verification Agent
+
+Receives 2FA codes via SMS when logging into external services. The agent's vault stores the credentials; the phone number receives the verification code.
+
+### Sales Development Agent
+
+Follows up with leads via SMS after initial email outreach. The phone number makes the agent reachable for quick replies without cluttering email.
+
+## What Makes This Different
+
+Other platforms let you provision phone numbers. The difference with Anima is that the phone number is part of the agent's unified identity:
+
+- Same `agent_id` across email, phone, cards, vault, and DID
+- Same policy engine governing what the agent can do across all channels
+- Same audit log capturing every SMS alongside every email and transaction
+- Same webhook system for all event types
+
+Your agent does not have a phone number in one system and an email in another. It has one identity that happens to be reachable via phone, email, and every other channel.
+
+[Read the Phone docs](/docs/phone) | [Set up webhooks](/docs/webhooks) | [Get started](/docs/getting-started)

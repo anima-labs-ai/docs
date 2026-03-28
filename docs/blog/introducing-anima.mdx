@@ -1,0 +1,142 @@
+---
+title: "Introducing Anima: The Unified Identity Platform for AI Agents"
+description: "Anima gives AI agents real-world identity — email, phone, payment cards, encrypted vault, and cryptographic identity — in a single API."
+date: "2026-03-28"
+author: "Anima Team"
+tags: ["launch", "platform", "identity", "agents"]
+---
+
+# Introducing Anima: The Unified Identity Platform for AI Agents
+
+AI agents are crossing from demos into production. They book travel, manage procurement, handle customer support, and negotiate with vendors. But to do any of that in the real world, an agent needs more than an LLM and a prompt. It needs **identity**.
+
+## The Identity Gap
+
+Think about what a human employee gets on day one: a work email, a phone extension, a corporate card, access credentials, and an ID badge. An AI agent doing the same job needs the same things — and until now, you had to stitch them together yourself.
+
+The current landscape looks like this:
+
+- **Email**: One vendor gives you agent inboxes
+- **Phone**: Another gives you programmable numbers
+- **Cards**: A third handles virtual card issuing
+- **Credentials**: You roll your own secrets management
+- **Identity**: You hope nobody asks "which agent did that?"
+
+Each integration has its own SDK, its own auth model, its own billing, and its own failure modes. You end up building an identity layer from scratch every time you deploy an agent.
+
+## One Platform. One API. One Identity.
+
+Anima collapses the entire stack into a single platform. Every agent gets a unified identity that spans:
+
+- **Email** — Real inboxes on custom domains with inbound/outbound, content scanning, and webhooks
+- **Phone** — US phone numbers with SMS and voice, backed by Telnyx with 10DLC compliance
+- **Cards** — Virtual debit cards with per-transaction spending limits, MCC restrictions, and freeze controls
+- **Vault** — Bitwarden-backed encrypted storage for logins, API keys, and secrets
+- **Identity** — W3C DIDs, Verifiable Credentials, and Agent Cards for discovery and trust
+
+All bound to a single `agent_id`. All managed through one SDK.
+
+## What This Looks Like in Code
+
+Here is a complete agent setup — email, phone, card, vault, and identity — in a single script:
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Create the agent
+const agent = await anima.agents.create({ name: "Procurement Agent" });
+
+// Email: send from a real inbox
+await anima.messages.send_email({
+  agentId: agent.id,
+  to: "vendor@example.com",
+  subject: "PO #1042 — Confirm delivery date",
+  body: "Please confirm the expected delivery for PO #1042.",
+});
+
+// Phone: provision a number and send SMS
+await anima.phone.provision({ agentId: agent.id, number: "+14155551234" });
+await anima.phone.sendSms({
+  agentId: agent.id,
+  to: "+15551234567",
+  body: "Your order has shipped. Track at https://example.com/track/1042",
+});
+
+// Card: issue a virtual card with spending controls
+const card = await anima.cards.create({
+  agentId: agent.id,
+  label: "Procurement",
+  currency: "usd",
+  spendLimitDaily: 100_00,
+  spendLimitPerAuth: 50_00,
+});
+
+// Vault: store vendor credentials
+await anima.vault.provision({ agentId: agent.id });
+await anima.vault.createCredential({
+  agentId: agent.id,
+  type: "login",
+  name: "Vendor Portal",
+  username: "procurement-bot",
+  password: "rotated-secret",
+  uris: ["https://vendor.example.com/login"],
+});
+
+// Identity: resolve the agent's DID
+const did = await anima.identity.resolveDid(`did:anima:${agent.id}`);
+console.log(did);
+```
+
+That is one SDK, one API key, one agent ID. No glue code. No multi-vendor orchestration.
+
+## Key Differentiators
+
+### Cryptographic Identity (DIDs)
+
+Every Anima agent gets a `did:anima` decentralized identifier. This is not just a database row — it is a W3C-compliant DID with public keys, service endpoints, and verifiable credentials. Agents can prove who they are to other agents, services, and compliance systems.
+
+### x402 Payments
+
+Agents encounter paywalls and paid APIs constantly. Anima implements the x402 protocol: when a server returns `HTTP 402 Payment Required`, the agent's wallet automatically negotiates and pays — within budget guards you define. No credit card forms. No checkout flows.
+
+### Policy Engine
+
+Every action goes through a configurable policy engine. You define rules like "never spend more than $50 per transaction" or "only send emails to @acme.com domains." Policies are enforced at the platform level, not in your application code.
+
+### SOC 2 Controls
+
+Anima is built for production. Dual-layer content scanning (regex + AI classification), API key scoping (master keys vs. agent keys), encrypted vault storage, and full audit logging.
+
+## SDKs and Tools
+
+Anima ships SDKs for the ecosystems where agents run:
+
+| SDK | Install | Status |
+|-----|---------|--------|
+| Python | `pip install anima-labs` | GA |
+| Node.js | `npm install @anima-labs/sdk` | GA |
+| Go | `go get github.com/anima-labs/anima-go` | GA |
+| CLI | `npm install -g @anima-labs/cli` | GA |
+| MCP Server | 160+ tools for Claude, GPT, and other LLM agents | GA |
+
+The MCP server is worth highlighting: it exposes every Anima capability as a tool that LLM agents can call directly. Your agent does not need custom integration code — it discovers and uses Anima through the Model Context Protocol.
+
+## Who Is This For?
+
+- **Agent developers** who need production-ready identity primitives without building them from scratch
+- **Enterprises** deploying agents that must comply with SOC 2, AML, and audit requirements
+- **AI-native startups** building products where agents transact, communicate, and authenticate autonomously
+
+## Get Started
+
+Anima is available today. You can be up and running in under 5 minutes:
+
+1. Sign up at [console.anima.email](https://console.anima.email)
+2. Install the SDK: `pip install anima-labs` or `npm install @anima-labs/sdk`
+3. Create your first agent and send an email — see the [Quickstart](/docs/quickstart-email)
+
+We are building the identity layer for the agentic internet. If you are building agents that need to operate in the real world, we would love to hear from you.
+
+[Star us on GitHub](https://github.com/anima-labs) | [Join the Discord](https://discord.gg/anima) | [Read the Docs](/docs/getting-started)

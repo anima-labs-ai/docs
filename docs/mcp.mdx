@@ -1,42 +1,101 @@
 ---
 title: "MCP Server"
-description: "Connect Anima to Claude Desktop via Model Context Protocol."
+description: "Connect Anima to Claude Desktop and other MCP clients via Model Context Protocol."
 ---
 
 # MCP Server
 
-Anima exposes over 77 specialized tools via the Model Context Protocol (MCP).
+Anima exposes over 77 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, virtual cards, vault, phone, and more.
 
 ## Installation
 
 ```bash
-npx @anima/mcp-server --api-key=mk_live_...
+npx @anima-labs/mcp --api-key=ak_...
 ```
 
-## Configuration for Claude Desktop
+## Configuration
 
-Add the following configuration to Claude Desktop:
+### Claude Desktop
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
     "anima": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@anima/mcp-server",
-        "--api-key=mk_live_..."
-      ]
+      "args": ["-y", "@anima-labs/mcp"],
+      "env": {
+        "ANIMA_API_KEY": "ak_..."
+      }
     }
   }
 }
 ```
 
-## Available Tools
+### Claude Code
 
-- **Mail Operations:** Send, receive, search, and manage emails.
-- **Agent Management:** Create and list sub-agents dynamically.
-- **Drafts & Templates:** Prepare emails for review.
-- **Contacts:** Manage address books.
+```bash
+claude mcp add anima -- npx -y @anima-labs/mcp
+```
 
-> **Tip:** Anima tools are designed to be composable. An agent can search for an email, summarize it, draft a reply, and send it—all in one session.
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `ANIMA_API_KEY` | Your Anima API key (required) |
+| `ANIMA_BASE_URL` | Custom API base URL (optional) |
+
+## Available Tool Categories
+
+The MCP server exposes tools across 15 categories:
+
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Agent** | create, list, get, delete | Manage AI agent identities |
+| **Email** | send, search, list | Send and manage email messages |
+| **Message** | send, list, get | Inbox messaging operations |
+| **Cards** | create, list, freeze, policies | Virtual card issuing and management |
+| **Vault** | provision, create, get, search | Encrypted credential storage |
+| **Phone** | provision, send-sms, list | Phone numbers and SMS |
+| **Webhook** | create, list, delete | Real-time event subscriptions |
+| **Domain** | create, verify, list | Custom email domain management |
+| **Invoice** | create, list, match | Invoice tracking and reconciliation |
+| **Funding** | list, create | Funding source management |
+| **Security** | policies, audit | Security policy configuration |
+| **Organization** | get, update | Organization settings |
+| **Browser Payments** | detect, fill, pay | Automated checkout form filling |
+| **x402** | payment protocols | HTTP 402 payment protocol tools |
+| **Utility** | misc helpers | Search, status, and utility tools |
+
+## Selective Tool Loading
+
+Load only the tool categories you need:
+
+```bash
+npx @anima-labs/mcp --tools=email,cards,vault
+```
+
+## Transport Modes
+
+The MCP server supports both stdio (default) and HTTP transports:
+
+```bash
+# stdio (default, for Claude Desktop)
+npx @anima-labs/mcp
+
+# HTTP (for web-based MCP clients)
+npx @anima-labs/mcp --transport=http --port=3100
+```
+
+## Example Usage
+
+Once connected, you can ask your AI assistant natural language questions like:
+
+- "Send an email from my agent to user@example.com"
+- "Create a virtual card with a $50 daily limit"
+- "Store my CRM login credentials in the vault"
+- "List all transactions on card **** 4242"
+- "Search my inbox for emails about invoices"
+
+The AI assistant will automatically select and call the appropriate Anima MCP tools.

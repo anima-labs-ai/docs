@@ -12,7 +12,7 @@
 | **A** | Launch Readiness | ✅ Complete | 8/8 | █████████████████████ 100% |
 | **B** | Developer Experience | ✅ Complete | 5/5 | █████████████████████ 100% |
 | **C** | Agent Identity & Commerce | ✅ Complete | 6/6 | █████████████████████ 100% |
-| **D** | Enterprise & Compliance | 🔲 Not Started | 0/4 | ░░░░░░░░░░░░░░░░░░░░░ 0% |
+| **D** | Enterprise & Compliance | ✅ Complete | 4/4 | █████████████████████ 100% |
 
 ---
 
@@ -62,16 +62,16 @@
 
 ---
 
-## Phase D — Enterprise & Compliance 🔲
+## Phase D — Enterprise & Compliance ✅
 
 > SOC 2, anomaly detection, compliance reporting, Go SDK.
 
 | # | Task | Status | Repos | Key Deliverables |
 |---|------|--------|-------|-----------------|
-| D1 | SOC 2 Certification Roadmap | 🔲 Not Started | `anima/` | Control mapping, audit trails, access reviews, evidence collection |
-| D2 | Anomaly Detection & Behavioral Monitoring | 🔲 Not Started | `anima/` | ML-based anomaly detection, behavioral baselines, alerting |
-| D3 | Compliance Reporting | 🔲 Not Started | `anima/` | Automated compliance reports, regulatory templates, audit exports |
-| D4 | Go SDK | 🔲 Not Started | `go/` | Full-featured Go client SDK with all resources |
+| D1 | SOC 2 Certification Roadmap | ✅ Done | `anima/`, `node/`, `python/`, `go/` | Immutable AuditLog (append-only, batch insert, Hono middleware), AccessReview model, 33 SOC 2 Trust Service Criteria (CC1-CC9, A1), ComplianceControl + EvidenceItem models, automated evidence collection, platform→control auto-mapping, CSV/JSON audit export, SDK resources |
+| D2 | Anomaly Detection & Behavioral Monitoring | ✅ Done | `anima/`, `node/`, `python/`, `go/` | AgentBaseline with hourly patterns, 6 behavioral metrics, z-score/rate-multiplier/time-violation/absolute-threshold detection, AnomalyRule engine with cooldown, soft/hard quarantine with auto-escalation, background workers (5min detection + 6hr baseline), anomaly API (13 endpoints), SDK resources |
+| D3 | Compliance Reporting | ✅ Done | `anima/`, `node/`, `python/`, `go/` | ComplianceReport + DataSubjectRequest models, 5 report templates (SOC 2 summary, activity, access review, audit export, GDPR DSAR), compliance dashboard, DSAR lifecycle with SLA tracking, report generation/export, SDK resources |
+| D4 | Go SDK | ✅ Done | `go/` | Full-featured Go SDK (`github.com/anima-labs/anima-go`), zero external dependencies, generic HTTP client with retries/backoff, typed errors with errors.Is/As, generic pagination iterator, webhook HMAC-SHA256 verification, 19 resource services covering all Phase A-D features |
 
 ---
 
@@ -88,6 +88,7 @@
 | `toolkit/` | Various | Framework integrations (7 platforms) | Published |
 | `docs/` | — | Documentation site content (MDX) | Active |
 | `examples/` | — | Example agents (7 examples) | Active |
+| `go/` | `github.com/anima-labs/anima-go` | Go SDK (19 services) | Published |
 | `opencode/` | — | OpenCode project (separate) | Independent |
 
 ---
@@ -118,3 +119,9 @@
 - `python/` — Identity, Registry, Wallet, Pods, A2A resources (sync + async)
 - `mcp/` — Identity, Registry, Wallet, Pod, A2A tool groups (29 new tools)
 - `cli/` — Identity, Registry, Wallet, Pod, A2A command groups
+
+### Phase D (2026-03-28)
+- `anima/` — Immutable audit log, SOC 2 controls (33 criteria), evidence collection, behavioral baselines, anomaly detection engine, quarantine, compliance reporting, DSAR support, background workers
+- `node/` — Audit, Compliance, Anomaly resources
+- `python/` — Audit, Compliance, Anomaly resources (sync + async)
+- `go/` — **New repo** — Full Go SDK with 19 resource services, HTTP client, errors, pagination, webhook verification

@@ -31,43 +31,59 @@ If you only want to validate the custom-domain UX, DNS record generation, mailbo
 
 ## 2. Installation
 
+<Tabs items={["Python", "Node.js"]}>
+<Tab value="Python">
 ```bash
-bun add @anima/sdk
+pip install anima-labs
 ```
+</Tab>
+<Tab value="Node.js">
+```bash
+npm install @anima-labs/sdk
+```
+</Tab>
+</Tabs>
 
-## 3. Initialize the Client
+## 3. Create an Agent & Send Email
 
+<Tabs items={["Python", "Node.js"]}>
+<Tab value="Python">
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+agent = anima.agents.create(name="Support Bot")
+print(f"Agent: {agent.id}")
+
+anima.messages.send_email(
+    agent_id=agent.id,
+    to="user@example.com",
+    subject="Hello from Anima",
+    body="This email was sent by an AI agent.",
+)
+print("Email sent!")
+```
+</Tab>
+<Tab value="Node.js">
 ```ts
-import { AnimaClient } from "@anima/sdk";
+import { Anima } from "@anima-labs/sdk";
 
-const client = new AnimaClient({
-  apiKey: process.env.ANIMA_API_KEY,
+const anima = new Anima({ apiKey: "ak_..." });
+
+const agent = await anima.agents.create({ name: "Support Bot" });
+console.log(`Agent: ${agent.id}`);
+
+await anima.messages.sendEmail({
+  agentId: agent.id,
+  to: "user@example.com",
+  subject: "Hello from Anima",
+  body: "This email was sent by an AI agent.",
 });
+console.log("Email sent!");
 ```
-
-## 4. Create an Agent & Send Email
-
-```ts
-async function main() {
-  const agent = await client.agents.create({
-    name: "Support Bot",
-    email_prefix: "support",
-  });
-
-  console.log(`Created agent: ${agent.email}`);
-
-  const { id } = await client.mail.send({
-    from: agent.id,
-    to: "user@example.com",
-    subject: "Hello from Anima",
-    text: "This email was sent programmatically by an AI agent.",
-  });
-
-  console.log(`Email sent! ID: ${id}`);
-}
-
-main();
-```
+</Tab>
+</Tabs>
 
 ## 5. Configure production outbound email
 
@@ -99,6 +115,8 @@ For the DNS side of custom domains, see [Custom Domains](/docs/custom-domains). 
 
 ## Next Steps
 
+- [Quickstart: Cards](/docs/quickstart-cards) — Issue virtual cards with spending controls.
+- [Quickstart: Vault](/docs/quickstart-vault) — Store credentials securely for your agents.
 - [Explore SDKs](/docs/sdks) — Deep dive into the TypeScript and Python client libraries.
 - [MCP Server](/docs/mcp) — Connect Anima to Claude Desktop or other MCP clients.
-- [Custom Domains](/docs/custom-domains) — Configure DNS for Stalwart inbound and SES outbound.
+- [Examples](/docs/examples) — Complete runnable example agents.

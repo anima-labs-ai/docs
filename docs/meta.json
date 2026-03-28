@@ -33,6 +33,10 @@
 		"...(sdks)",
 		"---Resources---",
 		"examples",
-		"faq"
+		"faq",
+		"---Legal---",
+		"...(legal)",
+		"---Blog---",
+		"...(blog)"
 	]
 }

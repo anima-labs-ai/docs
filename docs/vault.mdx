@@ -1,0 +1,145 @@
+---
+title: "Vault"
+description: "Store and manage encrypted credentials for your AI agents."
+---
+
+# Vault
+
+The Anima Vault provides encrypted credential storage for AI agents. Each agent gets its own isolated vault backed by Bitwarden, supporting logins, API keys, payment cards, and identity data.
+
+## Overview
+
+Agents often need to authenticate with external services — CRMs, booking platforms, merchant sites. The vault stores these credentials securely and makes them available to the agent at runtime, without exposing secrets in code or environment variables.
+
+## Provisioning
+
+Before an agent can store credentials, its vault must be provisioned:
+
+```python
+# Python
+anima.vault.provision(agent_id=agent.id)
+```
+
+```ts
+// TypeScript
+await anima.vault.provision({ agentId: agent.id });
+```
+
+Check vault status:
+
+```python
+status = anima.vault.status(agent_id=agent.id)
+print(status.provisioned)  # True
+```
+
+## Credential Types
+
+| Type | Fields | Use Case |
+|------|--------|----------|
+| `login` | username, password, URIs, TOTP | Website logins |
+| `secure_note` | notes | API keys, tokens, free-form secrets |
+| `card` | cardholder, number, expiry, CVV | Payment card details |
+| `identity` | name, email, phone, address | Personal/business identity data |
+
+## CRUD Operations
+
+### Create a credential
+
+```python
+credential = anima.vault.create_credential(
+    agent_id=agent.id,
+    name="CRM Login",
+    type="login",
+    username="bot@company.com",
+    password="s3cur3-p4ssw0rd",
+    uris=["https://crm.company.com"],
+)
+```
+
+### Retrieve a credential
+
+```python
+creds = anima.vault.get_credential(
+    agent_id=agent.id,
+    credential_id=credential.id,
+)
+print(creds.username, creds.password)
+```
+
+### List all credentials
+
+```python
+all_creds = anima.vault.list(agent_id=agent.id)
+for c in all_creds:
+    print(f"{c.name} ({c.type})")
+```
+
+### Search credentials
+
+```python
+results = anima.vault.search(
+    agent_id=agent.id,
+    query="crm",
+)
+```
+
+### Update a credential
+
+```python
+anima.vault.update_credential(
+    agent_id=agent.id,
+    credential_id=credential.id,
+    password="new-p4ssw0rd",
+)
+```
+
+### Delete a credential
+
+```python
+anima.vault.delete_credential(
+    agent_id=agent.id,
+    credential_id=credential.id,
+)
+```
+
+## TOTP Support
+
+For credentials with TOTP (Time-based One-Time Password) configured:
+
+```python
+totp = anima.vault.get_totp(
+    agent_id=agent.id,
+    credential_id=credential.id,
+)
+print(totp.code)  # Current 6-digit code
+```
+
+## Password Generation
+
+Generate strong passwords for new accounts:
+
+```python
+password = anima.vault.generate_password(
+    length=24,
+    uppercase=True,
+    lowercase=True,
+    numbers=True,
+    special=True,
+)
+print(password.value)
+```
+
+## Deprovision
+
+Remove an agent's vault and all stored credentials:
+
+```python
+anima.vault.deprovision(agent_id=agent.id)
+```
+
+## Security
+
+- All credentials are encrypted at rest using AES-256-GCM
+- Each agent's vault is isolated — agents cannot access each other's credentials
+- Vault access is scoped to the agent's API key
+- See [Encryption](/docs/encryption) for details on the encryption model

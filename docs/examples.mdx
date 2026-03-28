@@ -1,0 +1,43 @@
+---
+title: "Examples"
+description: "Example agents demonstrating the Anima platform."
+---
+
+# Example Agents
+
+Explore complete, runnable example agents that demonstrate how to use the Anima platform.
+
+## Available Examples
+
+| Example | Services Used | Description |
+|---------|--------------|-------------|
+| [Email Agent](https://github.com/anima-labs-ai/examples/tree/main/email-agent) | Email | AI agent that monitors an inbox and auto-replies using GPT-4 |
+| [E-Commerce Agent](https://github.com/anima-labs-ai/examples/tree/main/ecommerce-agent) | Email, Cards, Vault | Purchase agent with AI evaluation, card payment, and credential storage |
+| [Support Agent](https://github.com/anima-labs-ai/examples/tree/main/support-agent) | Email, Vault | Customer support with AI triage, response generation, and escalation |
+| [Travel Agent](https://github.com/anima-labs-ai/examples/tree/main/travel-agent) | Email, Cards, Vault | Travel booking with AI planning, loyalty credentials, and card payment |
+| [Card Provisioning](https://github.com/anima-labs-ai/examples/tree/main/card-provisioning) | Cards | Virtual card provisioning with spending policies (TypeScript) |
+| [OpenAI Terminal](https://github.com/anima-labs-ai/examples/tree/main/openai-terminal) | Email | Terminal chat agent using OpenAI Agents SDK |
+| [Vercel AI Agent](https://github.com/anima-labs-ai/examples/tree/main/vercel-ai-agent) | Email | Streaming agent using Vercel AI SDK (TypeScript) |
+
+## Getting Started
+
+```bash
+git clone https://github.com/anima-labs-ai/examples.git
+cd examples/<example-name>
+cp .env.example .env
+# Add your API keys
+pip install -r requirements.txt  # or npm install
+python main.py                   # or npx tsx main.ts
+```
+
+## Building Your Own Agent
+
+Every Anima agent follows a similar pattern:
+
+1. **Create an agent** — your agent's identity on the platform
+2. **Provision capabilities** — email inbox, vault, virtual card, phone number
+3. **Implement logic** — use AI to process inputs and make decisions
+4. **Act through Anima** — send emails, make payments, store credentials
+5. **Clean up** — freeze cards, deprovision resources when done
+
+See the [quickstart guides](/docs/quickstart-email) to get started with each capability.

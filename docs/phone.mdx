@@ -1,0 +1,95 @@
+---
+title: "Phone"
+description: "Provision phone numbers and send SMS from your AI agents."
+---
+
+# Phone
+
+Give your AI agents real phone numbers with SMS capabilities.
+
+## Overview
+
+Anima Phone lets you provision phone numbers for AI agents, send SMS messages, and receive inbound communications. This is useful for 2FA verification, appointment reminders, urgent notifications, and customer outreach.
+
+## Search for Numbers
+
+Find available phone numbers by area code or region:
+
+```python
+# Python
+numbers = anima.phone.search(
+    country="US",
+    area_code="415",
+)
+for n in numbers:
+    print(f"{n.number} ({n.region})")
+```
+
+```ts
+// TypeScript
+const numbers = await anima.phone.search({
+  country: "US",
+  areaCode: "415",
+});
+```
+
+## Provision a Number
+
+Assign a phone number to an agent:
+
+```python
+phone = anima.phone.provision(
+    agent_id=agent.id,
+    number="+14155551234",
+)
+print(f"Provisioned: {phone.number}")
+```
+
+```ts
+const phone = await anima.phone.provision({
+  agentId: agent.id,
+  number: "+14155551234",
+});
+```
+
+## Send SMS
+
+```python
+message = anima.phone.send_sms(
+    agent_id=agent.id,
+    to="+15551234567",
+    body="Your appointment is confirmed for tomorrow at 2pm.",
+)
+print(f"SMS sent: {message.id}")
+```
+
+```ts
+const message = await anima.phone.sendSms({
+  agentId: agent.id,
+  to: "+15551234567",
+  body: "Your appointment is confirmed for tomorrow at 2pm.",
+});
+```
+
+## List Numbers
+
+```python
+numbers = anima.phone.list(agent_id=agent.id)
+for n in numbers:
+    print(f"{n.number} — {n.status}")
+```
+
+## Release a Number
+
+When a number is no longer needed:
+
+```python
+anima.phone.release(
+    agent_id=agent.id,
+    number="+14155551234",
+)
+```
+
+## Webhooks
+
+Configure webhooks to receive inbound SMS and voice events. See [Webhooks](/docs/webhooks) for setup details.

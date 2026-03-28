@@ -7,6 +7,8 @@
 		"quickstart-vault",
 		"sdks",
 		"---Platform---",
+		"vault",
+		"phone",
 		"custom-domains",
 		"mcp",
 		"webhooks",
@@ -18,7 +20,8 @@
 		"encryption",
 		"---Protocols---",
 		"...(protocols)",
-		"---Support---",
+		"---Resources---",
+		"examples",
 		"faq"
 	]
 }

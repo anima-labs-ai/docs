@@ -1,0 +1,70 @@
+---
+title: "Quickstart: Email"
+description: "Send your first email from an AI agent in under 5 minutes."
+---
+
+# Quickstart: Email
+
+Give your AI agent a real email address and send its first message.
+
+## Prerequisites
+
+- An Anima API key from [console.anima.email](https://console.anima.email)
+- Python 3.10+ or Node.js 18+
+
+## Python
+
+```bash
+pip install anima-labs
+```
+
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+# Create an agent with an email inbox
+agent = anima.agents.create(name="My First Agent")
+print(f"Agent: {agent.id}")
+
+# Send an email
+anima.messages.send_email(
+    agent_id=agent.id,
+    to="recipient@example.com",
+    subject="Hello from my AI agent",
+    body="This email was sent by an AI agent powered by Anima.",
+)
+print("Email sent!")
+```
+
+## Node.js / TypeScript
+
+```bash
+npm install @anima-labs/sdk
+```
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Create an agent with an email inbox
+const agent = await anima.agents.create({ name: "My First Agent" });
+console.log(`Agent: ${agent.id}`);
+
+// Send an email
+await anima.messages.sendEmail({
+  agentId: agent.id,
+  to: "recipient@example.com",
+  subject: "Hello from my AI agent",
+  body: "This email was sent by an AI agent powered by Anima.",
+});
+console.log("Email sent!");
+```
+
+## What's Next
+
+- [Quickstart: Cards](/docs/quickstart-cards) — Issue virtual cards for payments
+- [Quickstart: Vault](/docs/quickstart-vault) — Store credentials securely
+- [Webhooks](/docs/webhooks) — Get notified when emails arrive
+- [Custom Domains](/docs/custom-domains) — Use your own domain

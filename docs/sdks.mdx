@@ -5,7 +5,7 @@ description: "Official TypeScript and Python SDKs for Anima."
 
 # Official SDKs
 
-Seamlessly integrate Anima into your Python and TypeScript applications.
+Seamlessly integrate Anima into your Python and TypeScript applications. Both SDKs provide access to the full unified platform: agents, email, cards, vault, phone, and webhooks.
 
 ## TypeScript / Node.js
 
@@ -14,45 +14,95 @@ The TypeScript SDK provides full type safety and works with Node.js, Bun, and De
 ### Installation
 
 ```bash
-npm install @anima/sdk
+npm install @anima-labs/sdk
 ```
 
 ### Usage
 
 ```ts
-import { AnimaClient } from "@anima/sdk";
+import { Anima } from "@anima-labs/sdk";
 
-const client = new AnimaClient({
-  apiKey: "mk_live_...",
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Create an agent
+const agent = await anima.agents.create({ name: "Researcher" });
+
+// Send email
+await anima.messages.sendEmail({
+  agentId: agent.id,
+  to: "user@example.com",
+  subject: "Hello",
+  body: "Sent by an AI agent",
 });
 
-// List all agents
-const agents = await client.agents.list();
-console.log(agents);
+// Issue a virtual card
+const card = await anima.cards.create({
+  agentId: agent.id,
+  label: "Research Card",
+  currency: "usd",
+  spendLimitDaily: 50000,
+});
 ```
 
 ## Python
 
-The Python SDK is fully typed and supports sync and async operations.
+The Python SDK is fully typed and supports both sync and async operations.
 
 ### Installation
 
 ```bash
-pip install anima
+pip install anima-labs
 ```
 
 ### Usage
 
 ```python
-from anima import AnimaClient
+from anima import Anima
 
-client = AnimaClient(api_key="mk_live_...")
+anima = Anima(api_key="ak_...")
 
 # Create an agent
-agent = client.agents.create(
-    name="Researcher",
-    email_prefix="research"
+agent = anima.agents.create(name="Researcher")
+
+# Send email
+anima.messages.send_email(
+    agent_id=agent.id,
+    to="user@example.com",
+    subject="Hello",
+    body="Sent by an AI agent",
 )
 
-print(f"Agent email: {agent.email}")
+# Issue a virtual card
+card = anima.cards.create(
+    agent_id=agent.id,
+    label="Research Card",
+    currency="usd",
+    spend_limit_daily=50000,
+)
 ```
+
+### Async Usage
+
+```python
+from anima import AsyncAnima
+
+anima = AsyncAnima(api_key="ak_...")
+agent = await anima.agents.create(name="Async Agent")
+```
+
+## Available Resources
+
+Both SDKs expose the same set of resources:
+
+| Resource | Description |
+|----------|-------------|
+| `agents` | Create and manage AI agents |
+| `messages` | Send and receive email messages |
+| `inboxes` | Manage email inboxes |
+| `cards` | Issue and manage virtual cards |
+| `vault` | Store and retrieve encrypted credentials |
+| `phone` | Manage phone numbers |
+| `webhooks` | Subscribe to real-time events |
+| `domains` | Configure custom email domains |
+| `security` | Manage security policies |
+| `api_keys` | Create and rotate API keys |

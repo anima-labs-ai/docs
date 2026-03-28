@@ -1,0 +1,97 @@
+---
+title: "Quickstart: Cards"
+description: "Issue a virtual card for your AI agent with spending limits."
+---
+
+# Quickstart: Cards
+
+Give your AI agent a virtual debit card with built-in spending controls.
+
+## Prerequisites
+
+- An Anima API key from [console.anima.email](https://console.anima.email)
+- Completed [KYB verification](/docs/kyb) for card issuing
+- Python 3.10+ or Node.js 18+
+
+## Python
+
+```bash
+pip install anima-labs
+```
+
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+# Create an agent
+agent = anima.agents.create(name="Shopping Agent")
+
+# Issue a virtual card with spending limits
+card = anima.cards.create(
+    agent_id=agent.id,
+    label="Daily Shopping",
+    currency="usd",
+    spend_limit_daily=10000,        # $100.00 in cents
+    spend_limit_per_auth=5000,      # $50.00 per transaction
+    allowed_merchant_categories=["5411", "5412"],  # Grocery stores
+)
+
+print(f"Card: **** {card.last4}")
+print(f"Daily limit: ${card.spend_limit_daily / 100:.2f}")
+
+# Freeze the card when done
+anima.cards.freeze(card_id=card.id)
+print("Card frozen")
+```
+
+## Node.js / TypeScript
+
+```bash
+npm install @anima-labs/sdk
+```
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+// Create an agent
+const agent = await anima.agents.create({ name: "Shopping Agent" });
+
+// Issue a virtual card with spending limits
+const card = await anima.cards.create({
+  agentId: agent.id,
+  label: "Daily Shopping",
+  currency: "usd",
+  spendLimitDaily: 10000,        // $100.00 in cents
+  spendLimitPerAuth: 5000,       // $50.00 per transaction
+  allowedMerchantCategories: ["5411", "5412"],  // Grocery stores
+});
+
+console.log(`Card: **** ${card.last4}`);
+console.log(`Daily limit: $${(card.spendLimitDaily / 100).toFixed(2)}`);
+
+// Freeze the card when done
+await anima.cards.freeze({ cardId: card.id });
+console.log("Card frozen");
+```
+
+## Spending Policies
+
+Cards support fine-grained spending controls:
+
+| Policy | Description |
+|--------|-------------|
+| `spend_limit_daily` | Maximum total spend per day (cents) |
+| `spend_limit_per_auth` | Maximum per-transaction amount (cents) |
+| `allowed_merchant_categories` | MCC codes the card can transact with |
+| Auto-approve rules | Automatically approve transactions matching criteria |
+| Approval workflows | Require human approval for specific transactions |
+
+## What's Next
+
+- [Quickstart: Vault](/docs/quickstart-vault) — Store merchant credentials
+- [Quickstart: Email](/docs/quickstart-email) — Send confirmation emails
+- [Card Policies](/docs/cards/policies) — Advanced spending controls
+- [KYB Verification](/docs/kyb) — Complete business verification for cards

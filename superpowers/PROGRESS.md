@@ -11,7 +11,7 @@
 |-------|------|--------|-------|----------|
 | **A** | Launch Readiness | ✅ Complete | 8/8 | █████████████████████ 100% |
 | **B** | Developer Experience | ✅ Complete | 5/5 | █████████████████████ 100% |
-| **C** | Agent Identity & Commerce | 🔲 Not Started | 0/6 | ░░░░░░░░░░░░░░░░░░░░░ 0% |
+| **C** | Agent Identity & Commerce | ✅ Complete | 6/6 | █████████████████████ 100% |
 | **D** | Enterprise & Compliance | 🔲 Not Started | 0/4 | ░░░░░░░░░░░░░░░░░░░░░ 0% |
 
 ---
@@ -47,18 +47,18 @@
 
 ---
 
-## Phase C — Agent Identity & Commerce 🔲
+## Phase C — Agent Identity & Commerce ✅
 
 > Build the identity protocol moat. DID/VC, agent registry, wallet with x402, OAuth vault, multi-tenancy, A2A.
 
 | # | Task | Status | Repos | Key Deliverables |
 |---|------|--------|-------|-----------------|
-| C1 | Agent Identity Protocol (DID + VC + Agent Cards) | 🔲 Not Started | `anima/` | DID document generation, VC issuance, Agent Card standard, `.well-known/agent.json` |
-| C2 | Agent Registry & Discovery | 🔲 Not Started | `anima/` | Public agent registry, search/discovery API, trust scoring, DNS-based discovery |
-| C3 | Agent Wallet with x402 + AP2 | 🔲 Not Started | `anima/` | x402 payment protocol, AP2 agent-to-agent payments, wallet balance management |
-| C4 | OAuth Token Vault (Credential Orchestrator) | 🔲 Not Started | `anima/` | OAuth flow management, token refresh, scoped delegation, 3rd-party service auth |
-| C5 | Multi-Tenancy (Pods) | 🔲 Not Started | `anima/` | Isolated agent environments, resource quotas, cross-pod communication |
-| C6 | A2A Protocol Support | 🔲 Not Started | `anima/`, `examples/` | Google A2A protocol implementation, agent-to-agent task delegation |
+| C1 | Agent Identity Protocol (DID + VC + Agent Cards) | ✅ Done | `anima/`, `node/`, `python/`, `mcp/`, `cli/` | `did:anima` method, Ed25519 keypairs, W3C DID Core 1.0 documents, JWT-VC issuance/verification, 7 credential types, StatusList2021 revocation, Agent Card generation, `/.well-known/agent.json` endpoint |
+| C2 | Agent Registry & Discovery | ✅ Done | `anima/`, `node/`, `python/`, `mcp/`, `cli/` | Public registry with DID-indexed entries, search by capability/trust/KYA/tags, auto-detected capabilities, SDK resources + MCP tools + CLI commands |
+| C3 | Agent Wallet with x402 + AP2 | ✅ Done | `anima/`, `node/`, `python/`, `mcp/`, `cli/` | Wallet model with daily/monthly budget guards, x402 payment protocol fetch, smart counter resets, freeze/unfreeze, SDK + MCP + CLI surface |
+| C4 | OAuth Token Vault (Credential Orchestrator) | ✅ Done | `anima/` | Extended credential types (oauth_token, api_key, certificate), background token refresh worker (60s scan), credential audit logging |
+| C5 | Multi-Tenancy (Pods) | ✅ Done | `anima/`, `node/`, `python/`, `mcp/`, `cli/` | Pod model with slug uniqueness, pod-scoped isolation on 7 core models, `pk_` prefixed API keys, usage counting, soft delete, SDK + MCP + CLI surface |
+| C6 | A2A Protocol Support | ✅ Done | `anima/`, `node/`, `python/`, `mcp/`, `cli/` | Google A2A protocol types + client, task lifecycle (submitted→working→completed/failed/canceled), trust score gate, history events, SDK + MCP + CLI surface |
 
 ---
 
@@ -83,7 +83,7 @@
 | `node/` | `@anima-labs/sdk` | TypeScript/Node SDK | Published |
 | `python/` | `anima-labs` | Python SDK (sync + async) | Published |
 | `cli/` | `@anima-labs/cli` | CLI tool (`am` command) | Published |
-| `mcp/` | `@anima-labs/mcp` | MCP server (133+ tools) | Published |
+| `mcp/` | `@anima-labs/mcp` | MCP server (160+ tools) | Published |
 | `skill/` | — | Claude Code Skill (SKILL.md) | Published |
 | `toolkit/` | Various | Framework integrations (7 platforms) | Published |
 | `docs/` | — | Documentation site content (MDX) | Active |
@@ -111,3 +111,10 @@
 - `cli/` — `feat: add address commands`
 - `toolkit/` — LangChain/Vercel/OpenAI expansion, OpenClaw, Codex, OpenCode, Cowork integrations, README update
 - `skill/` — Address tools section added
+
+### Phase C (2026-03-28)
+- `anima/` — `agent-identity` package (DID, VC, Agent Cards), registry, wallet, OAuth vault, pods, A2A protocol
+- `node/` — Identity, Registry, Wallet, Pods, A2A resources
+- `python/` — Identity, Registry, Wallet, Pods, A2A resources (sync + async)
+- `mcp/` — Identity, Registry, Wallet, Pod, A2A tool groups (29 new tools)
+- `cli/` — Identity, Registry, Wallet, Pod, A2A command groups

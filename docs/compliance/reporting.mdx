@@ -19,7 +19,7 @@ import { Anima } from "@anima-labs/sdk";
 const anima = new Anima({ apiKey: "ak_..." });
 
 // Generate a SOC 2 audit readiness report
-const report = await anima.compliance.reports.generate({
+const report = await useanima.shpliance.reports.generate({
   template: "soc2-readiness",
   period: {
     startDate: "2026-01-01",
@@ -39,7 +39,7 @@ from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-report = anima.compliance.reports.generate(
+report = useanima.shpliance.reports.generate(
     template="soc2-readiness",
     period={
         "start_date": "2026-01-01",
@@ -91,7 +91,7 @@ Handle GDPR and CCPA data subject access requests:
 <Tab value="Node.js">
 ```ts
 // Initiate a DSAR
-const dsar = await anima.compliance.dsar.create({
+const dsar = await useanima.shpliance.dsar.create({
   subjectEmail: "user@example.com",
   requestType: "access",  // "access" | "deletion" | "portability"
   notes: "GDPR Article 15 request received via support ticket #4521",
@@ -102,7 +102,7 @@ console.log(`Status: ${dsar.status}`);  // "processing" | "ready" | "completed"
 console.log(`Estimated completion: ${dsar.estimatedCompletionAt}`);
 
 // Check DSAR status and download results
-const result = await anima.compliance.dsar.get(dsar.id);
+const result = await useanima.shpliance.dsar.get(dsar.id);
 if (result.status === "ready") {
   console.log(`Download: ${result.downloadUrl}`);
   console.log(`Records found: ${result.recordCount}`);
@@ -112,7 +112,7 @@ if (result.status === "ready") {
 </Tab>
 <Tab value="Python">
 ```python
-dsar = anima.compliance.dsar.create(
+dsar = useanima.shpliance.dsar.create(
     subject_email="user@example.com",
     request_type="access",
     notes="GDPR Article 15 request received via support ticket #4521",
@@ -122,7 +122,7 @@ print(f"DSAR ID: {dsar.id}")
 print(f"Status: {dsar.status}")
 
 # Check status and download
-result = anima.compliance.dsar.get(dsar.id)
+result = useanima.shpliance.dsar.get(dsar.id)
 if result.status == "ready":
     print(f"Download: {result.download_url}")
     print(f"Records found: {result.record_count}")
@@ -147,7 +147,7 @@ When a DSAR is processed, data is collected across these categories:
 Get a real-time view of your compliance posture:
 
 ```ts
-const dashboard = await anima.compliance.dashboard.get();
+const dashboard = await useanima.shpliance.dashboard.get();
 
 console.log("--- Compliance Dashboard ---");
 console.log(`SOC 2 Controls: ${dashboard.soc2.passing}/${dashboard.soc2.total} passing`);
@@ -164,7 +164,7 @@ console.log(`Last Audit Report: ${dashboard.lastReport.generatedAt}`);
 Automate report generation on a schedule:
 
 ```ts
-await anima.compliance.reports.schedule({
+await useanima.shpliance.reports.schedule({
   template: "security-posture",
   frequency: "weekly",          // "daily" | "weekly" | "monthly" | "quarterly"
   format: "pdf",

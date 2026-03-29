@@ -229,12 +229,12 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Generate from oRPC contracts or maintain manually
    - Cover all endpoints across all domains (agents, emails, phones, cards, vault, webhooks, security, domains, organizations)
    - Include request/response schemas, error codes, authentication
-   - Publish at `https://api.anima.email/openapi.json`
+   - Publish at `https://api.useanima.sh/openapi.json`
    - Version the spec (v1)
 
 2. **Documentation site:**
    - Framework: Fumadocs (Next.js-based, fits your stack) or Mintlify
-   - Deploy at `https://docs.anima.email`
+   - Deploy at `https://docs.useanima.sh`
    - Sections:
      - **Getting Started** — API key, first request, quickstart per language
      - **Concepts** — Agents, Organizations, Identity, Vault, Wallet
@@ -266,7 +266,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Video walkthroughs (optional, high impact)
 
 **Ready criteria:**
-- Docs site is live at docs.anima.email
+- Docs site is live at docs.useanima.sh
 - OpenAPI spec is published and accessible
 - Every endpoint is documented with request/response examples
 - Interactive playground works
@@ -416,7 +416,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Test with Claude/GPT to verify tools are selected correctly from natural language
 
 5. **Hosted MCP endpoint:**
-   - Deploy at `https://mcp.anima.email/mcp`
+   - Deploy at `https://mcp.useanima.sh/mcp`
    - Streamable HTTP transport
    - API key auth via header
    - Auto-scaling
@@ -438,7 +438,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 **Ready criteria:**
 - Every *current* SDK method has a corresponding MCP tool (future resources like Address and Wallet add their own MCP tools in their respective phases)
 - `--tools` flag works for selective loading
-- Hosted endpoint is live at mcp.anima.email/mcp
+- Hosted endpoint is live at mcp.useanima.sh/mcp
 - Listed on at least Smithery and Glama
 - Configuration templates work for Claude Desktop, Cursor, Windsurf
 
@@ -573,7 +573,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### B2. Hosted MCP Endpoint
 
-**Note:** Merged into A7. The hosted MCP endpoint at `mcp.anima.email/mcp` is now part of Phase A MCP completeness, as both competitors already offer this and it's table stakes for launch.
+**Note:** Merged into A7. The hosted MCP endpoint at `mcp.useanima.sh/mcp` is now part of Phase A MCP completeness, as both competitors already offer this and it's table stakes for launch.
 
 ---
 
@@ -820,7 +820,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      {
        "name": "Agent Name",
        "description": "What this agent does",
-       "url": "https://agent-endpoint.anima.email",
+       "url": "https://agent-endpoint.useanima.sh",
        "did": "did:anima:org123:agent456",
        "capabilities": {
          "email": true,
@@ -836,7 +836,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
        },
        "trust_score": 87,
        "contact": {
-         "email": "agent@example.anima.email",
+         "email": "agent@example.useanima.sh",
          "phone": "+1234567890"
        }
      }
@@ -930,7 +930,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 3. **Well-known URL resolution:**
    - Agents with custom domains: `GET https://agent-domain.com/.well-known/agent.json`
-   - Anima-hosted agents: `GET https://<agent-slug>.anima.email/.well-known/agent.json`
+   - Anima-hosted agents: `GET https://<agent-slug>.useanima.sh/.well-known/agent.json`
    - Returns A2A Agent Card format
 
 4. **Verification badges:**
@@ -943,7 +943,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Badge verification: `GET /v1/registry/verify-badge/:badgeId`
 
 5. **IETF ANS compatibility:**
-   - Support agent:// URI scheme: `agent://name.anima.email`
+   - Support agent:// URI scheme: `agent://name.useanima.sh`
    - DNS TXT record for agent discovery: `_agent.domain.com TXT "did=did:anima:..."`
    - PKI-based identity verification as ANS draft proposes
    - Capability-aware resolution: resolve DID → capabilities → endpoints
@@ -1288,7 +1288,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 4. **A2A discovery:**
    - Agents discoverable via well-known URL: `/.well-known/agent.json`
    - Registry integration (C2): search registry for agents with specific capabilities
-   - DNS-based discovery: `_a2a._tcp.agent.anima.email SRV`
+   - DNS-based discovery: `_a2a._tcp.agent.useanima.sh SRV`
 
 5. **SDK, MCP, CLI integration:**
    - SDK: `anima.a2a.discover()`, `anima.a2a.sendTask()`, `anima.a2a.streamTask()`, `anima.a2a.listTasks()`, `anima.a2a.getTask()`

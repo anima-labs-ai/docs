@@ -2,7 +2,7 @@
 
 Documentation for the Anima platform — unified identity infrastructure for AI agents.
 
-Docs site: https://docs.anima.email
+Docs site: https://docs.useanima.sh
 
 ## Contributing
 

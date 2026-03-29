@@ -31,7 +31,7 @@ Read `python/pyproject.toml`. Verify:
 - `description` is accurate
 - `keywords` include: ai, agent, email, phone, cards, vault, identity
 - `classifiers` include Python 3.9-3.13
-- `urls` point to docs.anima.email and github
+- `urls` point to docs.useanima.sh and github
 - `py.typed` is included in package data
 
 - [ ] **Step 3: Update pyproject.toml metadata**
@@ -59,8 +59,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://anima.email"
-Documentation = "https://docs.anima.email"
+Homepage = "https://useanima.sh"
+Documentation = "https://docs.useanima.sh"
 Repository = "https://github.com/anima-labs/anima-python"
 ```
 
@@ -728,7 +728,7 @@ Create `docs/site/public/llms.txt` with a concise summary of Anima's API for LLM
 > Unified agent identity infrastructure — email, phone, cards, vault
 
 ## API Base
-https://api.anima.email/v1
+https://api.useanima.sh/v1
 
 ## Authentication
 Bearer token: `Authorization: Bearer ak_...`

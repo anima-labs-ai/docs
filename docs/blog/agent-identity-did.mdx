@@ -59,12 +59,12 @@ The DID resolves to a DID Document that contains the agent's public keys, authen
     {
       "id": "did:anima:ag_8f3k2m9x1n4p7q6r#email",
       "type": "AgentEmail",
-      "serviceEndpoint": "mailto:agent@acme.anima.email"
+      "serviceEndpoint": "mailto:agent@acme.useanima.sh"
     },
     {
       "id": "did:anima:ag_8f3k2m9x1n4p7q6r#a2a",
       "type": "AgentToAgent",
-      "serviceEndpoint": "https://acme.anima.email/.well-known/agent.json"
+      "serviceEndpoint": "https://acme.useanima.sh/.well-known/agent.json"
     }
   ]
 }
@@ -106,7 +106,7 @@ print(doc.service)         # Communication endpoints
 Resolution is also available via HTTP for systems that do not use the SDK:
 
 ```bash
-curl https://api.anima.email/v1/identity/did/did:anima:ag_8f3k2m9x1n4p7q6r
+curl https://api.useanima.sh/v1/identity/did/did:anima:ag_8f3k2m9x1n4p7q6r
 ```
 
 ## W3C Verifiable Credentials
@@ -117,7 +117,7 @@ DIDs establish identity. Verifiable Credentials (VCs) establish **attributes** o
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
-    "https://anima.email/credentials/v1"
+    "https://useanima.sh/credentials/v1"
   ],
   "type": ["VerifiableCredential", "AgentCapabilityCredential"],
   "issuer": "did:anima:platform",

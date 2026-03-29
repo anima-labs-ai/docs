@@ -48,7 +48,7 @@ import { Anima } from "@anima-labs/sdk";
 const anima = new Anima({ apiKey: "ak_..." });
 
 // Get SOC 2 controls status
-const controls = await anima.compliance.soc2.listControls();
+const controls = await useanima.shpliance.soc2.listControls();
 
 for (const control of controls.data) {
   console.log(`${control.id}: ${control.name}`);
@@ -64,7 +64,7 @@ from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-controls = anima.compliance.soc2.list_controls()
+controls = useanima.shpliance.soc2.list_controls()
 
 for control in controls.data:
     print(f"{control.id}: {control.name}")
@@ -92,7 +92,7 @@ Anima automatically collects evidence for each control from audit logs, configur
 
 ```ts
 // Get evidence for a specific control
-const evidence = await anima.compliance.soc2.getEvidence("CC6.1", {
+const evidence = await useanima.shpliance.soc2.getEvidence("CC6.1", {
   startDate: "2026-01-01",
   endDate: "2026-03-31",
 });
@@ -120,7 +120,7 @@ Controls are continuously evaluated, not just at audit time:
 
 ```ts
 // Configure continuous monitoring
-await anima.compliance.soc2.configureMonitoring({
+await useanima.shpliance.soc2.configureMonitoring({
   evaluationInterval: "1h",  // How often to re-evaluate controls
   alertOnFailure: true,
   alertChannels: [
@@ -130,7 +130,7 @@ await anima.compliance.soc2.configureMonitoring({
 });
 
 // Get monitoring dashboard data
-const dashboard = await anima.compliance.soc2.getDashboard();
+const dashboard = await useanima.shpliance.soc2.getDashboard();
 console.log(`Controls passing: ${dashboard.passing}/${dashboard.total}`);
 console.log(`Last full evaluation: ${dashboard.lastFullEvaluation}`);
 console.log(`Audit readiness score: ${dashboard.readinessScore}%`);

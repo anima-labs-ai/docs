@@ -803,9 +803,9 @@ await anima.messages.sendEmail({
 
 "Manage agents from your terminal" guide:
 ```bash
-am init
-am identity create --name "My Agent"
-am email send --agent <id> --to user@example.com --subject "Hello"
+anima init
+anima identity create --name "My Agent"
+anima email send --agent <id> --to user@example.com --subject "Hello"
 ```
 
 - [ ] **Step 5: Write integration guides**

@@ -168,16 +168,16 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Document any commands that error or return placeholder data
 
 2. **Add missing webhook commands:**
-   - `am webhook create` — create webhook subscription
-   - `am webhook list` — list webhooks
-   - `am webhook get <id>` — get webhook details
-   - `am webhook delete <id>` — delete webhook
-   - `am webhook test <id>` — send test event
-   - `am webhook deliveries <id>` — list delivery attempts
+   - `anima webhook create` — create webhook subscription
+   - `anima webhook list` — list webhooks
+   - `anima webhook get <id>` — get webhook details
+   - `anima webhook delete <id>` — delete webhook
+   - `anima webhook test <id>` — send test event
+   - `anima webhook deliveries <id>` — list delivery attempts
 
 3. **Add missing security commands:**
-   - `am security events` — list security events
-   - `am security scan <content>` — scan content for PII/injection
+   - `anima security events` — list security events
+   - `anima security scan <content>` — scan content for PII/injection
 
 4. **Output formatting consistency:**
    - Every command supports `--output json|table|yaml`
@@ -207,7 +207,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - `--output` flag works consistently across all commands
 - Shell completions install and work
 - Homebrew installation works
-- `am --help` shows complete command tree
+- `anima --help` shows complete command tree
 
 **Testing criteria:**
 - CLI test suite passes
@@ -629,7 +629,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 5. **SDK, MCP, CLI, Skill support:**
    - Add address methods to TypeScript and Python SDKs
    - Add MCP tools: create_address, list_addresses, get_address, update_address, delete_address, validate_address
-   - Add CLI commands: `am address create`, `am address list`, `am address get`, `am address delete`, `am address validate`
+   - Add CLI commands: `anima address create`, `anima address list`, `anima address get`, `anima address delete`, `anima address validate`
    - Add skills for natural language address management
 
 **Ready criteria:**
@@ -868,7 +868,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 6. **SDK, MCP, CLI integration:**
    - SDK: `anima.identity.getDid(agentId)`, `anima.identity.getCredentials(agentId)`, `anima.identity.verifyCredential(vc)`, `anima.identity.getAgentCard(agentId)`
    - MCP tools: get_did, list_credentials, verify_credential, get_agent_card
-   - CLI: `am identity did <agentId>`, `am identity credentials <agentId>`, `am identity verify <vc>`, `am identity card <agentId>`
+   - CLI: `anima identity did <agentId>`, `anima identity credentials <agentId>`, `anima identity verify <vc>`, `anima identity card <agentId>`
    - Skills: natural language identity queries
 
 **Ready criteria:**
@@ -957,7 +957,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 7. **SDK, MCP, CLI integration:**
    - SDK: `anima.registry.register(agentId, options)`, `anima.registry.search(query)`, `anima.registry.lookup(did)`
    - MCP tools: register_agent, search_registry, lookup_agent
-   - CLI: `am registry register`, `am registry search`, `am registry lookup <did>`
+   - CLI: `anima registry register`, `anima registry search`, `anima registry lookup <did>`
 
 **Ready criteria:**
 - Agents can opt-in to public registry
@@ -1047,7 +1047,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 6. **SDK, MCP, CLI integration:**
    - SDK: `anima.wallet.getBalance()`, `anima.wallet.pay()`, `anima.wallet.x402Fetch()`, `anima.wallet.createMandate()`, `anima.wallet.getTransactions()`
    - MCP tools: get_wallet_balance, wallet_pay, x402_fetch, create_mandate, list_wallet_transactions
-   - CLI: `am wallet balance`, `am wallet pay`, `am wallet transactions`, `am wallet freeze/unfreeze`
+   - CLI: `anima wallet balance`, `anima wallet pay`, `anima wallet transactions`, `anima wallet freeze/unfreeze`
 
 **Ready criteria:**
 - Wallet CRUD works through API/SDK/MCP/CLI
@@ -1238,7 +1238,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 7. **SDK, MCP, CLI integration:**
    - SDK: `anima.pods.create()`, `anima.pods.list()`, client-level pod selection `new Anima({ apiKey, podId })`
    - MCP: create_pod, list_pods, switch_pod context
-   - CLI: `am pod create`, `am pod list`, `am pod use <id>` (sets default pod for subsequent commands)
+   - CLI: `anima pod create`, `anima pod list`, `anima pod use <id>` (sets default pod for subsequent commands)
 
 **Ready criteria:**
 - Pods create, list, get, update, delete
@@ -1293,7 +1293,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 5. **SDK, MCP, CLI integration:**
    - SDK: `anima.a2a.discover()`, `anima.a2a.sendTask()`, `anima.a2a.streamTask()`, `anima.a2a.listTasks()`, `anima.a2a.getTask()`
    - MCP tools: discover_agent, send_a2a_task, list_a2a_tasks
-   - CLI: `am a2a discover <url>`, `am a2a send <url> <task>`, `am a2a tasks`
+   - CLI: `anima a2a discover <url>`, `anima a2a send <url> <task>`, `anima a2a tasks`
 
 **Ready criteria:**
 - Anima agents can receive A2A tasks from external agents

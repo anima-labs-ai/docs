@@ -1,32 +1,103 @@
 ---
-title: "MCP Server"
-description: "Connect Anima to Claude Desktop and other MCP clients via Model Context Protocol."
+title: "MCP Servers"
+description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP clients via Model Context Protocol."
 ---
 
-# MCP Server
+# MCP Servers
 
-Anima exposes over 77 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, virtual cards, vault, phone, and more.
+Anima exposes over 77 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, virtual cards, vault, phone, voice calls, and more.
 
-## Installation
+Tools are organized into **6 domain servers**, so you can install only what you need:
+
+| Server | Package | Description |
+|--------|---------|-------------|
+| **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations, identity, registry, A2A |
+| **Email** | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
+| **Phone** | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
+| **Cards** | `@anima-labs/mcp-cards` | Virtual cards, wallet, funding, invoices, browser payments, x402 |
+| **Vault** | `@anima-labs/mcp-vault` | Encrypted credential storage, security policies |
+| **Platform** | `@anima-labs/mcp-platform` | Webhooks, pods, utilities |
+
+## Quick Start
+
+### Option A: Local (stdio)
+
+Run one or more servers locally via `npx`:
 
 ```bash
-npx @anima-labs/mcp --api-key=ak_...
+npx @anima-labs/mcp-phone --api-key=ak_...
+```
+
+### Option B: Hosted (remote)
+
+Connect directly to Anima's hosted servers — no local install needed:
+
+```
+https://mcp-agent-829045119779.us-central1.run.app/mcp
+https://mcp-email-829045119779.us-central1.run.app/mcp
+https://mcp-phone-829045119779.us-central1.run.app/mcp
+https://mcp-cards-829045119779.us-central1.run.app/mcp
+https://mcp-vault-829045119779.us-central1.run.app/mcp
+https://mcp-platform-829045119779.us-central1.run.app/mcp
 ```
 
 ## Configuration
 
 ### Claude Desktop
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
+**Local (stdio):**
 ```json
 {
   "mcpServers": {
-    "anima": {
+    "anima-phone": {
       "command": "npx",
-      "args": ["-y", "@anima-labs/mcp"],
+      "args": ["-y", "@anima-labs/mcp-phone"],
       "env": {
         "ANIMA_API_KEY": "ak_..."
+      }
+    },
+    "anima-email": {
+      "command": "npx",
+      "args": ["-y", "@anima-labs/mcp-email"],
+      "env": {
+        "ANIMA_API_KEY": "ak_..."
+      }
+    }
+  }
+}
+```
+
+**Hosted (remote via mcp-remote bridge):**
+```json
+{
+  "mcpServers": {
+    "anima-phone": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote",
+        "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "--header", "Authorization:${ANIMA_TOKEN}"
+      ],
+      "env": {
+        "ANIMA_TOKEN": "Bearer ak_..."
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+**Hosted (remote — native HTTP support):**
+```json
+{
+  "mcpServers": {
+    "anima-phone": {
+      "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ak_..."
       }
     }
   }
@@ -36,66 +107,124 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ### Claude Code
 
 ```bash
-claude mcp add anima -- npx -y @anima-labs/mcp
+# Local
+claude mcp add anima-phone -- npx -y @anima-labs/mcp-phone
+
+# Hosted
+claude mcp add anima-phone --transport http \
+  --url https://mcp-phone-829045119779.us-central1.run.app/mcp \
+  --header "Authorization: Bearer ak_..."
 ```
 
-### Environment Variables
+### VS Code
+
+Add to `.vscode/settings.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "anima-phone": {
+        "type": "http",
+        "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "headers": {
+          "Authorization": "Bearer ${input:anima-key}"
+        }
+      }
+    },
+    "inputs": [
+      {
+        "id": "anima-key",
+        "type": "promptString",
+        "description": "Anima API Key",
+        "password": true
+      }
+    ]
+  }
+}
+```
+
+### CLI Setup (all clients)
+
+The Anima CLI can auto-configure all detected MCP clients:
+
+```bash
+# Install for all detected clients (local mode)
+anima setup-mcp install --all
+
+# Install specific server for a specific client (remote mode)
+anima setup-mcp install --client cursor --mode remote --server phone
+
+# Install all servers
+anima setup-mcp install --all --server all
+```
+
+## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `ANIMA_API_KEY` | Your Anima API key (required) |
-| `ANIMA_BASE_URL` | Custom API base URL (optional) |
+| `ANIMA_API_URL` | Custom API base URL (optional) |
 
-## Available Tool Categories
+## Available Tools by Server
 
-The MCP server exposes tools across 15 categories:
-
+### mcp-agent
 | Category | Tools | Description |
 |----------|-------|-------------|
-| **Agent** | create, list, get, delete | Manage AI agent identities |
-| **Email** | send, search, list | Send and manage email messages |
+| **Agent** | create, list, get, delete, rotate-key | Manage AI agent identities |
+| **Organization** | get, update, create, delete, rotate-key | Organization settings |
+| **Identity** | create, list, get, verify | Agent identity management |
+| **Registry** | register, search, get, list | Agent registry / discovery |
+| **A2A** | send, receive, list | Agent-to-agent messaging |
+
+### mcp-email
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Email** | send, reply, search, list | Send and manage email |
 | **Message** | send, list, get | Inbox messaging operations |
-| **Cards** | create, list, freeze, policies | Virtual card issuing and management |
-| **Vault** | provision, create, get, search | Encrypted credential storage |
-| **Phone** | provision, send-sms, list | Phone numbers and SMS |
-| **Webhook** | create, list, delete | Real-time event subscriptions |
-| **Domain** | create, verify, list | Custom email domain management |
-| **Invoice** | create, list, match | Invoice tracking and reconciliation |
+| **Domain** | create, verify, list, delete | Custom email domain management |
+| **Address** | create, list, get | Email address management |
+
+### mcp-phone
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Phone** | provision, list, get, release | Phone number management |
+| **Voice** | call, list-calls, get-call, hangup | Voice call operations |
+
+### mcp-cards
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Cards** | create, list, get, freeze, close, policies | Virtual card issuing |
+| **Wallet** | balance, list-transactions | Wallet operations |
 | **Funding** | list, create | Funding source management |
-| **Security** | policies, audit | Security policy configuration |
-| **Organization** | get, update | Organization settings |
-| **Browser Payments** | detect, fill, pay | Automated checkout form filling |
-| **x402** | payment protocols | HTTP 402 payment protocol tools |
-| **Utility** | misc helpers | Search, status, and utility tools |
+| **Invoice** | create, list, match | Invoice tracking |
+| **Browser Payments** | detect, fill, pay | Automated checkout |
+| **x402** | payment protocols | HTTP 402 payment protocol |
 
-## Selective Tool Loading
+### mcp-vault
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Vault** | provision, create, get, search, list, delete | Encrypted credential storage |
+| **Security** | policies, audit, update | Security policy configuration |
 
-Load only the tool categories you need:
+### mcp-platform
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Webhook** | create, list, delete | Real-time event subscriptions |
+| **Pod** | create, list, get | Pod management |
+| **Utility** | search, status, health | Utility and status tools |
 
-```bash
-npx @anima-labs/mcp --tools=email,cards,vault
-```
+## Legacy Monolith Server
 
-## Transport Modes
-
-The MCP server supports both stdio (default) and HTTP transports:
-
-```bash
-# stdio (default, for Claude Desktop)
-npx @anima-labs/mcp
-
-# HTTP (for web-based MCP clients)
-npx @anima-labs/mcp --transport=http --port=3100
-```
+The original monolith `@anima-labs/mcp` package is still supported but deprecated. Migrate to the split servers for better performance and selective loading.
 
 ## Example Usage
 
-Once connected, you can ask your AI assistant natural language questions like:
+Once connected, ask your AI assistant natural language questions:
 
-- "Send an email from my agent to user@example.com"
-- "Create a virtual card with a $50 daily limit"
-- "Store my CRM login credentials in the vault"
-- "List all transactions on card **** 4242"
-- "Search my inbox for emails about invoices"
-
-The AI assistant will automatically select and call the appropriate Anima MCP tools.
+- "Send an email from my agent to user@example.com" → **mcp-email**
+- "Create a virtual card with a $50 daily limit" → **mcp-cards**
+- "Store my CRM login credentials in the vault" → **mcp-vault**
+- "Make a voice call to +1-555-0123" → **mcp-phone**
+- "List all transactions on card **** 4242" → **mcp-cards**
+- "Register my agent in the public registry" → **mcp-agent**

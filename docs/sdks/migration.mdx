@@ -1,0 +1,367 @@
+---
+title: "SDK Migration Guide"
+description: "Upgrade to the latest Anima SDKs with auto-pagination, env var fallback, debug logging, per-request options, and more."
+---
+
+# SDK Migration Guide
+
+This guide covers the new features in the latest Anima SDKs and how to adopt them. The upgrade is non-breaking -- your existing code will continue to work.
+
+## What's New
+
+| Feature | Description |
+|---------|-------------|
+| Auto-pagination (`PageIterator`) | Automatically iterate through all pages of results |
+| Environment variable fallback | SDK reads `ANIMA_API_KEY` if no key is passed |
+| Debug logging | Built-in structured logging with `ANIMA_LOG` |
+| Per-request options | Override timeout, headers, and idempotency per call |
+| Raw response access | Get the full HTTP response alongside typed data |
+| Request/response events | Hook into the request lifecycle for observability |
+| Webhook middleware | Framework-native webhook verification |
+
+## Auto-Pagination (PageIterator)
+
+No more manual cursor management. The new `PageIterator` handles pagination automatically.
+
+### Before
+
+```python
+# Python -- manual pagination
+all_agents = []
+cursor = None
+
+while True:
+    result = anima.agents.list(limit=100, cursor=cursor)
+    all_agents.extend(result["items"])
+    if not result.get("hasMore"):
+        break
+    cursor = result["nextCursor"]
+```
+
+```ts
+// TypeScript -- manual pagination
+const allAgents = [];
+let cursor: string | undefined;
+
+do {
+  const result = await anima.agents.list({ limit: 100, cursor });
+  allAgents.push(...result.items);
+  cursor = result.hasMore ? result.nextCursor : undefined;
+} while (cursor);
+```
+
+### After
+
+```python
+# Python -- auto-pagination
+for agent in anima.agents.list_auto_paging(limit=100):
+    print(agent["name"])
+
+# Or collect all at once
+all_agents = list(anima.agents.list_auto_paging())
+```
+
+```ts
+// TypeScript -- auto-pagination
+for await (const agent of anima.agents.listAutoPaging({ limit: 100 })) {
+  console.log(agent.name);
+}
+
+// Or collect all at once
+const allAgents = await anima.agents.listAutoPaging().toArray();
+```
+
+## Environment Variable Fallback
+
+The SDK now reads configuration from environment variables automatically. The `apiKey` parameter is now optional -- if omitted, the SDK looks for `ANIMA_API_KEY`.
+
+### Before
+
+```python
+# Python -- api_key was required
+anima = Anima(api_key="ak_...")
+```
+
+```ts
+// TypeScript -- apiKey was required
+const anima = new Anima({ apiKey: "ak_..." });
+```
+
+### After
+
+```bash
+# Set environment variables
+export ANIMA_API_KEY="ak_..."
+export ANIMA_API_URL="https://api.useanima.sh"  # optional
+```
+
+```python
+# Python -- no arguments needed
+from anima import Anima
+anima = Anima()
+
+# Explicit key still works and takes precedence
+anima = Anima(api_key="ak_override")
+```
+
+```ts
+// TypeScript -- no arguments needed
+import { Anima } from "@anima-labs/sdk";
+const anima = new Anima();
+
+// Explicit key still works and takes precedence
+const anima2 = new Anima({ apiKey: "ak_override" });
+```
+
+### Supported Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ANIMA_API_KEY` | API key for authentication | none |
+| `ANIMA_API_URL` | Base URL for the API | `https://api.useanima.sh` |
+| `ANIMA_LOG` | Log level (`debug`, `info`, `warn`, `error`) | `warn` |
+
+## Debug Logging
+
+Enable structured debug logs to inspect HTTP requests, retries, and timing.
+
+### Before
+
+```python
+# Python -- no built-in logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
+# ...but SDK didn't emit structured logs
+```
+
+### After
+
+```bash
+export ANIMA_LOG=debug
+```
+
+```python
+# Python -- structured logging built in
+anima = Anima(log="debug")
+
+# Output:
+# [anima] POST /v1/agents 201 (142ms)
+# [anima] GET /v1/agents/ag_abc123 200 (89ms)
+# [anima] GET /v1/agents/ag_abc123 429 -- retrying in 1s (attempt 1/3)
+```
+
+```ts
+// TypeScript -- structured logging built in
+const anima = new Anima({ log: "debug" });
+
+// Output:
+// [anima] POST /v1/agents 201 (142ms)
+// [anima] GET /v1/agents/ag_abc123 200 (89ms)
+```
+
+## Per-Request Options
+
+Override client-level settings on a per-request basis. Useful for setting custom timeouts, idempotency keys, or extra headers.
+
+### Before
+
+```python
+# Python -- no per-request overrides
+# Had to create separate client instances for different timeouts
+anima_fast = Anima(api_key="ak_...", timeout=5)
+anima_slow = Anima(api_key="ak_...", timeout=60)
+```
+
+### After
+
+```python
+# Python -- per-request options
+agent = anima.agents.create(
+    name="My Agent",
+    request_options={
+        "timeout": 60,
+        "idempotency_key": "create-agent-abc",
+        "headers": {"X-Custom-Header": "value"},
+    },
+)
+```
+
+```ts
+// TypeScript -- per-request options
+const agent = await anima.agents.create(
+  { name: "My Agent" },
+  {
+    timeout: 60_000,
+    idempotencyKey: "create-agent-abc",
+    headers: { "X-Custom-Header": "value" },
+  },
+);
+```
+
+## Raw Response Access
+
+Access the full HTTP response (status, headers) alongside the parsed body.
+
+### Before
+
+```python
+# Python -- only parsed data was available
+agent = anima.agents.get("ag_abc123")
+# No access to status code, headers, or request ID
+```
+
+### After
+
+```python
+# Python -- raw response access
+response = anima.agents.with_raw_response.get("ag_abc123")
+
+print(f"Status: {response.status_code}")
+print(f"Request ID: {response.headers['x-request-id']}")
+print(f"Rate limit remaining: {response.headers['x-ratelimit-remaining']}")
+
+agent = response.parsed  # typed data, same as before
+print(f"Agent: {agent['name']}")
+```
+
+```ts
+// TypeScript -- raw response access
+const response = await anima.agents.withRawResponse.get("ag_abc123");
+
+console.log(`Status: ${response.status}`);
+console.log(`Request ID: ${response.headers.get("x-request-id")}`);
+console.log(`Rate limit remaining: ${response.headers.get("x-ratelimit-remaining")}`);
+
+const agent = response.data; // typed data, same as before
+console.log(`Agent: ${agent.name}`);
+```
+
+## Request/Response Events
+
+Hook into the SDK's request lifecycle for logging, metrics, or tracing.
+
+### Before
+
+```python
+# Python -- no event hooks
+# Had to wrap the client or monkey-patch methods
+```
+
+### After
+
+```python
+# Python -- request/response events
+def on_request(event):
+    print(f"--> {event['method']} {event['url']}")
+
+def on_response(event):
+    print(f"<-- {event['status']} ({event['durationMs']}ms)")
+
+anima = Anima(
+    on_request=on_request,
+    on_response=on_response,
+)
+
+# Every SDK call now emits events:
+# --> POST /v1/agents
+# <-- 201 (142ms)
+```
+
+```ts
+// TypeScript -- request/response events
+const anima = new Anima({
+  onRequest: (event) => {
+    console.log(`--> ${event.method} ${event.url}`);
+  },
+  onResponse: (event) => {
+    console.log(`<-- ${event.status} (${event.durationMs}ms)`);
+  },
+});
+```
+
+## Webhook Middleware
+
+Framework-native webhook verification replaces manual signature checking.
+
+### Before
+
+```python
+# Python -- manual verification
+import hmac
+import hashlib
+
+def verify_webhook(payload: bytes, signature: str, secret: str) -> bool:
+    expected = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature, expected)
+
+@app.post("/webhooks")
+async def handle(request: Request):
+    body = await request.body()
+    sig = request.headers.get("x-anima-signature", "")
+    if not verify_webhook(body, sig, "whsec_..."):
+        raise HTTPException(status_code=401)
+    event = json.loads(body)
+    # handle event...
+```
+
+### After
+
+```python
+# Python -- FastAPI dependency
+from anima import fastapi_webhook_dependency
+from fastapi import FastAPI, Depends
+
+app = FastAPI()
+webhook_dep = fastapi_webhook_dependency("whsec_...")
+
+@app.post("/webhooks")
+async def handle(event=Depends(webhook_dep)):
+    if event.type == "message.received":
+        print(f"New email from {event.data['from']}")
+```
+
+```ts
+// TypeScript -- Express middleware
+import express from "express";
+import { webhookMiddleware } from "@anima-labs/sdk";
+
+const app = express();
+app.use(express.json());
+
+app.post("/webhooks", webhookMiddleware("whsec_..."), (req, res) => {
+  const event = req.webhookEvent;
+  console.log(`Event: ${event.type}`);
+  res.sendStatus(200);
+});
+```
+
+## Breaking Changes
+
+There are **no breaking changes** in this release. All new features are additive:
+
+- `apiKey` / `api_key` is now optional (falls back to `ANIMA_API_KEY`), but passing it explicitly still works
+- All existing method signatures remain unchanged
+- New methods (`listAutoPaging`, `withRawResponse`) are additions, not replacements
+
+## Upgrade Steps
+
+1. Update your SDK to the latest version:
+
+```bash
+# Python
+pip install --upgrade anima-labs
+
+# Node.js
+npm install @anima-labs/sdk@latest
+```
+
+2. (Optional) Set `ANIMA_API_KEY` in your environment and remove hardcoded keys
+3. (Optional) Replace manual pagination loops with `listAutoPaging`
+4. (Optional) Add `ANIMA_LOG=debug` during development for visibility
+
+## Next Steps
+
+- [Official SDKs](/docs/sdks) -- Full SDK reference for TypeScript and Python
+- [Go SDK](/docs/sdks/go) -- Go SDK documentation
+- [Webhooks](/docs/webhooks) -- Webhook event reference
+- [Examples](/docs/examples) -- Complete runnable examples

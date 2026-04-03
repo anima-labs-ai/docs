@@ -1,0 +1,433 @@
+---
+title: "Voice WebSocket Protocol"
+description: "Full protocol reference for real-time voice call events over WebSocket, including message types, schemas, authentication, and error handling."
+---
+
+# Voice WebSocket Protocol
+
+Stream real-time voice call events over a persistent WebSocket connection. Use this protocol for live dashboards, call monitoring, real-time transcription displays, and custom call control interfaces.
+
+## Connection Setup
+
+### Endpoint
+
+```
+wss://api.useanima.sh/v1/events/ws
+```
+
+### Authentication
+
+Include your API key as a query parameter or in the first message after connection:
+
+```
+wss://api.useanima.sh/v1/events/ws?apiKey=ak_...
+```
+
+Or authenticate with an `auth` message after connecting:
+
+```json
+{
+  "type": "auth",
+  "apiKey": "ak_..."
+}
+```
+
+The server responds with an `auth.success` or `auth.error` message:
+
+```json
+{
+  "type": "auth.success",
+  "connectionId": "conn_abc123",
+  "serverTime": "2025-01-15T10:30:00.000Z"
+}
+```
+
+### SDK Connection
+
+The SDKs handle connection, authentication, and reconnection automatically.
+
+```python
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+stream = anima.events.connect()
+
+for event in stream:
+    print(f"{event['type']}: {event['data']}")
+```
+
+```ts
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+const stream = anima.events.connect();
+
+stream.on("event", (event) => {
+  console.log(`${event.type}:`, event.data);
+});
+
+stream.on("error", (err) => {
+  console.error("Stream error:", err);
+});
+```
+
+## Message Format
+
+All messages follow a consistent envelope format:
+
+```json
+{
+  "type": "string",
+  "timestamp": "ISO 8601 string",
+  "data": { }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Message type identifier |
+| `timestamp` | string | ISO 8601 timestamp of the event |
+| `data` | object | Event-specific payload |
+
+## Message Types
+
+### call.started
+
+Emitted when an outbound or inbound call is connected.
+
+```json
+{
+  "type": "call.started",
+  "timestamp": "2025-01-15T10:30:00.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "agentId": "ag_xyz789",
+    "direction": "outbound",
+    "from": "+14155551234",
+    "to": "+14155555678",
+    "voiceId": "voice_aria",
+    "recordingEnabled": true
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `callId` | string | Unique call identifier |
+| `agentId` | string | Agent handling the call |
+| `direction` | string | `"outbound"` or `"inbound"` |
+| `from` | string | Caller phone number (E.164) |
+| `to` | string | Callee phone number (E.164) |
+| `voiceId` | string | Voice model used for the call |
+| `recordingEnabled` | boolean | Whether recording is active |
+
+### call.ringing
+
+Emitted when the outbound call is ringing on the recipient's end.
+
+```json
+{
+  "type": "call.ringing",
+  "timestamp": "2025-01-15T10:30:01.000Z",
+  "data": {
+    "callId": "call_abc123"
+  }
+}
+```
+
+### call.answered
+
+Emitted when the recipient picks up.
+
+```json
+{
+  "type": "call.answered",
+  "timestamp": "2025-01-15T10:30:05.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "answeredAt": "2025-01-15T10:30:05.000Z"
+  }
+}
+```
+
+### call.transcription
+
+Emitted in real-time as speech is transcribed. Segments may be partial (streaming) or final.
+
+```json
+{
+  "type": "call.transcription",
+  "timestamp": "2025-01-15T10:30:10.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "segmentId": "seg_001",
+    "speaker": "caller",
+    "text": "Hi, I'd like to schedule an appointment.",
+    "isFinal": true,
+    "confidence": 0.97,
+    "startTime": 5.2,
+    "endTime": 8.1,
+    "language": "en"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `segmentId` | string | Unique segment identifier |
+| `speaker` | string | `"agent"` or `"caller"` |
+| `text` | string | Transcribed text |
+| `isFinal` | boolean | `false` for partial, `true` for finalized |
+| `confidence` | number | Transcription confidence (0.0 - 1.0) |
+| `startTime` | number | Seconds from call start |
+| `endTime` | number | Seconds from call start |
+| `language` | string | Detected language code |
+
+### call.agent_response
+
+Emitted when the agent generates a response that will be spoken.
+
+```json
+{
+  "type": "call.agent_response",
+  "timestamp": "2025-01-15T10:30:11.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "text": "Of course! I can help you with that. What day works best for you?",
+    "tokensUsed": 42,
+    "latencyMs": 320
+  }
+}
+```
+
+### call.dtmf
+
+Emitted when the caller presses a key on their phone keypad (DTMF tone).
+
+```json
+{
+  "type": "call.dtmf",
+  "timestamp": "2025-01-15T10:31:00.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "digit": "1",
+    "durationMs": 120
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `digit` | string | Key pressed: `"0"`-`"9"`, `"*"`, `"#"` |
+| `durationMs` | number | How long the key was held (milliseconds) |
+
+### call.hold
+
+Emitted when the call is placed on or taken off hold.
+
+```json
+{
+  "type": "call.hold",
+  "timestamp": "2025-01-15T10:32:00.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "status": "on_hold"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `"on_hold"` or `"resumed"` |
+
+### call.transfer
+
+Emitted when the call is transferred to another number or agent.
+
+```json
+{
+  "type": "call.transfer",
+  "timestamp": "2025-01-15T10:33:00.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "transferTo": "+14155559999",
+    "reason": "Customer requested human agent"
+  }
+}
+```
+
+### call.sentiment
+
+Emitted periodically with rolling sentiment analysis.
+
+```json
+{
+  "type": "call.sentiment",
+  "timestamp": "2025-01-15T10:33:30.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "current": "positive",
+    "score": 0.72,
+    "trend": "improving"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `current` | string | `"positive"`, `"neutral"`, or `"negative"` |
+| `score` | number | Sentiment score (-1.0 to 1.0) |
+| `trend` | string | `"improving"`, `"stable"`, or `"declining"` |
+
+### call.ended
+
+Emitted when the call terminates for any reason.
+
+```json
+{
+  "type": "call.ended",
+  "timestamp": "2025-01-15T10:35:00.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "reason": "completed",
+    "durationSeconds": 300,
+    "recordingUrl": "https://recordings.useanima.sh/call_abc123.wav",
+    "transcriptAvailable": true,
+    "summary": "Caller scheduled an appointment for January 20th at 2 PM."
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reason` | string | `"completed"`, `"caller_hangup"`, `"agent_hangup"`, `"no_answer"`, `"busy"`, `"failed"`, `"timeout"` |
+| `durationSeconds` | number | Total call duration in seconds |
+| `recordingUrl` | string | Signed URL to the recording (if enabled) |
+| `transcriptAvailable` | boolean | Whether the full transcript is ready |
+| `summary` | string | AI-generated call summary |
+
+### call.error
+
+Emitted when an error occurs during the call.
+
+```json
+{
+  "type": "call.error",
+  "timestamp": "2025-01-15T10:35:01.000Z",
+  "data": {
+    "callId": "call_abc123",
+    "code": "voice_synthesis_timeout",
+    "message": "Voice synthesis did not respond within 5 seconds",
+    "recoverable": true
+  }
+}
+```
+
+## Subscribing to Specific Calls
+
+Filter events to a specific call or agent by sending a `subscribe` message:
+
+```json
+{
+  "type": "subscribe",
+  "filters": {
+    "callId": "call_abc123"
+  }
+}
+```
+
+```json
+{
+  "type": "subscribe",
+  "filters": {
+    "agentId": "ag_xyz789",
+    "eventTypes": ["call.transcription", "call.ended"]
+  }
+}
+```
+
+The server confirms with:
+
+```json
+{
+  "type": "subscribe.success",
+  "subscriptionId": "sub_abc123",
+  "filters": {
+    "agentId": "ag_xyz789",
+    "eventTypes": ["call.transcription", "call.ended"]
+  }
+}
+```
+
+## Heartbeat / Ping-Pong
+
+The server sends a `ping` message every 30 seconds. The client must respond with a `pong` within 10 seconds or the connection will be closed.
+
+```json
+// Server sends
+{
+  "type": "ping",
+  "timestamp": "2025-01-15T10:30:30.000Z"
+}
+
+// Client responds
+{
+  "type": "pong"
+}
+```
+
+The SDKs handle ping-pong automatically. If you are implementing a raw WebSocket client, ensure you respond to every `ping`.
+
+## Error Handling
+
+### Connection Errors
+
+| Code | Reason | Action |
+|------|--------|--------|
+| `4001` | Invalid API key | Check your API key and reconnect |
+| `4002` | Rate limit exceeded | Back off and retry after the `Retry-After` header |
+| `4003` | Connection limit reached | Close unused connections before opening new ones |
+| `4008` | Ping timeout | Client did not respond to ping in time; reconnect |
+| `4500` | Internal server error | Retry with exponential backoff |
+
+### Reconnection Strategy
+
+Use exponential backoff with jitter for automatic reconnection:
+
+1. First retry: 1 second
+2. Second retry: 2 seconds
+3. Third retry: 4 seconds
+4. Max backoff: 30 seconds
+5. Add random jitter of 0-1 seconds to each delay
+
+```ts
+// The SDK handles reconnection automatically
+const stream = anima.events.connect({
+  reconnect: true,            // default: true
+  maxReconnectAttempts: 10,   // default: 10
+  maxReconnectDelay: 30000,   // default: 30s
+});
+
+stream.on("reconnecting", (attempt) => {
+  console.log(`Reconnecting (attempt ${attempt})...`);
+});
+
+stream.on("reconnected", () => {
+  console.log("Reconnected successfully");
+});
+```
+
+```python
+stream = anima.events.connect(
+    reconnect=True,
+    max_reconnect_attempts=10,
+    max_reconnect_delay=30000,
+)
+```
+
+## Next Steps
+
+- [Quickstart: Voice Calls](/docs/quickstart-voice) -- Make your first AI-powered phone call
+- [Voice Catalog](/docs/voice-catalog) -- Browse available voice models
+- [Call Intelligence](/docs/call-intelligence) -- Recording, transcription, and scoring
+- [Webhooks](/docs/webhooks) -- HTTP-based event delivery as an alternative to WebSocket

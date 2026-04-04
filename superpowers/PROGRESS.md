@@ -1,6 +1,6 @@
 # Anima Platform — Progress Tracker
 
-**Last updated:** 2026-03-28
+**Last updated:** 2026-04-05
 **Spec:** [Roadmap Design](specs/2026-03-28-anima-platform-roadmap-design.md)
 
 ---
@@ -13,6 +13,7 @@
 | **B** | Developer Experience | ✅ Complete | 5/5 | █████████████████████ 100% |
 | **C** | Agent Identity & Commerce | ✅ Complete | 6/6 | █████████████████████ 100% |
 | **D** | Enterprise & Compliance | ✅ Complete | 4/4 | █████████████████████ 100% |
+| **E** | Vault Identity Platform | 🔄 In Progress | 0/16 | ░░░░░░░░░░░░░░░░░░░░░ 0% |
 
 ---
 
@@ -72,6 +73,35 @@
 | D2 | Anomaly Detection & Behavioral Monitoring | ✅ Done | `anima/`, `node/`, `python/`, `go/` | AgentBaseline with hourly patterns, 6 behavioral metrics, z-score/rate-multiplier/time-violation/absolute-threshold detection, AnomalyRule engine with cooldown, soft/hard quarantine with auto-escalation, background workers (5min detection + 6hr baseline), anomaly API (13 endpoints), SDK resources |
 | D3 | Compliance Reporting | ✅ Done | `anima/`, `node/`, `python/`, `go/` | ComplianceReport + DataSubjectRequest models, 5 report templates (SOC 2 summary, activity, access review, audit export, GDPR DSAR), compliance dashboard, DSAR lifecycle with SLA tracking, report generation/export, SDK resources |
 | D4 | Go SDK | ✅ Done | `go/` | Full-featured Go SDK (`github.com/anima-labs/anima-go`), zero external dependencies, generic HTTP client with retries/backoff, typed errors with errors.Is/As, generic pagination iterator, webhook HMAC-SHA256 verification, 19 resource services covering all Phase A-D features |
+
+---
+
+## Phase E — Vault Identity Platform 🔄
+
+> Transform mcp-vault from a Bitwarden-backed CRUD store into a market-leading agent secrets platform. Per-agent encryption, secret injection, ephemeral tokens, policy enforcement, cross-channel analytics, identity federation.
+
+| # | Task | Status | Repos | Key Deliverables |
+|---|------|--------|-------|-----------------|
+| E1 | Enable Vault Feature Flag | ⬜ Pending | `anima/` | Feature flag ON, health check, error handling |
+| E2 | Per-Agent Encryption Keys | ⬜ Pending | `anima/` | HKDF-derived agent DEKs, credential-level encryption |
+| E3 | Cross-Module Integration | ⬜ Pending | `anima/` | Vault → email, phone, cards credential resolution |
+| E4 | Credential Sharing | ⬜ Pending | `anima/` | CredentialShare model, agent/member/pod scoping |
+| E5 | Ephemeral Scoped Credentials | ⬜ Pending | `anima/` | VaultToken with TTL, scope, task binding, revocation |
+| E6 | Intent-Aware Policy Engine | ⬜ Pending | `anima/` | Allow/Deny/Observe/StepUp per tool call |
+| E7 | Step-Up Authorization | ⬜ Pending | `anima/` | Approval flow with email/SMS notification |
+| E8 | CLI Credential Injection | ⬜ Pending | `cli/`, `anima/` | `am vault exec` with env var injection |
+| E9 | Browser Autofill | ⬜ Pending | `anima/apps/extension/`, `anima/` | Chrome extension vault autofill |
+| E10 | Cross-Channel Analytics | ⬜ Pending | `anima/` | pgvector behavioral profiles, risk scores |
+| E11 | Forensic Traceability | ⬜ Pending | `anima/` | Delegation chains, prompt hash, audit context |
+| E12 | Identity Federation (OIDC) | ⬜ Pending | `anima/` | OIDC provider, "Sign in with Anima" |
+| E13 | Update All SDKs | ⬜ Pending | `node/`, `python/`, `go/` | Vault tokens, policies, sharing, analytics resources |
+| E14 | Update MCP Servers | ⬜ Pending | `mcp-vault/`, `mcp/`, `mcp-core/` | 10+ new vault MCP tools |
+| E15 | Update CLI | ⬜ Pending | `cli/` | Token, policy, sharing, analytics commands |
+| E16 | Update Docs & Skills | ⬜ Pending | `docs/`, `skill/`, `anima/` | Full vault documentation, llm.txt, blog post, examples |
+
+**Plan:** [Phase E Implementation Plan](plans/2026-04-05-phase-e-vault-identity-platform.md)
+**Spec:** [Vault Identity Platform Design](specs/2026-04-05-vault-identity-platform-design.md)
+**Business:** [Vault Business Plan](specs/2026-04-05-vault-business-plan.md)
 
 ---
 

@@ -2,6 +2,7 @@
 	"pages": [
 		"---Getting Started---",
 		"getting-started",
+		"install",
 		"quickstart-email",
 		"quickstart-voice",
 		"quickstart-cards",

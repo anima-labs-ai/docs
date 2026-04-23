@@ -55,8 +55,8 @@ const start = await fetch(
 
 if (!start.ok) throw new Error("Failed to start KYB");
 
-const status = await fetch(`/api/identities/${identityId}/kyb/status`)
-  .then((res) => res.json());
+const statusUrl = `/api/identities/${identityId}/kyb/status`;
+const status = await fetch(statusUrl).then((res) => res.json());
 
 console.log(status.state); // not_started | pending | action_required | in_review | approved | rejected
 ```

@@ -161,14 +161,14 @@ print(f"Export job: {export_job.id}, Status: {export_job.status}")
 
 ## API Reference
 
-| Endpoint                          | Method | Description                         |
-| --------------------------------- | ------ | ----------------------------------- |
-| `/api/audit-log/events`           | GET    | Query audit events                  |
-| `/api/audit-log/events/:id`       | GET    | Get a single audit event            |
-| `/api/audit-log/export`           | POST   | Start an export job                 |
-| `/api/audit-log/export/:id`       | GET    | Check export job status             |
-| `/api/audit-log/siem`             | POST   | Configure SIEM streaming            |
-| `/api/audit-log/siem`             | GET    | Get SIEM configuration              |
+| Endpoint                              | Description                         |
+| ------------------------------------- | ----------------------------------- |
+| `GET api/audit-log/events`            | Query audit events                  |
+| `GET api/audit-log/events/{id}`       | Get a single audit event            |
+| `POST api/audit-log/export`           | Start an export job                 |
+| `GET api/audit-log/export/{id}`       | Check export job status             |
+| `POST api/audit-log/siem`             | Configure SIEM streaming            |
+| `GET api/audit-log/siem`              | Get SIEM configuration              |
 
 ### Query Parameters
 

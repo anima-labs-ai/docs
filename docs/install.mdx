@@ -1,75 +1,21 @@
 ---
 title: "Install the Anima CLI"
-description: "Install anima via curl, Homebrew, Winget, or npm — each path verifies signatures end-to-end."
+description: "Install anima in an agent runtime — npm for Node/TS agents, signed Linux binary for containers and CI. Every path verifies signatures end-to-end."
 ---
 
 # Install the Anima CLI
 
-The `anima` CLI ships via two tracks:
+The `anima` CLI is built for **agents**, not for human click-through installs. That shapes every decision on this page:
 
-- **Signed binary** (recommended for production & enterprise) — standalone executable, no runtime required, verified with Sigstore at install time.
-- **npm** (recommended for JavaScript/TypeScript developers already running `npm`/`bun`/`pnpm`) — installs into `node_modules/.bin`, follows your existing dev workflow.
+- **No macOS or Windows binaries.** Agent workloads run on Linux — in containers, VMs, and CI runners. A developer on a Mac should use the npm package; their agent, when it actually executes, runs on Linux.
+- **No Homebrew or Winget.** Those exist to make installs ergonomic for humans; agents read release manifests directly.
+- **Sigstore everywhere.** One uniform trust anchor for both install paths, verifiable offline from any pipeline.
 
-Both tracks are published from the same tagged release, so feature parity is guaranteed.
-
-## Quick install
+## Pick your channel
 
 <Tabs>
 
-<Tab title="macOS / Linux — curl">
-
-```bash
-curl -fsSL https://get.useanima.sh | sh
-```
-
-The installer:
-1. Detects your OS + architecture.
-2. Downloads [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) if not already present (hash-pinned to a known-good build).
-3. Fetches the signed `SHA256SUMS` manifest from the GitHub release.
-4. Verifies the manifest's Sigstore signature against our pinned release-workflow identity.
-5. Downloads your platform's binary and checks it against the now-trusted hash.
-6. Installs to `/usr/local/bin` if writable, otherwise `~/.local/bin`.
-
-If *any* verification step fails, the install aborts — there is no silent fallback.
-
-Pin a specific version:
-
-```bash
-curl -fsSL https://get.useanima.sh | sh -s -- --version v1.2.3
-```
-
-Install into a custom directory:
-
-```bash
-curl -fsSL https://get.useanima.sh | sh -s -- --prefix /opt/anima/bin
-```
-
-</Tab>
-
-<Tab title="macOS — Homebrew">
-
-```bash
-brew tap anima-labs-ai/anima
-brew install anima
-```
-
-The formula ships a pre-built, [notarized](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution) binary (not a source build). Hashes in the formula are updated automatically from the signed release manifest on every tag.
-
-</Tab>
-
-<Tab title="Windows — Winget">
-
-```powershell
-winget install AnimaLabs.Anima
-```
-
-Winget verifies the SHA-256 against the manifest in `microsoft/winget-pkgs` before running the install. Our release workflow opens the update PR automatically on each tag.
-
-Binary is code-signed with our Windows signing certificate (EV when available, OV in the interim — see [Security](/security)).
-
-</Tab>
-
-<Tab title="Any platform — npm">
+<Tab title="Node / TS agent — npm">
 
 ```bash
 # npm
@@ -82,17 +28,74 @@ bun install -g @anima-labs/cli
 pnpm add -g @anima-labs/cli
 ```
 
-The npm package is published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), so you can verify its origin with:
+The package is published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), linking the tarball to the exact commit and GitHub Actions workflow that built it.
+
+Verify the attestation:
 
 ```bash
 npm view @anima-labs/cli --json | jq .dist.attestations
 ```
 
-Use this path when you want `anima` coupled to a Node toolchain — e.g. as a devDependency in an agent project.
+Or enforce verification at install time (npm ≥ 9.5):
+
+```bash
+npm install @anima-labs/cli
+npm audit signatures
+```
+
+Use this path when `anima` is a runtime dependency of a Node/TS agent project.
+
+</Tab>
+
+<Tab title="Container / CI — curl | sh (Linux x64, arm64)">
+
+```bash
+curl -fsSL https://get.useanima.sh | sh
+```
+
+The installer:
+1. Detects architecture (x64 / arm64) — aborts on non-Linux.
+2. Downloads [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) if not already present (hash-pinned to a known-good build).
+3. Fetches the signed `SHA256SUMS` manifest from the GitHub release.
+4. Verifies the manifest's Sigstore signature against our pinned release-workflow identity.
+5. Downloads the platform binary and checks it against the now-trusted hash.
+6. Installs to `/usr/local/bin` if writable, otherwise `~/.local/bin`.
+
+If *any* verification step fails, the install aborts — there is no silent fallback. A failed install is visible; a degraded one isn't.
+
+Pin a specific version (recommended for reproducible container builds):
+
+```bash
+curl -fsSL https://get.useanima.sh | sh -s -- --version v0.5.0
+```
+
+Install into a custom prefix:
+
+```bash
+curl -fsSL https://get.useanima.sh | sh -s -- --prefix /opt/anima/bin
+```
 
 </Tab>
 
 </Tabs>
+
+## Inside a Dockerfile
+
+For a reproducible agent container, pin the version and verify explicitly:
+
+```dockerfile
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Pin the version. Bumping this is a deliberate, reviewable change.
+ARG ANIMA_VERSION=v0.5.0
+
+RUN curl -fsSL https://get.useanima.sh | sh -s -- --version "$ANIMA_VERSION" \
+  && anima --version
+```
+
+The installer does the signature verification inline. If the release is ever tampered with or the pinned workflow identity changes, the `RUN` step fails and the image build stops.
 
 ## Verify the install
 
@@ -101,46 +104,34 @@ anima --version
 anima vault --help
 ```
 
-## Choosing between npm and binary
-
-|                         | Signed binary                          | npm                                   |
-|-------------------------|----------------------------------------|---------------------------------------|
-| Runtime dependency      | None (statically linked)               | Node 18+ or Bun 1.0+                  |
-| Cold-start time         | ~30 ms                                 | ~180 ms (Node bootstrap)              |
-| Code signing            | macOS notarized, Windows signtool, Sigstore everywhere | npm provenance (Sigstore)     |
-| Enterprise procurement  | ✅ Single binary, reproducible hashes   | ⚠️ Requires npm registry access       |
-| Update path             | `brew upgrade` / `winget upgrade` / re-run installer | `npm install -g @anima-labs/cli@latest` |
-| Best for                | CI/CD runners, air-gapped hosts, ops machines | Agent projects, devDependencies |
-
-When in doubt: **binary for servers, npm for developer laptops with an existing Node toolchain.**
-
 ## Verify a binary manually
 
-Every release asset has a matching Sigstore bundle. To verify end-to-end without trusting the installer:
+Every release asset has a matching Sigstore bundle. To verify end-to-end without trusting the installer (e.g. in an air-gapped pipeline):
 
 ```bash
-# Download the binary and its Sigstore bundle
-curl -fsSL -o anima-darwin-arm64 \
-  https://github.com/anima-labs-ai/cli/releases/download/v1.2.3/anima-darwin-arm64
-curl -fsSL -o anima-darwin-arm64.sigstore.bundle \
-  https://github.com/anima-labs-ai/cli/releases/download/v1.2.3/anima-darwin-arm64.sigstore.bundle
+VERSION="v0.5.0"
+ARCH="$(uname -m | sed 's/x86_64/x64/; s/aarch64/arm64/')"
+BIN="anima-linux-${ARCH}"
+BASE="https://github.com/anima-labs-ai/cli/releases/download/${VERSION}"
 
-# Verify against the pinned GitHub workflow identity
+curl -fsSL -O "${BASE}/${BIN}"
+curl -fsSL -O "${BASE}/${BIN}.sigstore.bundle"
+
 cosign verify-blob \
-  --bundle anima-darwin-arm64.sigstore.bundle \
-  --certificate-identity-regexp 'https://github.com/anima-labs-ai/cli/.github/workflows/release\.yml@refs/tags/v.+' \
+  --bundle "${BIN}.sigstore.bundle" \
+  --certificate-identity-regexp 'https://github.com/anima-labs-ai/cli/\.github/workflows/release\.yml@refs/tags/v.+' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  anima-darwin-arm64
+  "${BIN}"
 ```
 
 A successful verification means:
-1. The binary was signed by *our* release workflow (not a different repo's).
+1. The binary was signed by *our* release workflow, at a release tag — not a different repo's and not a non-tagged build.
 2. The signing event is recorded in the public [Rekor transparency log](https://rekor.sigstore.dev) — anyone can audit it.
 3. The binary bytes haven't been modified since signing.
 
-## GPG (optional, for Debian/RPM pipelines)
+## GPG (optional, for distro pipelines)
 
-Releases also ship a GPG-signed `SHA256SUMS.asc` when the publisher key is available. Verify with:
+Releases ship a GPG-signed `SHA256SUMS.asc` when the publisher key is provisioned. This is redundant with Sigstore and exists only for downstream packagers that prefer a traditional PGP trust chain. Verify with:
 
 ```bash
 gpg --verify SHA256SUMS.asc SHA256SUMS
@@ -151,16 +142,14 @@ Our publisher key fingerprint is published at [useanima.sh/.well-known/gpg-key.a
 
 ## Troubleshooting
 
-**`cosign: command not found`** — The installer will download a pinned cosign on your behalf. If you see this error in a different context, install cosign from [docs.sigstore.dev](https://docs.sigstore.dev/cosign/system_config/installation/).
+**`Unsupported OS`** — You ran the `curl | sh` installer on macOS or Windows. The CLI ships Linux-only binaries; on a developer machine, use `npm install -g @anima-labs/cli` instead.
 
-**Signature verification failed** — Do not proceed. Report at [github.com/anima-labs-ai/cli/issues](https://github.com/anima-labs-ai/cli/issues) and include the full installer output. A failed verification either means a transient CDN issue (retry) or a genuine tampering attempt (we want to hear about it immediately).
+**Signature verification failed** — Do not proceed. Report at [github.com/anima-labs-ai/cli/issues](https://github.com/anima-labs-ai/cli/issues) and include the full installer output. A failed verification is either a transient CDN issue (retry) or a genuine tampering attempt (we want to hear about it immediately).
 
-**`~/.local/bin not in PATH`** — The installer prints the exact line to add to your shell rc. For bash/zsh:
+**`~/.local/bin not in PATH`** — The installer prints the exact line to add to your shell rc:
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
-
-**First-run permission prompts** — The CLI uses the OS keyring for secret storage. macOS shows a Keychain prompt; GNOME/KDE show libsecret/KWallet prompts. Allow once per credential class.
 
 ## See also
 

@@ -42,8 +42,8 @@ Stripe Issuing gives a narrow deadline for authorization-time decisioning, so pr
 
 ## Controls API Example
 
-```ts title="POST /api/identities/:id/cards/:cardId/controls"
-await fetch(`/api/identities/${identityId}/cards/${cardId}/controls`, {
+```ts title="POST https://api.useanima.sh/api/identities/:id/cards/:cardId/controls"
+await fetch(`https://api.useanima.sh/api/identities/${identityId}/cards/${cardId}/controls`, {
   method: "POST",
   headers: { "content-type": "application/json" },
   body: JSON.stringify({

@@ -49,13 +49,13 @@ Start KYB through the API, then poll status until the onboarding state changes.
 
 ```ts title="kyb-api.ts"
 const start = await fetch(
-  `/api/identities/${identityId}/kyb/start`,
+  `https://api.useanima.sh/api/identities/${identityId}/kyb/start`,
   { method: "POST" },
 );
 
 if (!start.ok) throw new Error("Failed to start KYB");
 
-const statusUrl = `/api/identities/${identityId}/kyb/status`;
+const statusUrl = `https://api.useanima.sh/api/identities/${identityId}/kyb/status`;
 const status = await fetch(statusUrl).then((res) => res.json());
 
 console.log(status.state); // not_started | pending | action_required | in_review | approved | rejected

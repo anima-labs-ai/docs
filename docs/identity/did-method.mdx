@@ -89,7 +89,7 @@ doc, err := client.Identity.ResolveDID(ctx, "did:anima:ag_8f3k2m9x1n4p7q6r")
 ### Resolve DID
 
 ```
-GET /api/identity/did/:did
+GET https://api.useanima.sh/api/identity/did/:did
 ```
 
 Resolves a `did:anima` identifier to its DID Document.
@@ -103,7 +103,7 @@ Resolves a `did:anima` identifier to its DID Document.
 DIDs are created automatically when an agent is provisioned. To explicitly create or rotate keys:
 
 ```
-POST /api/identity/did
+POST https://api.useanima.sh/api/identity/did
 ```
 
 ```json
@@ -116,7 +116,7 @@ POST /api/identity/did
 ### Rotate Keys
 
 ```
-POST /api/identity/did/:did/rotate
+POST https://api.useanima.sh/api/identity/did/:did/rotate
 ```
 
 Rotates the agent's verification key. The previous key is added to the document's `keyAgreement` section for a configurable grace period.

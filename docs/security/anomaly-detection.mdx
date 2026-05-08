@@ -81,12 +81,12 @@ Define custom detection rules for your specific use case:
 <Tab value="Node.js">
 ```ts
 await anima.anomalyDetection.rules.create({
-  name: "large-purchase-new-vendor",
-  description: "Flag large purchases from vendors never used before",
+  name: "high-volume-email-new-recipient",
+  description: "Flag high email volume to recipients never sent to before",
   conditions: [
-    { field: "category", operator: "eq", value: "cards.authorize" },
-    { field: "metadata.amountCents", operator: "gt", value: 10000 },
-    { field: "metadata.merchantName", operator: "not_in_baseline", value: true },
+    { field: "category", operator: "eq", value: "email.send" },
+    { field: "metadata.batchSize", operator: "gt", value: 100 },
+    { field: "metadata.to", operator: "not_in_baseline", value: true },
   ],
   action: "require_approval",
   severity: "high",
@@ -97,12 +97,12 @@ await anima.anomalyDetection.rules.create({
 <Tab value="Python">
 ```python
 anima.anomaly_detection.rules.create(
-    name="large-purchase-new-vendor",
-    description="Flag large purchases from vendors never used before",
+    name="high-volume-email-new-recipient",
+    description="Flag high email volume to recipients never sent to before",
     conditions=[
-        {"field": "category", "operator": "eq", "value": "cards.authorize"},
-        {"field": "metadata.amountCents", "operator": "gt", "value": 10000},
-        {"field": "metadata.merchantName", "operator": "not_in_baseline", "value": True},
+        {"field": "category", "operator": "eq", "value": "email.send"},
+        {"field": "metadata.batchSize", "operator": "gt", "value": 100},
+        {"field": "metadata.to", "operator": "not_in_baseline", "value": True},
     ],
     action="require_approval",
     severity="high",

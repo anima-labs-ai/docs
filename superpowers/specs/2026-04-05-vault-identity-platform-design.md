@@ -489,12 +489,12 @@ am vault exec --token vtk_abc123 -- curl https://api.example.com
 ┌──────────────────────────────────────────────────────┐
 │            Cross-Channel Analytics Worker              │
 │                                                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────┐ │
-│  │ Email    │  │ Phone    │  │ Card     │  │ Vault│ │
-│  │ Events   │  │ Events   │  │ Events   │  │Events│ │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──┬───┘ │
-│       │              │              │           │     │
-│       └──────────────┴──────────────┴───────────┘     │
+│  ┌──────────┐  ┌──────────┐  ┌──────┐ │
+│  │ Email    │  │ Phone    │  │ Vault│ │
+│  │ Events   │  │ Events   │  │Events│ │
+│  └────┬─────┘  └────┬─────┘  └──┬───┘ │
+│       │              │           │     │
+│       └──────────────┴───────────┘     │
 │                         │                             │
 │              ┌──────────┴──────────┐                  │
 │              │ Feature Extraction  │                  │
@@ -518,7 +518,6 @@ am vault exec --token vtk_abc123 -- curl https://api.example.com
 | Scenario | Channels Involved | Detection |
 |----------|------------------|-----------|
 | Agent sends 50 emails then accesses prod DB credentials | Email + Vault | Volume spike + credential type escalation |
-| Agent makes a $500 purchase then accesses card credentials | Cards + Vault | Spend + vault access correlation |
 | Agent makes calls to unusual numbers and accesses API keys | Phone + Vault | Geographic anomaly + credential access |
 | Agent accesses 10 credentials in 1 minute (normal is 2/hour) | Vault only | Rate anomaly |
 
@@ -562,10 +561,9 @@ External Agent Framework (LangChain, CrewAI, AutoGen)
   "name": "Sales Agent",
   "email": "sales@company.useanima.sh",
   "phone": "+15551234567",
-  "capabilities": ["email", "phone", "vault", "cards"],
+  "capabilities": ["email", "phone", "vault"],
   "trust_score": 0.95,
   "vault_access": true,
-  "card_access": true,
   "delegation_chain": "base64_encoded_chain"
 }
 ```

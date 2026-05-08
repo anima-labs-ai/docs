@@ -124,9 +124,8 @@ DIDs establish identity. Verifiable Credentials (VCs) establish **attributes** o
   "credentialSubject": {
     "id": "did:anima:ag_8f3k2m9x1n4p7q6r",
     "organizationId": "org_acme_corp",
-    "capabilities": ["email", "phone", "cards", "vault"],
-    "spendingLimitDaily": 50000,
-    "complianceStatus": "kyb_verified"
+    "capabilities": ["email", "phone", "vault"],
+    "complianceStatus": "verified"
   },
   "proof": {
     "type": "Ed25519Signature2020",
@@ -140,8 +139,7 @@ These credentials are cryptographically signed by Anima and can be independently
 
 1. The agent's identity (via DID resolution)
 2. That the agent belongs to a specific organization
-3. That the organization has completed KYB verification
-4. What capabilities and spending limits the agent has
+3. What capabilities the agent has
 
 All without calling Anima's API — the proof is in the credential itself.
 
@@ -197,7 +195,6 @@ await anima.registry.register({
 // Discover agents by capability
 const agents = await anima.registry.search({
   capability: "invoice-processing",
-  kybVerified: true,
 });
 ```
 

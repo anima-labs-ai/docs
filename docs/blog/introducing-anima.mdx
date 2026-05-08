@@ -1,6 +1,6 @@
 ---
 title: "Introducing Anima: The Unified Identity Platform for AI Agents"
-description: "Anima gives AI agents real-world identity — email, phone, payment cards, encrypted vault, and cryptographic identity — in a single API."
+description: "Anima gives AI agents real-world identity — email, phone, encrypted vault, and cryptographic identity — in a single API."
 date: "2026-03-28"
 author: "Anima Team"
 tags: ["launch", "platform", "identity", "agents"]
@@ -12,13 +12,12 @@ AI agents are crossing from demos into production. They book travel, manage proc
 
 ## The Identity Gap
 
-Think about what a human employee gets on day one: a work email, a phone extension, a corporate card, access credentials, and an ID badge. An AI agent doing the same job needs the same things — and until now, you had to stitch them together yourself.
+Think about what a human employee gets on day one: a work email, a phone extension, access credentials, and an ID badge. An AI agent doing the same job needs the same things — and until now, you had to stitch them together yourself.
 
 The current landscape looks like this:
 
 - **Email**: One vendor gives you agent inboxes
 - **Phone**: Another gives you programmable numbers
-- **Cards**: A third handles virtual card issuing
 - **Credentials**: You roll your own secrets management
 - **Identity**: You hope nobody asks "which agent did that?"
 
@@ -30,7 +29,6 @@ Anima collapses the entire stack into a single platform. Every agent gets a unif
 
 - **Email** — Real inboxes on custom domains with inbound/outbound, content scanning, and webhooks
 - **Phone** — US phone numbers with SMS and voice, backed by Telnyx with 10DLC compliance
-- **Cards** — Virtual debit cards with per-transaction spending limits, MCC restrictions, and freeze controls
 - **Vault** — Bitwarden-backed encrypted storage for logins, API keys, and secrets
 - **Identity** — W3C DIDs, Verifiable Credentials, and Agent Cards for discovery and trust
 
@@ -38,7 +36,7 @@ All bound to a single `agent_id`. All managed through one SDK.
 
 ## What This Looks Like in Code
 
-Here is a complete agent setup — email, phone, card, vault, and identity — in a single script:
+Here is a complete agent setup — email, phone, vault, and identity — in a single script:
 
 ```ts
 import { Anima } from "@anima-labs/sdk";
@@ -62,15 +60,6 @@ await anima.phone.sendSms({
   agentId: agent.id,
   to: "+15551234567",
   body: "Your order has shipped. Track at https://example.com/track/1042",
-});
-
-// Card: issue a virtual card with spending controls
-const card = await anima.cards.create({
-  agentId: agent.id,
-  label: "Procurement",
-  currency: "usd",
-  spendLimitDaily: 100_00,
-  spendLimitPerAuth: 50_00,
 });
 
 // Vault: store vendor credentials
@@ -99,7 +88,7 @@ Every Anima agent gets a `did:anima` decentralized identifier. This is not just 
 
 ### x402 Payments
 
-Agents encounter paywalls and paid APIs constantly. Anima implements the x402 protocol: when a server returns `HTTP 402 Payment Required`, the agent's wallet automatically negotiates and pays — within budget guards you define. No credit card forms. No checkout flows.
+Agents encounter paywalls and paid APIs constantly. Anima implements the x402 protocol: when a server returns `HTTP 402 Payment Required`, the agent's wallet automatically negotiates and pays — within budget guards you define. No checkout flows.
 
 ### Policy Engine
 

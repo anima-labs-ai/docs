@@ -29,7 +29,7 @@ Read `python/src/anima/__init__.py` and list all exported classes and functions.
 Read `python/pyproject.toml`. Verify:
 - `name` is set to a valid PyPI name (e.g., `anima-labs`)
 - `description` is accurate
-- `keywords` include: ai, agent, email, phone, cards, vault, identity
+- `keywords` include: ai, agent, email, phone, vault, identity
 - `classifiers` include Python 3.9-3.13
 - `urls` point to docs.useanima.sh and github
 - `py.typed` is included in package data
@@ -41,11 +41,11 @@ Update `python/pyproject.toml` with:
 [project]
 name = "anima-labs"
 version = "0.1.0"
-description = "Anima SDK for Python — unified agent identity infrastructure (email, phone, cards, vault)"
+description = "Anima SDK for Python — unified agent identity infrastructure (email, phone, vault)"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
-keywords = ["ai", "agent", "email", "phone", "cards", "vault", "identity", "mcp", "llm"]
+keywords = ["ai", "agent", "email", "phone", "vault", "identity", "mcp", "llm"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -68,7 +68,7 @@ Repository = "https://github.com/anima-labs/anima-python"
 
 Replace `python/README.md` with full documentation including:
 - Installation: `pip install anima-labs`
-- Quick start (create client, send email, create card)
+- Quick start (create client, send email)
 - All 10 resources with method signatures
 - Async usage example
 - Webhook verification example
@@ -134,7 +134,7 @@ Update `node/README.md` to match Python SDK README quality:
 Check `node/package.json`:
 - `name`: `@anima-labs/sdk`
 - `description`: accurate
-- `keywords`: ai, agent, email, phone, cards, vault, identity
+- `keywords`: ai, agent, email, phone, vault, identity
 - `types` field points to correct declaration file
 - `exports` field is correct
 
@@ -159,11 +159,11 @@ git commit -m "feat(node-sdk): audit parity with Python SDK, update README"
 
 Read every command file in `cli/src/commands/` and verify each is wired to the API client (not just a stub with placeholder output). List any commands that are scaffolded but not functional.
 
-Groups to audit: admin, auth, card, config, email, extension, identity, init, phone, setup-mcp, vault
+Groups to audit: admin, auth, config, email, extension, identity, init, phone, setup-mcp, vault
 
 - [ ] **Step 2: Add webhook command group**
 
-Create `cli/src/commands/webhook/` with commands following the existing pattern from `cli/src/commands/card/`:
+Create `cli/src/commands/webhook/` with commands following the existing pattern from `cli/src/commands/email/`:
 
 Files to create:
 - `cli/src/commands/webhook/index.ts` — register all subcommands
@@ -255,13 +255,10 @@ const toolsFilter = args.tools?.split(',').map(t => t.trim());
 if (!toolsFilter || toolsFilter.includes('email')) {
   registerEmailTools(context);
 }
-if (!toolsFilter || toolsFilter.includes('cards')) {
-  registerCardTools(context);
-}
 // ... etc for each group
 ```
 
-Usage: `npx @anima-labs/mcp --tools email,cards,vault`
+Usage: `npx @anima-labs/mcp --tools email,vault`
 
 - [ ] **Step 4: Review all tool descriptions for LLM-friendliness**
 
@@ -345,13 +342,10 @@ Ensure SKILL.md documents all tool categories:
 - Domain tools
 - Phone tools
 - Vault tools
-- Card tools
 - Message tools
 - Webhook tools
 - Security tools
-- Funding tools
 - Invoice tools
-- Browser payment tools
 - X402 tools
 
 Each category should have a table with tool name, description, and key parameters.
@@ -359,9 +353,8 @@ Each category should have a table with tool name, description, and key parameter
 - [ ] **Step 3: Add workflow recipes for unified operations**
 
 Add skill recipes that demonstrate multi-service workflows:
-- "Provision a complete agent identity" (create agent + inbox + phone + card + vault)
+- "Provision a complete agent identity" (create agent + inbox + phone + vault)
 - "Send email with attachment" (upload attachment + send email)
-- "Create card with spending policy" (create card + create policy + set auto-approve rules)
 
 - [ ] **Step 4: Verify skill triggers work**
 
@@ -372,85 +365,6 @@ Test that the skill correctly activates on relevant natural language patterns in
 ```bash
 git add skill/ skills/
 git commit -m "feat(skills): complete skill coverage, add workflow recipes"
-```
-
----
-
-## Task 6: Wire Console Cards Pages (A2 — Part 1)
-
-**Files:**
-- Modify: `anima/apps/console/src/app/(dashboard)/cards/page.tsx`
-- Modify: `anima/apps/console/src/app/(dashboard)/cards/[id]/page.tsx` (or create if doesn't exist)
-- Reference: `anima/apps/console/src/app/(dashboard)/webhooks/page.tsx` (pattern)
-- Reference: `anima/packages/contracts/src/contracts/cards.ts` (API contract)
-
-- [ ] **Step 1: Read the reference webhook page pattern**
-
-Read `anima/apps/console/src/app/(dashboard)/webhooks/page.tsx` completely. Note:
-- How `orpc` client is imported
-- How `useSuspenseQuery` is used for data fetching
-- How `useMutation` is used for create/update/delete
-- How loading, error, empty states are handled
-- Component structure and UI patterns
-
-- [ ] **Step 2: Read the cards contract**
-
-Read `anima/packages/contracts/src/contracts/cards.ts` to understand available endpoints:
-- `cards.list` — list all cards
-- `cards.get` — get card by ID
-- `cards.create` — create new card
-- `cards.update` — update card
-- `cards.delete` — delete card
-- `cards.listTransactions` — list transactions for a card
-- `cards.listPolicies` — list policies for a card
-- `cards.listApprovals` — list pending approvals
-- `cards.decideApproval` — approve/decline
-- `cards.freeze` / `cards.unfreeze` — freeze/unfreeze card
-- `cards.killSwitch` — emergency kill switch
-
-- [ ] **Step 3: Read current cards page**
-
-Read `anima/apps/console/src/app/(dashboard)/cards/page.tsx`. Identify what's mocked vs real.
-
-- [ ] **Step 4: Wire cards list page to real API**
-
-Replace mocked data with:
-```typescript
-const { data: cards } = useSuspenseQuery(
-  orpc.cards.list.queryOptions({ input: { agentId } })
-);
-```
-
-Wire create card dialog to `useMutation(orpc.cards.create.mutationOptions())`.
-Wire delete action to `useMutation(orpc.cards.delete.mutationOptions())`.
-
-- [ ] **Step 5: Wire card detail page**
-
-Create or modify `cards/[id]/page.tsx` with:
-- Card details: `useSuspenseQuery(orpc.cards.get.queryOptions({ input: { cardId } }))`
-- Transactions tab: `useSuspenseQuery(orpc.cards.listTransactions.queryOptions({ input: { cardId } }))`
-- Policies tab: `useSuspenseQuery(orpc.cards.listPolicies.queryOptions({ input: { cardId } }))`
-- Approvals tab: `useSuspenseQuery(orpc.cards.listApprovals.queryOptions({ input: { cardId } }))`
-- Freeze/unfreeze actions: `useMutation(orpc.cards.freeze.mutationOptions())`
-- Kill switch action: `useMutation(orpc.cards.killSwitch.mutationOptions())`
-
-- [ ] **Step 6: Test cards pages**
-
-Run console dev server:
-```bash
-cd anima/apps/console && bun run dev
-```
-Navigate to cards pages, verify:
-- List page shows real cards (or empty state if none)
-- Create dialog works
-- Detail page loads with tabs
-- Freeze/unfreeze toggles correctly
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add anima/apps/console/src/app/\(dashboard\)/cards/
-git commit -m "feat(console): wire cards pages to real API"
 ```
 
 ---
@@ -594,7 +508,6 @@ git commit -m "feat(console): wire messages/email pages to real API"
 
 Wire to `organizations.get` and `organizations.update` for:
 - Organization name and metadata
-- KYB status display
 - Notification preferences
 
 - [ ] **Step 2: Wire billing page**
@@ -609,7 +522,7 @@ Wire to billing/Stripe endpoints for:
 
 Verify agents list and detail pages use real API:
 - `agents.list` for list page
-- `agents.get` for detail page with all associated resources (inboxes, phones, cards, vault)
+- `agents.get` for detail page with all associated resources (inboxes, phones, vault)
 - `agents.create`, `agents.update`, `agents.delete` for CRUD
 
 - [ ] **Step 4: Test all wired pages**
@@ -646,13 +559,11 @@ Copy and organize existing MDX files from `anima/docs/` into the docs site struc
 - `docs/site/content/getting-started.mdx`
 - `docs/site/content/custom-domains.mdx`
 - `docs/site/content/encryption.mdx`
-- `docs/site/content/kyb.mdx`
 - `docs/site/content/mcp.mdx`
 - `docs/site/content/sdks.mdx`
 - `docs/site/content/security.mdx`
 - `docs/site/content/webhooks.mdx`
 - `docs/site/content/faq.mdx`
-- `docs/site/content/cards/` (card-specific docs)
 - `docs/site/content/protocols/` (protocol docs)
 
 - [ ] **Step 3: Add navigation structure**
@@ -660,7 +571,7 @@ Copy and organize existing MDX files from `anima/docs/` into the docs site struc
 Configure sidebar navigation:
 - Getting Started
 - Concepts (Agents, Organizations, Identity)
-- Guides (Email, Phone, Cards, Vault, Webhooks, Domains)
+- Guides (Email, Phone, Vault, Webhooks, Domains)
 - API Reference
 - SDKs (TypeScript, Python, Go)
 - MCP
@@ -701,8 +612,8 @@ Option B: Write manually based on contract files.
 
 The spec must cover all endpoint groups:
 - Organizations, Agents, Messages, Emails, Domains
-- Cards, Phones, Vault, Webhooks, Security
-- Funding, Invoice, Billing, API Keys
+- Phones, Vault, Webhooks, Security
+- Invoice, Billing, API Keys
 
 Each endpoint needs: path, method, request body schema, response schema, auth requirements, error codes.
 
@@ -725,7 +636,7 @@ Integrate the OpenAPI spec with the docs site for interactive API reference:
 Create `docs/site/public/llms.txt` with a concise summary of Anima's API for LLM consumption:
 ```
 # Anima API
-> Unified agent identity infrastructure — email, phone, cards, vault
+> Unified agent identity infrastructure — email, phone, vault
 
 ## API Base
 https://api.useanima.sh/v1
@@ -737,7 +648,6 @@ Bearer token: `Authorization: Bearer ak_...`
 - Organizations: /v1/orgs
 - Agents: /v1/agents
 - Messages: /v1/messages (email, SMS)
-- Cards: /v1/cards (virtual Visa/Mastercard)
 - Phones: /v1/phones
 - Vault: /v1/vault (credential storage)
 - Webhooks: /v1/webhooks
@@ -861,11 +771,8 @@ OPENAI_API_KEY=sk-...
 `main.py` should demonstrate the unified platform:
 1. Create agent with email inbox
 2. Store merchant credentials in vault
-3. Create a virtual card with spending policy ($100 limit, specific merchant)
-4. Use OpenAI to simulate a purchasing decision
-5. Process the "purchase" using the card
-6. Send confirmation email with receipt
-7. Clean up (freeze card after use)
+3. Use OpenAI to simulate a purchasing decision
+4. Send confirmation email with receipt
 
 - [ ] **Step 3: Write comprehensive README**
 
@@ -952,11 +859,8 @@ git commit -m "feat(examples): add customer support agent with phone + email + v
 Python example demonstrating the most comprehensive unified workflow:
 1. Agent receives travel request via email
 2. Agent uses vault credentials to access travel API
-3. Agent creates virtual card with budget limit
-4. Agent "books" flight/hotel using the card
-5. Agent receives confirmation email
-6. Agent sends SMS to user confirming booking
-7. Agent freezes card after booking
+3. Agent receives confirmation email
+4. Agent sends SMS to user confirming booking
 
 - [ ] **Step 2: Write README with architecture diagram**
 
@@ -975,7 +879,6 @@ git commit -m "feat(examples): add travel booking agent demonstrating full agent
 
 **Files:**
 - Modify: `examples/email-agent/`
-- Modify: `examples/card-provisioning/`
 - Modify: `examples/vercel-ai-agent/`
 - Modify: `examples/openai-terminal/`
 
@@ -1004,7 +907,6 @@ Task 2 (Node SDK) ─────────── no deps, start immediately
 Task 3 (CLI) ──────────────── no deps, start immediately
 Task 4 (MCP) ──────────────── no deps, start immediately
 Task 5 (Skills) ───────────── after Task 4 (needs MCP tool list)
-Task 6 (Console: Cards) ───── no deps
 Task 7 (Console: Vault) ───── no deps
 Task 8 (Console: Phone) ──── no deps
 Task 9 (Console: Messages) ── no deps
@@ -1019,5 +921,5 @@ Task 17 (Examples: Update) ── after Task 1, Task 2
 ```
 
 **Parallelizable groups:**
-- Group 1 (immediate): Tasks 1, 2, 3, 4, 6, 7, 8, 9, 10, 11
+- Group 1 (immediate): Tasks 1, 2, 3, 4, 7, 8, 9, 10, 11
 - Group 2 (after Group 1): Tasks 5, 12, 13, 14, 15, 16, 17

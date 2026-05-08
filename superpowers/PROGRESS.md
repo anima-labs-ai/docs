@@ -26,7 +26,7 @@
 | A1 | Fix Python SDK Packaging & README | ✅ Done | `python/` | README rewritten, pyproject.toml updated, exports verified |
 | A2 | Wire Console to Real APIs | ⏭️ Deferred | `anima/` | Console page wiring deferred to post-launch (pages exist, partial real data) |
 | A3 | Complete CLI Gaps | ✅ Done | `cli/` | Webhook + security command groups added |
-| A4 | Ship Documentation | ✅ Done | `docs/` | Quickstarts (email, cards, vault), phone, MCP, SDKs, navigation restructured |
+| A4 | Ship Documentation | ✅ Done | `docs/` | Quickstarts (email, vault), phone, MCP, SDKs, navigation restructured |
 | A5 | Compelling Examples | ✅ Done | `examples/` | E-commerce, support, and travel agents (7 total examples) |
 | A6 | Node SDK Audit & Parity | ✅ Done | `node/` | ConflictError/InternalServerError added, README updated |
 | A7 | MCP Server Completeness | ✅ Done | `mcp/` | 77→133+ tools, `--tools` selective loading, README rewritten |
@@ -84,7 +84,7 @@
 |---|------|--------|-------|-----------------|
 | E1 | Enable Vault Feature Flag | ⬜ Pending | `anima/` | Feature flag ON, health check, error handling |
 | E2 | Per-Agent Encryption Keys | ⬜ Pending | `anima/` | HKDF-derived agent DEKs, credential-level encryption |
-| E3 | Cross-Module Integration | ⬜ Pending | `anima/` | Vault → email, phone, cards credential resolution |
+| E3 | Cross-Module Integration | ⬜ Pending | `anima/` | Vault → email, phone credential resolution |
 | E4 | Credential Sharing | ⬜ Pending | `anima/` | CredentialShare model, agent/member/pod scoping |
 | E5 | Ephemeral Scoped Credentials | ⬜ Pending | `anima/` | VaultToken with TTL, scope, task binding, revocation |
 | E6 | Intent-Aware Policy Engine | ⬜ Pending | `anima/` | Allow/Deny/Observe/StepUp per tool call |

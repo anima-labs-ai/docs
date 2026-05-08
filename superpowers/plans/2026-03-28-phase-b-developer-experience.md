@@ -27,9 +27,9 @@
 - [ ] **Step 1: Define event schemas and types**
 
 Create `anima/packages/contracts/src/schemas/events.ts` with:
-- Event type enum: `email.received`, `email.sent`, `email.delivered`, `email.bounced`, `sms.received`, `sms.sent`, `card.transaction.authorized`, `card.transaction.declined`, `card.frozen`, `vault.credential.accessed`, `vault.credential.created`, `approval.requested`, `approval.decided`, `security.pii_detected`, `security.injection_detected`
+- Event type enum: `email.received`, `email.sent`, `email.delivered`, `email.bounced`, `sms.received`, `sms.sent`, `vault.credential.accessed`, `vault.credential.created`, `approval.requested`, `approval.decided`, `security.pii_detected`, `security.injection_detected`
 - Event payload schema (Zod): `{ id: string, type: EventType, agentId: string, orgId: string, timestamp: string, data: Record<string, unknown> }`
-- Subscription request: `{ channels: string[] }` — supports wildcards like `email.*`, `card.*`, `*`
+- Subscription request: `{ channels: string[] }` — supports wildcards like `email.*`, `*`
 - Last-Event-ID for reconnection recovery
 
 - [ ] **Step 2: Create channel matcher utility**
@@ -63,7 +63,6 @@ Modify `anima/apps/api/src/server.ts`:
 
 Add `eventHub.publish()` calls in the relevant API handlers. For each operation that already fires webhooks, also publish to the EventHub:
 - Email send/receive handlers → `email.sent`, `email.received`
-- Card transaction handlers → `card.transaction.authorized`, `card.transaction.declined`
 - Vault access handlers → `vault.credential.accessed`
 - Security event handlers → `security.*`
 
@@ -92,7 +91,7 @@ Create `anima/apps/api/src/__tests__/unit/event-hub.test.ts`:
 
 Create `node/src/resources/events.ts`:
 ```ts
-// Usage: anima.events.subscribe(['email.*', 'card.*'], (event) => { ... })
+// Usage: anima.events.subscribe(['email.*'], (event) => { ... })
 // Returns unsubscribe function
 // Auto-reconnects with lastEventId on disconnect
 ```
@@ -241,7 +240,7 @@ Create `anima/packages/core/src/services/address-validation.ts`:
 
 Create `node/src/resources/addresses.ts`:
 - `create(params)`, `list(params)`, `get(params)`, `update(params)`, `delete(params)`, `validate(params)`
-- Follow existing resource patterns (see cards.ts, vault.ts)
+- Follow existing resource patterns (see vault.ts)
 - Export from index.ts as `anima.addresses`
 
 - [ ] **Step 2: Python SDK — addresses resource**
@@ -271,7 +270,7 @@ Create address management page at `anima/apps/console/src/app/(dashboard)/addres
 - List addresses with type badges, validation status
 - Create/edit dialog
 - Validate button
-- Follow existing console patterns (see cards/page.tsx)
+- Follow existing console patterns (see vault/page.tsx)
 
 - [ ] **Step 6: Documentation**
 
@@ -296,7 +295,6 @@ Read `toolkit/langchain/` — document which tools exist and what they cover.
 - [ ] **Step 2: Add missing tool definitions**
 
 Add tools for the full surface:
-- Cards: `CreateCardTool`, `ListCardsTool`, `FreezeCardTool`, `ListTransactionsTool`
 - Vault: `StoreCredentialTool`, `GetCredentialTool`, `ListCredentialsTool`, `GeneratePasswordTool`
 - Phone: `ProvisionPhoneTool`, `SendSmsTool`, `ListPhonesTool`
 - Address: `CreateAddressTool`, `ListAddressesTool`, `ValidateAddressTool`
@@ -323,14 +321,14 @@ Add tests for new tools. Update README with full tool reference.
 
 - [ ] **Step 1: Audit skill for address coverage**
 
-Read `skill/SKILL.md`. Verify it covers: email, phone, cards, vault, browser payments, x402.
+Read `skill/SKILL.md`. Verify it covers: email, phone, vault, x402.
 Check if address tools are missing (they should be, since address is new in B3).
 
 - [ ] **Step 2: Add address section to SKILL.md**
 
 Add address management tools section:
 - `create_address`, `list_addresses`, `get_address`, `update_address`, `delete_address`, `validate_address`
-- Include workflow examples: "Create billing address → Create card (auto-populated)"
+- Include workflow examples: "Create address → use across email and phone"
 
 - [ ] **Step 3: Update package version and tests**
 
@@ -355,7 +353,7 @@ Check https://github.com/openclaw/openclaw for plugin structure. Determine:
 
 Create `toolkit/openclaw/`:
 - Plugin manifest (JSON or YAML per OpenClaw spec)
-- Tool definitions covering full Anima surface: email, phone, cards, vault, address
+- Tool definitions covering full Anima surface: email, phone, vault, address
 - Configuration: API key injection via OpenClaw config
 - Agent identity provisioning: when an OpenClaw agent connects Anima, it auto-creates an Anima agent
 
@@ -364,7 +362,7 @@ Create `toolkit/openclaw/`:
 Create `toolkit/openclaw/README.md`:
 - Installation and configuration
 - "Give your OpenClaw agents real-world identity with Anima"
-- Example: OpenClaw agent that receives a message on Telegram → creates a purchasing task → uses Anima card to pay
+- Example: OpenClaw agent that receives a message on Telegram → uses Anima vault credentials and SMS
 
 ---
 
@@ -379,7 +377,7 @@ Create `toolkit/openclaw/README.md`:
 Create `toolkit/codex/`:
 - `package.json`: `@anima-labs/toolkit-codex`
 - Tool definitions in Codex-compatible function calling format
-- Full surface: email, phone, cards, vault, address
+- Full surface: email, phone, vault, address
 - Each tool: name, description, parameters (JSON Schema), implementation
 
 - [ ] **Step 2: OpenCode integration**

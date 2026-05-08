@@ -45,7 +45,7 @@ The market is at an inflection point:
 
 | Competitor | Funding | Core Approach | Threat Level | Where Anima Wins |
 |-----------|---------|--------------|--------------|------------------|
-| **Keycard** | $38M (a16z) | Secure Token Service, ephemeral identity-bound tokens | **High** | Keycard is identity tokens only — no vault, no email, no phone, no cards, no browser autofill |
+| **Keycard** | $38M (a16z) | Secure Token Service, ephemeral identity-bound tokens | **High** | Keycard is identity tokens only — no vault, no email, no phone, no browser autofill |
 | **Astrix** | Undisclosed | NHI security + AI Agent Control Plane | Medium-High | Broader NHI focus, less deep on agent-specific vault |
 | **Oasis** | Series B | Agentic Access Management | Medium | Governance-heavy, not developer-centric |
 
@@ -89,8 +89,8 @@ The market is at an inflection point:
                     Agent-Specific ←──────────────→ General-Purpose
                          │                                │
     Identity-Complete    │  ★ ANIMA                       │
-    (email+phone+cards   │  (vault + identity +           │
-     +vault)             │   all channels)                │
+    (email+phone+vault)  │  (vault + identity +           │
+                         │   all channels)                │
                          │                                │
                          │                                │
     Identity-Partial     │  Keycard (tokens only)         │  HashiCorp Vault
@@ -104,7 +104,7 @@ The market is at an inflection point:
                          │                                │
 ```
 
-**Anima's unique position:** Only platform combining vault + email + phone + cards + browser autofill under one agent identity. Every competitor solves a subset.
+**Anima's unique position:** Only platform combining vault + email + phone + browser autofill under one agent identity. Every competitor solves a subset.
 
 ---
 
@@ -112,15 +112,15 @@ The market is at an inflection point:
 
 ### 3.1 Core Thesis
 
-The winning agent identity platform will be the one that **owns the full identity surface** — not just auth tokens or secrets, but the complete operational identity (email, phone, cards, credentials). Vault is the final piece that completes this surface and creates the "Sign in with Anima" federation opportunity.
+The winning agent identity platform will be the one that **owns the full identity surface** — not just auth tokens or secrets, but the complete operational identity (email, phone, credentials). Vault is the final piece that completes this surface and creates the "Sign in with Anima" federation opportunity.
 
 ### 3.2 Why Vault Completes the Moat
 
 | Without Vault | With Vault |
 |---------------|------------|
-| Email + phone + cards = communication + spending | Email + phone + cards + vault = **complete agent identity** |
+| Email + phone = communication channels | Email + phone + vault = **complete agent identity** |
 | Agents need external secrets manager | Agents get secrets management built-in |
-| No cross-channel risk correlation | **Cross-channel analytics**: email + phone + cards + vault anomaly detection |
+| No cross-channel risk correlation | **Cross-channel analytics**: email + phone + vault anomaly detection |
 | Agents manage their own credentials | Platform manages credentials, agents just use them |
 | No federation opportunity | **"Sign in with Anima"** — become the identity provider for agents |
 
@@ -160,7 +160,7 @@ Vault adds three new revenue streams:
 
 **Supporting messages:**
 - "Credentials injected into CLI, browser, and API calls — the LLM never touches them"
-- "One identity for email, phone, cards, and secrets — cross-channel anomaly detection included"
+- "One identity for email, phone, and secrets — cross-channel anomaly detection included"
 - "Stop hardcoding API keys in your agent's config. Start using Anima Vault."
 
 ### 4.2 Launch Sequence
@@ -188,7 +188,7 @@ Priority comparison pages:
 - Update CLI with `am vault` commands
 - Publish to MCP registries (Smithery, MCP Registry)
 - Framework integration plugins (LangChain, CrewAI, Vercel AI)
-- Example agents using vault (e-commerce checkout, API integration, browser automation)
+- Example agents using vault (API integration, browser automation)
 
 ---
 
@@ -200,7 +200,7 @@ Priority comparison pages:
 | **1Password dominates browser autofill** | Medium-High | Medium | Build native autofill in existing Chrome extension; don't depend on Browserbase |
 | **Enterprise customers require Vault/Akeyless** | Medium | Medium | Offer Vault/Akeyless as alternative backends via provider abstraction |
 | **Vaultwarden scaling limits** | Low-Medium | Medium | Provider interface is already abstracted; can swap to custom storage |
-| **Browser extension review delays** | Medium | Low | Extension already exists for cards; vault is incremental |
+| **Browser extension review delays** | Medium | Low | Extension already exists; vault is incremental |
 | **Credential breach / security incident** | Low | Critical | Per-agent encryption, audit trail, instant revocation, bug bounty program |
 
 ---

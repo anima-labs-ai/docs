@@ -3,7 +3,6 @@
 	"pages": [
 		"introducing-anima",
 		"anima-vs-agentmail",
-		"anima-vs-agentcard",
 		"agent-identity-did",
 		"give-agent-phone-number",
 		"x402-payments"

@@ -90,7 +90,7 @@ Create `anima/packages/agent-identity/src/vc.ts`:
 - W3C VC Data Model 2.0 format
 - JWT-VC encoding using Ed25519 issuer key
 - Issuer DID: `did:anima:issuer`
-- Credential types: `AnimaEmailVerified`, `AnimaPhoneVerified`, `AnimaAddressVerified`, `AnimaKYBCompleted`, `AnimaPaymentCapable`, `AnimaOwnerBound`, `AnimaTrustScore`
+- Credential types: `AnimaEmailVerified`, `AnimaPhoneVerified`, `AnimaAddressVerified`, `AnimaOwnerBound`, `AnimaTrustScore`
 - `issueCredential(type, subject, claims, issuerKey)` → JWT-VC string
 - `verifyCredential(jwtVc, issuerPublicKey)` → `{ valid, credential, errors }`
 - `decodeCredential(jwtVc)` → decoded VC payload (no verification)
@@ -138,8 +138,6 @@ API routes: implement handlers with auto-issuance triggers:
 - When email is verified → auto-issue `AnimaEmailVerified`
 - When phone is verified → auto-issue `AnimaPhoneVerified`
 - When address is validated → auto-issue `AnimaAddressVerified`
-- When KYB completes → auto-issue `AnimaKYBCompleted`
-- When card is created → auto-issue `AnimaPaymentCapable`
 
 ---
 
@@ -156,7 +154,7 @@ Create `anima/packages/agent-identity/src/agent-card.ts`:
 - A2A Agent Card format (Google spec)
 - `generateAgentCard(agent, credentials, capabilities)` → Agent Card JSON
 - Auto-populated from agent config: name, description, DID, capabilities, verification level, trust score, contact info
-- Capabilities auto-detected: email (has EmailIdentity?), phone (has PhoneIdentity?), cards (has CardIdentity?), vault (has VaultIdentity?), address (has AddressIdentity?)
+- Capabilities auto-detected: email (has EmailIdentity?), phone (has PhoneIdentity?), vault (has VaultIdentity?), address (has AddressIdentity?)
 
 - [ ] **Step 2: Add well-known and card API routes**
 
@@ -254,7 +252,7 @@ Contract routes:
 
 Wallet handlers with:
 - Budget guards: per-request, daily, monthly limits
-- Protocol auto-selection: x402 → AP2 → Visa TAP → Mastercard VI → card fallback
+- Protocol auto-selection: x402 → AP2
 - Surface existing `@anima/protocols` router through the wallet API
 - x402 fetch: intercept 402 responses, pay with wallet, retry request
 - Transaction logging for all protocols
@@ -318,7 +316,7 @@ API: `GET /vault/audit?credentialId=X&since=Y` — queryable audit log
 - [ ] **Step 1: Create Pod Prisma model and add podId to core models**
 
 Pod model: id, orgId, name, slug (unique within org), status, limits (Json), metadata, timestamps.
-Add optional `podId` to: Agent, Message, CardIdentity, PhoneIdentity, VaultIdentity, AddressIdentity, Webhook.
+Add optional `podId` to: Agent, Message, PhoneIdentity, VaultIdentity, AddressIdentity, Webhook.
 Create migration.
 
 - [ ] **Step 2: Create pod contracts and API**

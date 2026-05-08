@@ -9,9 +9,9 @@
 
 ## Executive Summary
 
-Anima is a unified agent identity infrastructure platform combining email, phone, virtual cards, credential vault, and agent identity under one API. This spec defines the complete roadmap from launch readiness to enterprise compliance across 4 phases with 21 top-level work items (B2 merged into A7; C4 and D4 each have sub-phases).
+Anima is a unified agent identity infrastructure platform combining email, phone, credential vault, and agent identity under one API. This spec defines the complete roadmap from launch readiness to enterprise compliance across 4 phases with 21 top-level work items (B2 merged into A7; C4 and D4 each have sub-phases).
 
-**Strategic thesis:** Competitors (Agentmail, Agentphone, Agentcard) each solve one slice. Anima is the only platform offering all operational capabilities unified under an open agent identity protocol. The identity protocol (Phase C) is the moat — it turns Anima from a product into a standard.
+**Strategic thesis:** Competitors (Agentmail, Agentphone) each solve one slice. Anima is the only platform offering all operational capabilities unified under an open agent identity protocol. The identity protocol (Phase C) is the moat — it turns Anima from a product into a standard.
 
 **Sequencing:** Approach B (parallel tracks). Phase A ships launch readiness while Phase C identity protocol design runs concurrently. Phase B (developer experience) and Phase D (enterprise) layer on after Phase A core.
 
@@ -25,27 +25,26 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 | TypeScript SDK | 95% | Published @anima-labs/sdk, all 10 resources |
 | Python SDK | 95% code, 5% packaging | Fully implemented but README says "Coming soon" |
 | Go SDK | 0% | Placeholder only |
-| CLI | 85% | ~40+ commands, 11 groups (admin, auth, card, config, email, extension, identity, init, phone, setup-mcp, vault), substantially built |
+| CLI | 85% | ~40+ commands, 10 groups (admin, auth, config, email, extension, identity, init, phone, setup-mcp, vault), substantially built |
 | MCP Server | 90% | 77+ tools, stdio + HTTP modes |
 | Console | 40% | 24 pages exist, mostly mocked data |
 | Documentation | 30% | MDX files exist in anima/docs/, no public docs site |
 | Email | 95% | Multi-region SES, semantic search, custom domains |
 | Phone | 90% | Telnyx + Twilio, SMS/voice |
-| Cards | 90% | Stripe Issuing, policies, approvals, AML |
 | Vault | 85% | Bitwarden backend, 4 credential types |
 | Agent Identity | 40% | In-memory manager, reputation, no DID/VC |
-| Protocols | 80% | Visa TAP, AP2, Mastercard VI, x402 built but not surfaced |
+| Protocols | 80% | x402 built but not surfaced |
 | Security | 70% | PII/injection scanning, rate limiting, event logging |
 | Browser Extension | 60% | Checkout detection, Stripe/Braintree/Adyen adapters |
 | Skills | 70% | Exist in skill/ and skills/, need completeness audit |
-| Toolkit | 70% | Vercel AI, LangChain, OpenAI — email-heavy, missing card/phone/vault |
+| Toolkit | 70% | Vercel AI, LangChain, OpenAI — email-heavy, missing phone/vault |
 | Examples | 60% | 4 examples, don't showcase unified platform |
 
 ---
 
 ## Phase A — Launch Readiness
 
-**Goal:** Make Anima shippable as a competitive product that matches or exceeds Agentmail/Agentphone/Agentcard individually.
+**Goal:** Make Anima shippable as a competitive product that matches or exceeds Agentmail/Agentphone individually.
 **Priority:** Highest. Runs first.
 **Dependency:** None.
 
@@ -53,7 +52,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### A1. Fix Python SDK Packaging & README
 
-**Current state:** Full implementation exists at `python/src/anima/` with all 10 resources (Agents, Cards, Domains, Emails, Messages, Organizations, Phones, Security, Vault, Webhooks), both sync and async clients. README incorrectly says "Coming soon." `pyproject.toml` uses hatchling build system targeting Python 3.9+.
+**Current state:** Full implementation exists at `python/src/anima/` with all 9 resources (Agents, Domains, Emails, Messages, Organizations, Phones, Security, Vault, Webhooks), both sync and async clients. README incorrectly says "Coming soon." `pyproject.toml` uses hatchling build system targeting Python 3.9+.
 
 **What to build:**
 
@@ -105,8 +104,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 **What to build:**
 
 1. **Wire existing pages (follow webhooks page pattern):**
-   - Cards list page → `cards.list` endpoint
-   - Card detail page → `cards.get` + `cards.listTransactions` + `cards.listPolicies` + `cards.listApprovals`
    - Vault list page → `vault.listCredentials` endpoint (may need new `vault.listIdentities` contract)
    - Vault detail page → `vault.getCredential` with CRUD operations
    - Phone list page → `phones.list` endpoint
@@ -122,7 +119,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Phone number provisioning form — area code search, number selection, agent assignment
    - Vault credential create/edit forms — support all 4 types (login, secure_note, card, identity)
    - Email forwarding rules configuration
-   - Card policy builder — visual UI for spending limits, merchant filters, time windows
    - Approval workflow UI — pending approvals list, approve/decline actions, history
 
 3. **Pattern to follow:**
@@ -136,7 +132,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 4. **End-to-end user flows:**
    - Onboarding: Sign up → Create org → Create first agent → Send test email
-   - Card management: Create card → Set policies → View transactions → Freeze/unfreeze
    - Vault: Provision vault → Store credential → Retrieve credential
    - Phone: Provision number → Send test SMS → View conversation
 
@@ -158,7 +153,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### A3. Complete CLI Gaps
 
-**Current state:** CLI at `cli/` has ~40+ commands across 11 groups (admin, auth, card, config, email, extension, identity, init, phone, setup-mcp, vault). Built with proper subcommand structure, output formatting, and auth handling.
+**Current state:** CLI at `cli/` has ~40+ commands across 10 groups (admin, auth, config, email, extension, identity, init, phone, setup-mcp, vault). Built with proper subcommand structure, output formatting, and auth handling.
 
 **What to build:**
 
@@ -215,19 +210,19 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Shell completion tests (tab completion works)
 - Homebrew formula installs cleanly on macOS
 
-**Business justification:** CLIs are how power users and CI/CD pipelines interact with infrastructure. Agentmail's CLI has full inbox/message CRUD. Agentcard's CLI has full card/cardholder management. A CLI with gaps signals an immature product.
+**Business justification:** CLIs are how power users and CI/CD pipelines interact with infrastructure. Agentmail's CLI has full inbox/message CRUD. A CLI with gaps signals an immature product.
 
 ---
 
 ### A4. Ship Documentation
 
-**Current state:** MDX files exist in `anima/docs/` covering getting-started, custom-domains, encryption, kyb, mcp, sdks, security, webhooks, faq, cards/, and protocols/. No interactive API reference. No publicly accessible OpenAPI spec. No docs site deployed.
+**Current state:** MDX files exist in `anima/docs/` covering getting-started, custom-domains, encryption, mcp, sdks, security, webhooks, faq, and protocols/. No interactive API reference. No publicly accessible OpenAPI spec. No docs site deployed.
 
 **What to build:**
 
 1. **OpenAPI 3.1 specification:**
    - Generate from oRPC contracts or maintain manually
-   - Cover all endpoints across all domains (agents, emails, phones, cards, vault, webhooks, security, domains, organizations)
+   - Cover all endpoints across all domains (agents, emails, phones, vault, webhooks, security, domains, organizations)
    - Include request/response schemas, error codes, authentication
    - Publish at `https://api.useanima.sh/openapi.json`
    - Version the spec (v1)
@@ -238,7 +233,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Sections:
      - **Getting Started** — API key, first request, quickstart per language
      - **Concepts** — Agents, Organizations, Identity, Vault, Wallet
-     - **Guides** — Send email, Provision phone, Create card, Store credentials, Set up webhooks, Custom domains, KYB onboarding
+     - **Guides** — Send email, Provision phone, Store credentials, Set up webhooks, Custom domains
      - **API Reference** — Interactive, generated from OpenAPI spec, try-it-now for each endpoint
      - **SDKs** — TypeScript, Python, Go installation and usage
      - **MCP** — Setup for Claude Desktop, Cursor, Windsurf, hosted endpoint
@@ -246,11 +241,11 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      - **Skills** — Claude Code / Cursor skill installation and usage
      - **Integrations** — Framework toolkit guides (LangChain, OpenAI, Vercel AI, CrewAI, etc.)
      - **Security** — Encryption, PII detection, rate limiting, incident response
-     - **Protocols** — Visa TAP, AP2, Mastercard VI, x402 documentation
+     - **Protocols** — AP2, x402 documentation
      - **Changelog** — Version history
 
 3. **LLM-friendly documentation:**
-   - `llms.txt` file at root of docs site (Agentcard has this)
+   - `llms.txt` file at root of docs site
    - `llms-full.txt` with comprehensive context for AI consumption
    - Ensure docs are crawlable by Context7 and similar services
 
@@ -286,17 +281,15 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### A5. Compelling Examples
 
-**Current state:** 4 examples exist: email-agent (Python), card-provisioning (TypeScript), vercel-ai-agent (TypeScript), openai-terminal (Python). They demonstrate individual features but don't showcase the unified platform.
+**Current state:** 3 examples exist: email-agent (Python), vercel-ai-agent (TypeScript), openai-terminal (Python). They demonstrate individual features but don't showcase the unified platform.
 
 **What to build:**
 
 1. **E-commerce purchasing agent** (Python):
-   - Uses cards to make a purchase
    - Uses vault to store/retrieve merchant login credentials
    - Uses email to receive order confirmation and receipts
    - Uses address for shipping
-   - Demonstrates the full agent lifecycle: authenticate → browse → purchase → confirm
-   - Shows policy enforcement (spending limit, merchant filter)
+   - Demonstrates the full agent lifecycle: authenticate → browse → confirm
 
 2. **Customer support agent** (TypeScript):
    - Uses phone to receive inbound calls
@@ -306,7 +299,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Demonstrates multi-channel agent operation
 
 3. **Travel booking agent** (Python):
-   - Uses cards to book flights/hotels
    - Uses phone to call hotels for special requests
    - Uses email to receive booking confirmations
    - Uses address for billing/shipping
@@ -316,7 +308,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 4. **Multi-agent collaboration** (TypeScript) — **Deferred to C6 (A2A Protocol) as deliverable:**
    - Two agents collaborating via A2A
    - Agent A discovers Agent B via registry
-   - Agent A delegates a card with spending limit to Agent B
+   - Agent A delegates a task to Agent B
    - Agent B completes a task and reports back
    - Demonstrates agent-to-agent trust and delegation
 
@@ -343,7 +335,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### A6. Node SDK Audit & Parity
 
-**Current state:** Published as `@anima-labs/sdk` at `node/`. Has all 10 resources with full CRUD operations. Tests exist at `node/__tests__/`.
+**Current state:** Published as `@anima-labs/sdk` at `node/`. Has all 9 resources with full CRUD operations. Tests exist at `node/__tests__/`.
 
 **What to build:**
 
@@ -404,7 +396,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Note: Address MCP tools will be added as part of B3 scope; Wallet MCP tools as part of C3 scope. A7 covers only currently existing SDK operations.
 
 3. **Selective tool loading:**
-   - Add `--tools` flag: `npx @anima-labs/mcp --tools email,cards,vault`
+   - Add `--tools` flag: `npx @anima-labs/mcp --tools email,vault`
    - Useful for agents that only need a subset of capabilities
    - Reduces tool surface for simpler agent configurations
    - Agentmail MCP has this feature
@@ -449,7 +441,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Selective loading correctly filters tools
 - Registry listings are live and discoverable
 
-**Business justification:** MCP is how AI agents connect to external tools. It's the distribution channel. Both Agentphone and Agentcard have hosted MCP endpoints — without one, users must install and run your MCP server locally, which loses casual adopters. Registry listings are free distribution. Selective tool loading reduces confusion for agents that don't need 77+ tools.
+**Business justification:** MCP is how AI agents connect to external tools. It's the distribution channel. Without a hosted endpoint, users must install and run your MCP server locally, which loses casual adopters. Registry listings are free distribution. Selective tool loading reduces confusion for agents that don't need 77+ tools.
 
 ---
 
@@ -465,7 +457,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Verify skill descriptions accurately trigger on relevant user intents
 
 2. **Missing skill coverage:**
-   - Card management skills (create card, set spending limit, freeze/unfreeze, view transactions)
    - Phone skills (provision number, send SMS, view conversations)
    - Vault skills (store credential, retrieve credential, generate password)
    - Address skills (once B3 builds the service)
@@ -525,7 +516,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Connection lifecycle: connect → authenticate → subscribe → receive events → disconnect
 
 2. **Event channel model:**
-   - Clients subscribe to event channels: `email.*`, `sms.*`, `card.*`, `vault.*`, `security.*`, `approval.*`
+   - Clients subscribe to event channels: `email.*`, `sms.*`, `vault.*`, `security.*`, `approval.*`
    - Wildcard support: `*` for all events, `email.received` for specific event
    - Per-agent filtering: `agent:<agent-id>:email.*`
    - Per-org filtering (default): all events for the organization
@@ -533,7 +524,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 3. **Event types to stream:**
    - Email: received, sent, delivered, bounced, complained, rejected
    - SMS: received, sent, delivered, failed
-   - Card: transaction.authorized, transaction.declined, card.frozen, card.unfrozen, card.killed
    - Vault: credential.accessed, credential.created, credential.rotated
    - Approval: requested, approved, declined, expired
    - Security: pii_detected, injection_detected, rate_limited, anomaly_detected
@@ -579,7 +569,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### B3. Agent Address Service
 
-**Current state:** Vault identity credential type stores address fields (street, city, state, zip, country). Cardholder model has billing address (`billing_street1`, `billing_city`, etc.). But no first-class agent address concept with validation and multi-type support.
+**Current state:** Vault identity credential type stores address fields (street, city, state, zip, country). But no first-class agent address concept with validation and multi-type support.
 
 **What to build:**
 
@@ -622,7 +612,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - `POST /v1/agents/:agentId/addresses/:id/validate` — validate/re-validate address
 
 4. **Integration with existing services:**
-   - Card creation auto-populates billing address from agent's primary BILLING address
    - Browser extension auto-fills shipping address during checkout from agent's primary SHIPPING address
    - Vault identity credential type references AddressIdentity instead of storing raw address fields
 
@@ -635,17 +624,16 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 **Ready criteria:**
 - Address CRUD works through API, SDKs, MCP, CLI
 - Validation returns standardized addresses
-- Card creation auto-uses billing address
 - Extension auto-fills shipping address
 - Address types are enforced (one primary per type per agent)
 
 **Testing criteria:**
 - Unit tests for address model and validation
-- Integration tests: create address → create card (billing auto-populated)
+- Integration tests: create address → validate
 - Validation tests with real addresses (US, international)
 - Invalid address handling (returns suggestions)
 
-**Business justification:** Card transactions without valid billing addresses fail AVS (Address Verification System) checks. Agents that shop need shipping addresses. No competitor offers address as a first-class service. This gap blocks real-world agent autonomy — an agent that can't fill in a shipping address can't complete a purchase.
+**Business justification:** Agents that shop need shipping addresses. No competitor offers address as a first-class service.
 
 **Relationship to Agent Identity (Phase C):** Address is an attribute of the agent, stored as a child resource (like EmailIdentity, PhoneIdentity). When Phase C implements DIDs, the address becomes a Verifiable Credential claim: "This agent's billing address at 123 Main St is verified by Anima via USPS validation." No conceptual collision — identity wraps address with cryptographic verification.
 
@@ -653,37 +641,37 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### B4. Framework Integrations Expansion
 
-**Current state:** Toolkit at `toolkit/` covers Vercel AI SDK (Node), LangChain (Python), OpenAI Agents SDK (Python). Each has 8-12 tool definitions, mostly focused on email operations. Missing card, phone, vault, and address tool definitions in most integrations.
+**Current state:** Toolkit at `toolkit/` covers Vercel AI SDK (Node), LangChain (Python), OpenAI Agents SDK (Python). Each has 8-12 tool definitions, mostly focused on email operations. Missing phone, vault, and address tool definitions in most integrations.
 
 **What to build:**
 
 1. **Claude Code** (high priority):
    - Skill at `skill/` already exists — audit for completeness
-   - Ensure all operations are covered: email, phone, cards, vault, address
+   - Ensure all operations are covered: email, phone, vault, address
    - Publish via npm/skills registry
    - Test natural language trigger accuracy
 
 2. **Claude Cowork** (highest priority):
    - Reference: Anthropic's multi-agent collaboration product (https://claude.ai/cowork)
    - Anima tools available as shared agent capabilities in Cowork sessions
-   - Any agent in a Cowork session can provision emails, cards, phones, store credentials
+   - Any agent in a Cowork session can provision emails, phones, store credentials
    - Integration pattern: MCP server connection from Cowork workspace
    - Documentation: "How to give your Cowork agents real-world identity"
-   - Example: Multi-agent Cowork session where agents collaborate on a purchasing task
+   - Example: Multi-agent Cowork session where agents collaborate on a task
    - Note: If Cowork API/integration surface is not yet public, defer until available. Monitor Anthropic announcements.
 
 3. **OpenClaw** (highest priority):
    - Reference: https://github.com/openclaw/openclaw (open-source personal AI assistant, ~339K GitHub stars)
    - OpenClaw plugin/integration (supports 24+ platforms including WhatsApp, Telegram, Slack, Discord, Signal)
    - Anima as the identity provider for OpenClaw agents
-   - Each OpenClaw agent gets: email, phone, card, vault, address via Anima
+   - Each OpenClaw agent gets: email, phone, vault, address via Anima
    - Plugin hooks into OpenClaw's multi-channel communication layer
    - Configuration: add Anima API key to OpenClaw config, agents auto-provision identity
    - Documentation: "Give your OpenClaw agents real-world identity with Anima"
 
 4. **Codex** (OpenAI's coding agent):
    - Tool definitions compatible with Codex's function calling format
-   - Cover full surface: email, phone, cards, vault, address
+   - Cover full surface: email, phone, vault, address
    - Publish as npm package: `@anima-labs/toolkit-codex`
 
 5. **OpenCode:**
@@ -693,19 +681,18 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 6. **LangChain** (expand existing):
    - Currently email-only tools — expand to full surface
-   - Add tools: CreateCardTool, ListTransactionsTool, FreezeCardTool, ProvisionPhoneTool, SendSmsTool, StoreCredentialTool, GetCredentialTool, CreateAddressTool, ValidateAddressTool
+   - Add tools: ProvisionPhoneTool, SendSmsTool, StoreCredentialTool, GetCredentialTool, CreateAddressTool, ValidateAddressTool
    - Publish as `anima-toolkit-langchain` on PyPI
 
 7. **Each integration MUST expose the full unified surface:**
    - Email: send, list, get, search
    - Phone: provision, send SMS, list messages
-   - Cards: create, list, transactions, freeze/unfreeze, policies
    - Vault: store, retrieve, list, generate password
    - Address: create, list, validate
 
 **Ready criteria:**
 - All 6 integrations implemented and published
-- Each integration covers: email, phone, cards, vault, address
+- Each integration covers: email, phone, vault, address
 - Documentation and examples for each integration
 - Published to npm/PyPI as appropriate
 
@@ -715,7 +702,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Installation instructions work from clean environment
 - No import errors or dependency conflicts
 
-**Business justification:** Claude Cowork and OpenClaw are the two largest multi-agent platforms. If Anima is the default identity provider for these platforms, distribution is solved. Developers choose infrastructure that integrates with their stack — every missing framework integration is a lost user. The unified surface (email + phone + cards + vault + address) is what differentiates Anima integrations from Agentmail's email-only toolkit.
+**Business justification:** Claude Cowork and OpenClaw are the two largest multi-agent platforms. If Anima is the default identity provider for these platforms, distribution is solved. Developers choose infrastructure that integrates with their stack — every missing framework integration is a lost user. The unified surface (email + phone + vault + address) is what differentiates Anima integrations from Agentmail's email-only toolkit.
 
 ---
 
@@ -740,13 +727,13 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 4. **GitHub discoverability:**
    - Add to `awesome-mcp-servers` and similar curated lists
-   - Ensure GitHub topics include: mcp, ai-agent, email-api, virtual-cards, agent-identity
+   - Ensure GitHub topics include: mcp, ai-agent, email-api, agent-identity
    - Star-worthy README with badges, screenshots, quick demo GIF
 
 5. **Content marketing (ongoing activity, not a gated deliverable):**
-   - Blog posts targeting: "AI agent email API", "AI agent virtual card", "agent identity protocol"
-   - Comparison pages: "Anima vs Agentmail", "Anima vs Agentcard"
-   - Tutorial: "Build an autonomous purchasing agent in 10 minutes"
+   - Blog posts targeting: "AI agent email API", "agent identity protocol"
+   - Comparison pages: "Anima vs Agentmail"
+   - Tutorial: "Build an autonomous agent in 10 minutes"
    - Note: Content marketing is continuous and not part of B5 "done" criteria. Track separately.
 
 **Ready criteria:**
@@ -799,8 +786,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      - `AnimaEmailVerified` — email address is verified (SPF/DKIM passed)
      - `AnimaPhoneVerified` — phone number is verified (carrier confirmed)
      - `AnimaAddressVerified` — address passed validation (USPS/Google)
-     - `AnimaKYBCompleted` — owner organization completed KYB via Stripe Connect
-     - `AnimaPaymentCapable` — agent has active card(s) and can make payments
      - `AnimaOwnerBound` — agent is bound to a verified human/org identity
      - `AnimaTrustScore` — current trust/reputation score with evidence
    - VC format: W3C VC Data Model 2.0, JWT encoding for compactness
@@ -825,14 +810,13 @@ Anima is a unified agent identity infrastructure platform combining email, phone
        "capabilities": {
          "email": true,
          "phone": true,
-         "cards": true,
          "vault": true,
          "address": true,
-         "protocols": ["x402", "ap2", "visa-tap"]
+         "protocols": ["x402", "ap2"]
        },
        "verification": {
          "level": "standard",
-         "credentials": ["AnimaEmailVerified", "AnimaKYBCompleted"]
+         "credentials": ["AnimaEmailVerified"]
        },
        "trust_score": 87,
        "contact": {
@@ -847,10 +831,9 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 4. **Know Your Agent (KYA):**
    - Human-agent binding: link every agent to a verified owner
-   - Leverage existing KYB flow (Stripe Connect hosted onboarding) as verification backbone
    - KYA levels:
      - **Basic:** Email verified (org admin email confirmed via Clerk)
-     - **Standard:** Basic + KYB completed (Stripe Connect approved)
+     - **Standard:** Basic + organization verified
      - **Premium:** Standard + additional identity verification (government ID, address proof)
    - Issue `AnimaOwnerBound` VC at Standard+ level
    - Public disclosure: owner chooses what's visible (org name only, full details, or private)
@@ -887,7 +870,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Cross-platform VC verification (verify Anima VCs with third-party VC libraries)
 - DID Document conforms to W3C DID Core 1.0 spec (validate with did-resolver libraries)
 
-**Business justification:** The IETF has 5+ active drafts on agent identity (SCIM for AI, Agent Auth, ANS, Trust Scoring, Digital Identity Management). W3C DIDs v1.1 is finalizing. The Linux Foundation AAIF has 146 members. By shipping the first complete implementation combining DIDs + VCs + Agent Cards + KYA, Anima becomes the reference standard. Ping Identity, Strata, and Defakto are enterprise IAM plays — they provide identity governance but not operational capabilities (email, phone, cards). Anima is the only platform that can offer both. The protocol spec, published open-source, positions Anima as the standard setter, not just a vendor.
+**Business justification:** The IETF has 5+ active drafts on agent identity (SCIM for AI, Agent Auth, ANS, Trust Scoring, Digital Identity Management). W3C DIDs v1.1 is finalizing. The Linux Foundation AAIF has 146 members. By shipping the first complete implementation combining DIDs + VCs + Agent Cards + KYA, Anima becomes the reference standard. Ping Identity, Strata, and Defakto are enterprise IAM plays — they provide identity governance but not operational capabilities (email, phone). Anima is the only platform that can offer both. The protocol spec, published open-source, positions Anima as the standard setter, not just a vendor.
 
 ---
 
@@ -910,7 +893,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      agentCard   Json (A2A Agent Card)
      trustScore  Int (0-100)
      kyaLevel    KYALevel (BASIC, STANDARD, PREMIUM)
-     capabilities String[] (email, phone, cards, vault, address)
+     capabilities String[] (email, phone, vault, address)
      tags        String[] (user-defined, searchable)
      verified    Boolean
      verifiedAt  DateTime?
@@ -936,7 +919,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 4. **Verification badges:**
    - Badge levels based on KYA level:
      - Basic (email verified): blue badge
-     - Standard (KYB completed): green badge
+     - Standard (organization verified): green badge
      - Premium (full verification): gold badge
    - Badge is a Verifiable Credential, independently verifiable
    - Badge displayed on Agent Card and registry listing
@@ -980,7 +963,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 ### C3. Agent Wallet with x402 + AP2 Support
 
-**Current state:** `@anima/protocols` has fully implemented adapters for Visa TAP, Google AP2, Mastercard VI, and x402. Protocol router exists with priority-based selection and fallback. Cards exist via Stripe Issuing with policies, approvals, and transaction monitoring. But no "wallet" abstraction ties these together, and protocols are not surfaced through the API/SDK.
+**Current state:** `@anima/protocols` has fully implemented adapters for Google AP2 and x402. Protocol router exists with priority-based selection and fallback. But no "wallet" abstraction ties these together, and protocols are not surfaced through the API/SDK.
 
 **What to build:**
 
@@ -999,8 +982,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      spentToday      Decimal
      spentThisMonth  Decimal
      status          WalletStatus (ACTIVE, FROZEN, SUSPENDED)
-     fundingSources  FundingSource[] (Stripe bank/card)
-     cards           CardIdentity[]
      metadata        Json?
      createdAt       DateTime
      updatedAt       DateTime
@@ -1014,7 +995,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - `GET /v1/agents/:agentId/wallet/transactions` — unified transaction history across all payment methods
    - `POST /v1/agents/:agentId/wallet/pay` — unified payment endpoint (protocol auto-selected)
    - `POST /v1/agents/:agentId/wallet/x402-fetch` — HTTP fetch with x402 payment handling
-   - `POST /v1/agents/:agentId/wallet/fund` — add funds from funding source
    - `POST /v1/agents/:agentId/wallet/freeze` — freeze wallet (blocks all payments)
    - `POST /v1/agents/:agentId/wallet/unfreeze` — unfreeze wallet
 
@@ -1023,9 +1003,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Protocol router selects method based on merchant support:
      1. x402 (if merchant supports HTTP 402)
      2. AP2 (if merchant supports Google AP2)
-     3. Visa TAP (if merchant supports Visa agent auth)
-     4. Mastercard VI (if merchant supports MC Verifiable Intent)
-     5. Card (fallback — create single-use virtual card)
    - Budget guards enforced: per-request limit, daily limit, monthly limit
    - Transaction logged regardless of protocol used
    - Approval workflow triggered if amount exceeds auto-approve threshold
@@ -1035,7 +1012,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - SDK: `anima.wallet.x402Fetch(url, options)` — drop-in replacement for fetch()
    - Agent encounters HTTP 402 → wallet automatically pays → request succeeds
    - Budget guards: per-request max, session budget, daily budget
-   - Settlement via Stripe (existing infrastructure)
 
 5. **AP2 integration:**
    - Surface existing AP2 adapter through API
@@ -1065,7 +1041,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Budget guard enforcement tests (exceed limit → blocked)
 - Transaction history aggregation tests
 
-**Business justification:** Skyfire raised $9.5M for agent wallets. Coinbase x402 has AWS/Anthropic/Cloudflare backing. Google AP2 has 60+ partners. The protocol adapters are already built — they just need the wallet abstraction and unified API. This transforms Anima from "card issuer" to "agent financial identity." The unified pay endpoint that auto-selects protocols is something no competitor offers.
+**Business justification:** Skyfire raised $9.5M for agent wallets. Coinbase x402 has AWS/Anthropic/Cloudflare backing. Google AP2 has 60+ partners. The protocol adapters are already built — they just need the wallet abstraction and unified API. The unified pay endpoint that auto-selects protocols is something no competitor offers.
 
 ---
 
@@ -1197,7 +1173,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      name        String
      slug        String (unique within org)
      status      PodStatus (ACTIVE, SUSPENDED, DELETED)
-     limits      Json? (agent count, email volume, card count, etc.)
+     limits      Json? (agent count, email volume, etc.)
      metadata    Json?
      createdAt   DateTime
      updatedAt   DateTime
@@ -1205,7 +1181,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    ```
 
 2. **Pod scoping:**
-   - Add optional `podId` to core models: Agent, Message, CardIdentity, PhoneIdentity, VaultIdentity, AddressIdentity, Webhook, SecurityEvent
+   - Add optional `podId` to core models: Agent, Message, PhoneIdentity, VaultIdentity, AddressIdentity, Webhook, SecurityEvent
    - Pod-scoped queries: all list/get operations filter by podId when present
    - Agents created within a pod can only access resources within that pod
    - Cross-pod access is forbidden (enforced at API layer)
@@ -1222,7 +1198,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Pod-scoped webhook signing keys
 
 5. **Pod usage tracking:**
-   - Usage metering per pod (email count, SMS count, card transactions, vault access)
+   - Usage metering per pod (email count, SMS count, vault access)
    - Pod-level billing (for SaaS platforms that want to bill their customers)
    - Usage limits per pod (configurable by org admin)
 
@@ -1391,7 +1367,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 **What to build:**
 
 1. **Behavioral baselines:**
-   - Track per-agent metrics: email send rate (hourly/daily), SMS send rate, card transaction count and amounts, vault access frequency, API call frequency, unique recipients contacted
+   - Track per-agent metrics: email send rate (hourly/daily), SMS send rate, vault access frequency, API call frequency, unique recipients contacted
    - Establish baselines during first 7-14 days of agent operation
    - Store baselines in Redis for fast comparison
    - Update baselines on rolling 30-day window
@@ -1402,10 +1378,8 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      - Moving average: flag if current rate exceeds 5x the 24-hour moving average
      - Time-of-day awareness: baseline includes time patterns (agent active 9-5 → activity at 3am is anomalous)
    - **Rule-based triggers (configurable per org):**
-     - "Alert if card spend exceeds $X in Y hours"
      - "Alert if agent sends email to more than Z unique recipients in one hour"
      - "Alert if agent accesses credentials it's never used before"
-     - "Alert if agent makes transactions in a new country"
    - Default rules with sensible thresholds (configurable)
 
 3. **Alert system:**
@@ -1417,7 +1391,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 4. **Console dashboard:**
    - Real-time agent activity overview
-   - Time-series charts: email volume, SMS volume, card transactions, vault access, API calls
+   - Time-series charts: email volume, SMS volume, vault access, API calls
    - Anomaly timeline: when alerts were triggered, for which agents, current status
    - Drill-down: click alert → see specific agent, event timeline, baseline vs actual
 
@@ -1467,7 +1441,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 1. **GDPR/CCPA compliance:**
    - **Data Subject Access Request (DSAR) endpoint:**
      - `POST /v1/compliance/dsar` — initiate DSAR for a person (email or phone)
-     - Searches across: emails, SMS messages, card transactions, vault credentials, security events, audit logs
+     - Searches across: emails, SMS messages, vault credentials, security events, audit logs
      - Returns: comprehensive data export (JSON + PDF)
      - SLA: 30 days (GDPR requirement)
    - **Right to deletion:**
@@ -1478,7 +1452,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - **Data retention policies:**
      - Configurable per org: 30 days, 90 days, 1 year, 7 years, indefinite
      - Auto-purge job: delete data older than retention period
-     - Retention applies per data type (emails may have different retention than card transactions)
+     - Retention applies per data type (emails may have different retention than other data)
    - **Consent tracking:**
      - Log when/how consent was obtained for data processing
      - Consent type: explicit, legitimate interest, contractual necessity
@@ -1487,20 +1461,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
      - Data Processing Agreement template for enterprise customers
      - Available for download from console
 
-2. **PCI DSS assessment:**
-   - **Scope documentation:**
-     - Document that card data flows through Stripe (PCI Level 1 certified)
-     - Anima never stores raw PAN in its database (verify this)
-     - Vault stores card data encrypted — document encryption method
-     - Likely qualifies for SAQ-A (all card processing delegated to Stripe)
-   - **Self-assessment questionnaire:**
-     - Complete SAQ-A annually
-     - Document in compliance dashboard
-   - **Verification:**
-     - Audit `@anima/cards` and `@anima/vault` for any PAN/CVV in logs
-     - Add log scrubbing for card numbers (extend existing PII detection)
-
-3. **Compliance dashboard (console page):**
+2. **Compliance dashboard (console page):**
    - Data retention status per data type
    - Pending DSARs with SLA countdown
    - Audit log completeness indicator
@@ -1508,10 +1469,9 @@ Anima is a unified agent identity infrastructure platform combining email, phone
    - Last access review date
    - Last penetration test date
    - SOC 2 control status (green/yellow/red)
-   - PCI scope documentation link
    - Exportable compliance report (PDF)
 
-4. **Regulatory audit trail:**
+3. **Regulatory audit trail:**
    - Every API call logged: timestamp, actor (API key ID), action, resource type, resource ID, IP address, user agent, result (success/failure)
    - **Tamper-evident logging:**
      - Hash chain: each log entry includes hash of previous entry
@@ -1535,9 +1495,8 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 - Retention test: create data with 1-day retention → wait → auto-purged
 - Tamper-evidence test: attempt to modify audit log → detected/blocked
 - Log export test: export → import into Splunk/Elastic → data is queryable
-- PCI verification: scan all logs/databases for raw PAN → zero results
 
-**Business justification:** GDPR fines can reach 4% of annual revenue or EUR 20M. PCI non-compliance can result in fines up to $100K/month. Any company dealing with EU citizens needs GDPR compliance. Any company handling card data needs PCI documentation. Compliance reporting is the difference between "developer tool" and "enterprise infrastructure" — and it justifies $99+/month enterprise pricing. This is also a trust signal: documented compliance tells enterprises that Anima takes data seriously.
+**Business justification:** GDPR fines can reach 4% of annual revenue or EUR 20M. Any company dealing with EU citizens needs GDPR compliance. Compliance reporting is the difference between "developer tool" and "enterprise infrastructure" — and it justifies $99+/month enterprise pricing. This is also a trust signal: documented compliance tells enterprises that Anima takes data seriously.
 
 ---
 
@@ -1548,7 +1507,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 **What to build:**
 
 **Phased approach:**
-- **D4a (start after Phase A):** Go SDK v1 with core 10 resources matching current Python/Node SDK parity (agents, cards, domains, emails, messages, organizations, phones, security, vault, webhooks)
+- **D4a (start after Phase A):** Go SDK v1 with core 9 resources matching current Python/Node SDK parity (agents, domains, emails, messages, organizations, phones, security, vault, webhooks)
 - **D4b (start after Phase C):** Go SDK v2 adding identity, wallet, registry, a2a, address resources
 
 1. **SDK architecture (D4a scope):**
@@ -1560,7 +1519,6 @@ Anima is a unified agent identity infrastructure platform combining email, phone
        anima.go          (Client struct, constructor)
        option.go         (functional options)
        agents.go         (AgentService)
-       cards.go          (CardService)
        domains.go        (DomainService)
        emails.go         (EmailService)
        messages.go       (MessageService)
@@ -1615,7 +1573,7 @@ Anima is a unified agent identity infrastructure platform combining email, phone
 
 **Ready criteria:**
 - `go get github.com/anima-labs/anima-go` works
-- All resources implemented (agents, cards, domains, emails, messages, orgs, phones, security, vault, webhooks, addresses, wallet, registry, identity, a2a)
+- All resources implemented (agents, domains, emails, messages, orgs, phones, security, vault, webhooks, addresses, wallet, registry, identity, a2a)
 - Webhook signature verification works
 - Error types match Python/TypeScript SDKs
 - godoc is comprehensive
@@ -1701,7 +1659,7 @@ Phase B (Developer Experience) — starts after Phase A core
 Phase C (Identity & Commerce) — design parallel with A, implement after A
   ├─ C1 Identity Protocol ──────── no deps (new protocol)
   ├─ C2 Agent Registry ─────────── depends on C1 (DIDs, Agent Cards)
-  ├─ C3 Agent Wallet ────────────── depends on A (stable cards), C1 (DID for wallet)
+  ├─ C3 Agent Wallet ────────────── depends on A (stable API), C1 (DID for wallet)
   ├─ C4a OAuth Vault Core ────────── no deps (extends existing vault)
   ├─ C4b Secrets Injection ──────── depends on C4a
   ├─ C5 Multi-Tenancy (Pods) ──── depends on A (stable API); should implement before/concurrently with B3, C3, C4 to avoid retrofitting pod scoping
@@ -1739,7 +1697,6 @@ Phase D (Enterprise) — starts after Phase A
 | DID method registration rejected | High | Low | Follow W3C process, engage community early |
 | SOC 2 audit finds critical gaps | High | Medium | Start compliance prep in Phase A, use automation platform |
 | Competitor ships unified platform first | High | Medium | Parallel tracks (Approach B) accelerates identity protocol |
-| Stripe Issuing limits block card scaling | Medium | Medium | Evaluate alternative issuers (Marqeta, Lithic) as backup |
 | Telnyx shared profile compliance issue | Medium | High | Migrate to per-customer profiles before >50 orgs (documented in BUSINESS_PLAN) |
 | Protocol adoption is slow | Medium | Medium | Open-source spec, engage AAIF, submit IETF draft |
 | Python SDK name collision on PyPI | Low | Medium | Check availability early, have backup names |
@@ -1754,12 +1711,9 @@ Phase D (Enterprise) — starts after Phase A
 - **A2A:** Agent-to-Agent protocol — Google-originated standard for agent discovery and communication
 - **MCP:** Model Context Protocol — Anthropic-originated standard for agent-tool integration
 - **KYA:** Know Your Agent — verification process linking agents to responsible humans/orgs
-- **KYB:** Know Your Business — business identity verification (via Stripe Connect in Anima)
 - **x402:** HTTP payment protocol using 402 status code — Coinbase/Cloudflare standard
 - **AP2:** Agents-to-Payments Protocol — Originally developed by Google, open protocol for agent commerce with 60+ partners (PayPal, Coinbase, Mastercard, etc.). May be contributed to AAIF/Linux Foundation.
 - **ANS:** Agent Name Service — IETF draft for DNS-like agent discovery
 - **AAIF:** Agentic AI Foundation — Linux Foundation body stewarding MCP, A2A, goose
 - **Pod:** Isolated tenant container within an organization (multi-tenancy unit)
-- **AVS:** Address Verification System — card network fraud prevention via billing address matching
 - **DSAR:** Data Subject Access Request — GDPR right to access personal data
-- **SAQ-A:** PCI Self-Assessment Questionnaire type A — for merchants delegating all card processing

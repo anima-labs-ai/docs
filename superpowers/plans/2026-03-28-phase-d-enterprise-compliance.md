@@ -93,7 +93,7 @@ Contracts: `listControls`, `getControl`, `updateControlStatus`, `seedFramework`,
 
 - [ ] **Step 1: Create anomaly-related Prisma models**
 
-AgentBaseline: agentId, orgId, metric (email_send_rate/sms_send_rate/card_txn_count/vault_access_rate/api_call_rate/unique_recipients), period (hourly/daily), mean, stddev, sampleCount, hourlyPattern (Json), windowStart, windowEnd. Unique on [agentId, metric, period].
+AgentBaseline: agentId, orgId, metric (email_send_rate/sms_send_rate/vault_access_rate/api_call_rate/unique_recipients), period (hourly/daily), mean, stddev, sampleCount, hourlyPattern (Json), windowStart, windowEnd. Unique on [agentId, metric, period].
 
 AnomalyAlert: orgId, agentId, metric, severity (INFO/WARNING/CRITICAL), status (TRIGGERED/ACKNOWLEDGED/RESOLVED/FALSE_POSITIVE), baselineValue, actualValue, zScore, ruleId, details (Json), acknowledgedBy/At, resolvedBy/At.
 
@@ -187,12 +187,12 @@ Contracts: alerts (list/get/acknowledge/resolve/false-positive), rules (CRUD), b
 ## Task 8: Go SDK Resource Services (D4a — Part 2)
 
 **Files:**
-- Create: `go/agents.go`, `go/cards.go`, `go/domains.go`, `go/emails.go`, `go/messages.go`, `go/organizations.go`, `go/phones.go`, `go/security.go`, `go/vault.go`, `go/webhooks.go`
+- Create: `go/agents.go`, `go/domains.go`, `go/emails.go`, `go/messages.go`, `go/organizations.go`, `go/phones.go`, `go/security.go`, `go/vault.go`, `go/webhooks.go`
 - Create: tests and examples
 
 - [ ] **Step 1: Create Agent and Organization services**
 - [ ] **Step 2: Create messaging services** (Email, Messages, Domains)
-- [ ] **Step 3: Create Cards, Phones, Vault, Security services**
+- [ ] **Step 3: Create Phones, Vault, Security services**
 - [ ] **Step 4: Create Webhook service and examples**
 - [ ] **Step 5: CI, linting, README**
 

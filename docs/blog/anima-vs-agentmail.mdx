@@ -1,6 +1,6 @@
 ---
 title: "Anima vs AgentMail: Why You Need More Than Just Email"
-description: "AgentMail provides email for AI agents. Anima provides email plus phone, cards, vault, and cryptographic identity. Here is when to use each."
+description: "AgentMail provides email for AI agents. Anima provides email plus phone, vault, and cryptographic identity. Here is when to use each."
 date: "2026-03-28"
 author: "Anima Team"
 tags: ["comparison", "agentmail", "email", "identity"]
@@ -12,10 +12,9 @@ AgentMail does one thing and does it well: email for AI agents. If all your agen
 
 ## The Problem with Email-Only
 
-Consider a customer support agent. It receives a complaint via email, looks up the order, processes a refund, sends an SMS confirmation, and logs into the merchant portal to update the ticket. That workflow touches:
+Consider a customer support agent. It receives a complaint via email, looks up the order, sends an SMS confirmation, and logs into the merchant portal to update the ticket. That workflow touches:
 
 - **Email** (receive complaint, send resolution)
-- **Cards/Payments** (process refund)
 - **Phone** (send SMS confirmation)
 - **Vault** (store merchant portal credentials)
 - **Identity** (prove to the merchant portal that it is an authorized agent)
@@ -31,8 +30,6 @@ With AgentMail, you get step one. The rest requires separate integrations with s
 | Inbound webhooks | Yes | Yes |
 | Content scanning | Basic | Dual-layer (regex + AI) |
 | Phone numbers (SMS/voice) | No | Yes |
-| Virtual debit cards | No | Yes |
-| Spending controls & MCC filtering | No | Yes |
 | Encrypted credential vault | No | Yes (Bitwarden-backed) |
 | DID-based identity | No | Yes (did:anima) |
 | Verifiable Credentials | No | Yes (W3C VC) |
@@ -50,7 +47,7 @@ With AgentMail, you get step one. The rest requires separate integrations with s
 AgentMail is a reasonable choice if:
 
 - Your agent only sends and receives email
-- You do not need payment, phone, or identity capabilities
+- You do not need phone or identity capabilities
 - You are building a prototype and email is the only channel
 - You prefer a narrowly scoped vendor for email specifically
 
@@ -58,11 +55,11 @@ AgentMail is a reasonable choice if:
 
 Anima is the right choice when:
 
-- Your agent operates across multiple channels (email + phone + payments)
+- Your agent operates across multiple channels (email + phone)
 - You need cryptographic identity for agent-to-agent trust
 - Your compliance requirements demand audit trails across all agent actions
-- You want a single SDK instead of integrating 4-5 separate services
-- You need spending controls, vault storage, or policy enforcement
+- You want a single SDK instead of integrating multiple separate services
+- You need vault storage or policy enforcement
 
 ## Code Comparison
 
@@ -84,7 +81,7 @@ await client.send({
 ### Anima: Full agent workflow
 
 ```ts
-// Anima — email + SMS + card + vault in one SDK
+// Anima — email + SMS + vault in one SDK
 import { Anima } from "@anima-labs/sdk";
 
 const anima = new Anima({ apiKey: "ak_..." });
@@ -105,15 +102,6 @@ await anima.phone.sendSms({
   body: "Refund of $45.00 processed. Check your email for details.",
 });
 
-// Issue a one-time card for the refund payment
-const card = await anima.cards.create({
-  agentId: agent.id,
-  label: "Refund #4821",
-  currency: "usd",
-  spendLimitDaily: 45_00,
-  spendLimitPerAuth: 45_00,
-});
-
 // Store the case credentials for follow-up
 await anima.vault.createCredential({
   agentId: agent.id,
@@ -122,7 +110,6 @@ await anima.vault.createCredential({
   notes: JSON.stringify({
     orderId: "ORD-9921",
     refundAmount: 4500,
-    cardLast4: card.last4,
   }),
 });
 ```
@@ -131,9 +118,9 @@ Same agent. Same API key. No glue code between vendors.
 
 ## The Unified Identity Advantage
 
-The deeper issue with using AgentMail alongside other point solutions is identity fragmentation. Your agent has one identity in AgentMail, another in your card provider, another in your phone service. There is no single source of truth for "who is this agent and what is it authorized to do?"
+The deeper issue with using AgentMail alongside other point solutions is identity fragmentation. Your agent has one identity in AgentMail, another in your phone service. There is no single source of truth for "who is this agent and what is it authorized to do?"
 
-With Anima, every agent gets a `did:anima` identifier that spans all capabilities. The policy engine enforces rules across email, phone, cards, and payments from a single configuration. Audit logs capture every action across every channel in one place.
+With Anima, every agent gets a `did:anima` identifier that spans all capabilities. The policy engine enforces rules across email and phone from a single configuration. Audit logs capture every action across every channel in one place.
 
 This matters for compliance. When an auditor asks "what did agent X do last month?", you query one system — not five.
 
@@ -144,13 +131,13 @@ If you are already on AgentMail and want to move to Anima, the process is straig
 1. Install the Anima SDK alongside AgentMail
 2. Create agents in Anima and set up custom domains
 3. Migrate email sending calls from AgentMail's API to `anima.messages.send_email()`
-4. Add phone, card, and vault capabilities as needed
+4. Add phone and vault capabilities as needed
 5. Remove the AgentMail dependency
 
 The Anima email API is designed to be familiar. If you have used AgentMail, you will find the patterns similar — the main difference is that Anima uses `agentId` to scope everything to a unified agent identity.
 
 ## Bottom Line
 
-AgentMail is fine for email. But production agents do not just send email — they call, pay, authenticate, and prove their identity. Anima provides the full stack so you can build agents that operate in the real world without stitching together five different services.
+AgentMail is fine for email. But production agents do not just send email — they call, authenticate, and prove their identity. Anima provides the full stack so you can build agents that operate in the real world without stitching together multiple different services.
 
 [Get started with Anima](/docs/getting-started) | [See the full SDK reference](/docs/sdks)

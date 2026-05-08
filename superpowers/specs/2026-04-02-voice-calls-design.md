@@ -18,7 +18,7 @@
 
 ## 1. Executive Summary
 
-Anima is the only unified agent identity infrastructure platform combining email, phone (SMS), virtual cards, credential vault, and agent identity. Adding programmable voice calls closes the last major communication gap — agents that can already email and text will now be able to call and be called.
+Anima is the only unified agent identity infrastructure platform combining email, phone (SMS), credential vault, and agent identity. Adding programmable voice calls closes the last major communication gap — agents that can already email and text will now be able to call and be called.
 
 **What we're building:** A two-tier voice call system where AI agents send and receive phone calls using a text-in/text-out WebSocket interface. The agent never touches audio — Anima handles all speech-to-text (STT) and text-to-speech (TTS) conversion.
 
@@ -28,7 +28,7 @@ Anima is the only unified agent identity infrastructure platform combining email
 
 **Beyond calls:** Voice calls generate rich data. We'll build call intelligence features — recording, transcription, RAG search, scoring, vulnerability detection, and summarization — that make every call a searchable, scorable, auditable asset.
 
-**Competitive edge:** No competitor offers voice calls + email + SMS + virtual cards + vault under one platform. AgentPhone does voice-only. Bland AI, Vapi, and Retell are voice-only platforms. Anima is the unified play, and adding voice is the piece that completes the communication stack.
+**Competitive edge:** No competitor offers voice calls + email + SMS + vault under one platform. AgentPhone does voice-only. Bland AI, Vapi, and Retell are voice-only platforms. Anima is the unified play, and adding voice is the piece that completes the communication stack.
 
 **Additional scope:** Remove all Twilio code from the phone package (Telnyx-only going forward).
 
@@ -75,14 +75,14 @@ Every competitor solves one slice:
 - Vapi/Retell/Bland = voice only
 - Agentmail = email only
 
-Anima offers: Email + SMS + Voice + Virtual Cards + Credential Vault + Agent Identity + Compliance — all under one API key, one SDK, one MCP server.
+Anima offers: Email + SMS + Voice + Credential Vault + Agent Identity + Compliance — all under one API key, one SDK, one MCP server.
 
 **Voice-specific differentiators we will build:**
 
 1. **MCP-native voice calls** — AgentPhone has MCP, but no one else does. We already have 350+ MCP tools. Adding voice MCP tools extends our lead.
 2. **Two-tier pricing** — No competitor offers tiered voice quality. Vapi lets you pick providers but doesn't package it as tiers. Our Basic/Premium model is simpler for developers and enables price discrimination.
 3. **Call intelligence built-in** — Most competitors offer recordings + transcripts and stop there. We'll offer RAG search, scoring, vulnerability detection, auto-summarization, and compliance scanning. This is what enterprises pay for.
-4. **Cross-channel intelligence** — A voice call can reference an email thread. A card transaction can trigger a voice call. No competitor can connect these dots because they only have one channel.
+4. **Cross-channel intelligence** — A voice call can reference an email thread. No competitor can connect these dots because they only have one channel.
 5. **Agent-scoped security** — PII leakage detection, prompt injection via voice, social engineering detection. No voice platform does this today. It's the #1 enterprise concern for AI agent adoption.
 
 ### 2.3. Target Customers
@@ -93,8 +93,8 @@ Anima offers: Email + SMS + Voice + Virtual Cards + Credential Vault + Agent Ide
 - **Customer support agents** — receive inbound calls, resolve issues, escalate to humans when needed
 - **Sales agents** — make outbound calls, qualify leads, book meetings
 - **Operations agents** — appointment reminders, order confirmations, delivery updates
-- **Financial agents** — fraud alerts, payment confirmations, account notifications (using voice + cards together)
-- **Multi-channel agents** — follow up an email with a phone call, confirm a card transaction via voice
+- **Operations agents** — fraud alerts, account notifications, scheduling reminders
+- **Multi-channel agents** — follow up an email with a phone call
 
 ### 2.4. Pricing Strategy
 
@@ -169,7 +169,7 @@ Anima offers: Email + SMS + Voice + Virtual Cards + Credential Vault + Agent Ide
 | **Total monthly cost** | **$34,232** |
 | **Gross margin** | **56%** |
 
-*Note: This is voice revenue only. Anima's total revenue includes email, SMS, cards, and vault usage across the same customer base.*
+*Note: This is voice revenue only. Anima's total revenue includes email, SMS, and vault usage across the same customer base.*
 
 ### 2.6. Go-to-Market
 
@@ -1118,7 +1118,7 @@ async for call in async_anima.calls.list(limit=100):
 
 **2. Idempotency Keys**
 
-Critical for financial operations (cards, wallet) and now call creation. Prevents duplicate calls on retries.
+Critical for financial operations (wallet) and now call creation. Prevents duplicate calls on retries.
 
 ```typescript
 const call = await anima.calls.create(
@@ -1679,16 +1679,14 @@ This phase restructures the monolithic MCP server into domain-specific servers a
    - Publish as `@anima-labs/mcp-email`
 3. Create `mcp-phone/` — phone SMS + voice tools (~25 tools, including new voice tools)
    - Publish as `@anima-labs/mcp-phone`
-4. Create `mcp-cards/` — cards, wallet, funding, invoice, browser-payments, x402 tools (~35 tools)
-   - Publish as `@anima-labs/mcp-cards`
-5. Create `mcp-vault/` — vault, security tools (~15 tools)
+4. Create `mcp-vault/` — vault, security tools (~15 tools)
    - Publish as `@anima-labs/mcp-vault`
-6. Create `mcp-platform/` — utility, webhook, pod, compliance, anomaly tools (~20 tools)
+5. Create `mcp-platform/` — utility, webhook, pod, compliance, anomaly tools (~20 tools)
    - Publish as `@anima-labs/mcp-platform`
-7. Update `@anima-labs/mcp` meta-package to import all sub-packages (backwards compatible)
-8. Verify `npx @anima-labs/mcp --tools=phone,email` still works
-9. Write tests for each sub-server
-10. Commit: "Split MCP into 6 domain-specific servers"
+6. Update `@anima-labs/mcp` meta-package to import all sub-packages (backwards compatible)
+7. Verify `npx @anima-labs/mcp --tools=phone,email` still works
+8. Write tests for each sub-server
+9. Commit: "Split MCP into domain-specific servers"
 
 #### V5.3. Add Voice MCP Tools to mcp-phone (Day 5-6) [✓]
 
@@ -1709,11 +1707,10 @@ This phase restructures the monolithic MCP server into domain-specific servers a
 **Tasks:**
 1. Create `Dockerfile` for each MCP server (lightweight, Bun runtime)
 2. Create `cloudbuild.yaml` for MCP deployment pipeline
-3. Deploy 6 Cloud Run services:
+3. Deploy Cloud Run services:
    - `mcp-agent.anima.com` or `mcp.anima.com/agent`
    - `mcp-email.anima.com` or `mcp.anima.com/email`
    - `mcp-phone.anima.com` or `mcp.anima.com/phone`
-   - `mcp-cards.anima.com` or `mcp.anima.com/cards`
    - `mcp-vault.anima.com` or `mcp.anima.com/vault`
    - `mcp-platform.anima.com` or `mcp.anima.com/platform`
 4. Configure Cloud Run:
@@ -1878,7 +1875,7 @@ This phase restructures the monolithic MCP server into domain-specific servers a
 **Tasks:**
 1. `examples/voice-customer-support/` — inbound support agent (Node + Python)
 2. `examples/voice-outbound-sales/` — outbound sales caller with CRM integration
-3. `examples/voice-appointment-reminder/` — outbound notification with card payment
+3. `examples/voice-appointment-reminder/` — outbound notification
 4. `examples/multi-channel-agent/` — email + SMS + voice combined workflow
 5. `examples/voice-mcp-claude/` — Claude Desktop making phone calls via MCP
 6. Update main README with voice capabilities and new SDK features
@@ -1909,7 +1906,6 @@ The current MCP server (`@anima-labs/mcp`) has grown to **162 tools across 21 gr
 | **@anima-labs/mcp-agent** | `mcp-agent` | ~25 | agent, organization, identity, registry, a2a |
 | **@anima-labs/mcp-email** | `mcp-email` | ~30 | email, message, domain, address |
 | **@anima-labs/mcp-phone** | `mcp-phone` | ~25 | phone (SMS + Voice), webhook (phone-specific) |
-| **@anima-labs/mcp-cards** | `mcp-cards` | ~35 | cards, wallet, funding, invoice, browser-payments, x402 |
 | **@anima-labs/mcp-vault** | `mcp-vault` | ~15 | vault, security |
 | **@anima-labs/mcp-platform** | `mcp-platform` | ~20 | utility, webhook, pod, compliance, anomaly |
 
@@ -1919,7 +1915,6 @@ The current MCP server (`@anima-labs/mcp`) has grown to **162 tools across 21 gr
 # Install only what you need
 npx @anima-labs/mcp-phone          # Just phone (SMS + voice)
 npx @anima-labs/mcp-email          # Just email
-npx @anima-labs/mcp-cards          # Just cards + payments
 ```
 
 **Meta-package for everything:**
@@ -1946,7 +1941,6 @@ All MCP servers share the same core infrastructure (extracted to `@anima-labs/mc
   ├── @anima-labs/mcp-agent
   ├── @anima-labs/mcp-email
   ├── @anima-labs/mcp-phone   ← Voice tools land here
-  ├── @anima-labs/mcp-cards
   ├── @anima-labs/mcp-vault
   └── @anima-labs/mcp-platform
 ```
@@ -2002,7 +1996,6 @@ INBOUND_ACCEPT_TIMEOUT_MS=15000       # How long to wait for agent to accept
 - `mcp-agent/` — agent MCP server (~8 files)
 - `mcp-email/` — email MCP server (~8 files)
 - `mcp-phone/` — phone + voice MCP server (~10 files)
-- `mcp-cards/` — cards MCP server (~10 files)
 - `mcp-vault/` — vault MCP server (~6 files)
 - `mcp-platform/` — platform MCP server (~8 files)
 
@@ -2059,7 +2052,6 @@ INBOUND_ACCEPT_TIMEOUT_MS=15000       # How long to wait for agent to accept
 | **Voice calls** | Yes (2 tiers) | Yes | Yes | Yes | Yes |
 | **Email** | Yes | No | No | No | No |
 | **SMS** | Yes | Yes | No | No | No |
-| **Virtual cards** | Yes | No | No | No | No |
 | **Credential vault** | Yes | No | No | No | No |
 | **Agent identity** | Yes | No | No | No | No |
 | **MCP tools** | 360+ | 26 | 0 | 0 | 0 |

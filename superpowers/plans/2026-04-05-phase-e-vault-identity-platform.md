@@ -104,7 +104,6 @@
 **Files:**
 - Modify: `anima/apps/api/src/routes/handlers/email.ts`
 - Modify: `anima/apps/api/src/routes/handlers/phone.ts`
-- Modify: `anima/apps/api/src/routes/handlers/cards.ts`
 - Create: `anima/packages/vault/src/credential-resolver.ts`
 - Create: `anima/packages/vault/src/__tests__/credential-resolver.test.ts`
 
@@ -125,19 +124,14 @@
   - Auto-resolve `api_key` credentials with provider matching `telnyx` or `twilio`
   - Fall back to platform credentials if no agent-specific ones found
 
-- [ ] **Step 4: Wire vault to cards service**
-  - For browser-based payment flows, vault can provide card details for autofill
-  - Wire `card` credential type to card service for automated payment scenarios
-  - Audit log: record credential usage for card operations
-
-- [ ] **Step 5: Write integration tests**
+- [ ] **Step 4: Write integration tests**
   - Test: store SMTP credential → send email → verify credential was used from vault
   - Test: store API key → make phone call → verify API key was used
   - Test: fallback to platform credentials when no vault credential exists
 
-**Acceptance criteria:** Vault credentials are automatically consumed by email, phone, and cards services. Audit trail records each cross-module credential usage.
+**Acceptance criteria:** Vault credentials are automatically consumed by email and phone services. Audit trail records each cross-module credential usage.
 
-**Git commit:** `feat(vault): wire vault credentials to email, phone, and cards services`
+**Git commit:** `feat(vault): wire vault credentials to email and phone services`
 
 ---
 
@@ -481,12 +475,12 @@
 - Create: `anima/apps/api/src/__tests__/integration/vault-analytics.test.ts`
 
 - [ ] **Step 1: Add AgentBehaviorProfile model to Prisma schema**
-  - Fields: id, orgId, agentId (unique), emailPattern (vector(256)), phonePattern (vector(256)), spendPattern (vector(256)), vaultPattern (vector(256)), compositePattern (vector(256)), riskScore (float), riskFactors (Json), lastAnomalyAt, anomalyCount, emailsLast24h, callsLast24h, spendsLast24h, vaultAccessLast24h, updatedAt
+  - Fields: id, orgId, agentId (unique), emailPattern (vector(256)), phonePattern (vector(256)), vaultPattern (vector(256)), compositePattern (vector(256)), riskScore (float), riskFactors (Json), lastAnomalyAt, anomalyCount, emailsLast24h, callsLast24h, vaultAccessLast24h, updatedAt
   - Create migration with pgvector extension
 
 - [ ] **Step 2: Create analytics worker**
   - BullMQ worker running every 5 minutes
-  - Aggregates events from: Message (email), CallRecord (phone), CardTransaction (cards), CredentialAuditLog (vault)
+  - Aggregates events from: Message (email), CallRecord (phone), CredentialAuditLog (vault)
   - Builds behavioral feature vectors per agent
   - Computes composite risk score using existing anomaly detection (from Phase D) + cross-channel correlation
   - Stores embeddings in pgvector for similarity search
@@ -604,7 +598,7 @@
 
 - [ ] **Step 6: Implement userinfo endpoint**
   - `GET /oauth/userinfo` — returns agent identity details
-  - Fields: sub, email, phone, did, org, name, capabilities, vault_access, card_access
+  - Fields: sub, email, phone, did, org, name, capabilities, vault_access
 
 - [ ] **Step 7: Write tests**
   - Unit: JWT signing and verification

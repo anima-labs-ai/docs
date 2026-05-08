@@ -35,8 +35,8 @@ const anima = new Anima({ apiKey: "ak_..." });
 // Query audit events
 const events = await anima.auditLog.query({
   agentId: "ag_8f3k2m9x1n4p7q6r",
-  category: "cards",
-  action: "authorize",
+  category: "email",
+  action: "send",
   startTime: "2026-03-01T00:00:00Z",
   endTime: "2026-03-28T23:59:59Z",
   limit: 50,
@@ -58,8 +58,8 @@ anima = Anima(api_key="ak_...")
 
 events = anima.audit_log.query(
     agent_id="ag_8f3k2m9x1n4p7q6r",
-    category="cards",
-    action="authorize",
+    category="email",
+    action="send",
     start_time="2026-03-01T00:00:00Z",
     end_time="2026-03-28T23:59:59Z",
     limit=50,
@@ -79,8 +79,8 @@ client := anima.NewClient("ak_...")
 
 events, err := client.AuditLog.Query(ctx, &anima.AuditLogQueryParams{
     AgentID:   "ag_8f3k2m9x1n4p7q6r",
-    Category:  "cards",
-    Action:    "authorize",
+    Category:  "email",
+    Action:    "send",
     StartTime: "2026-03-01T00:00:00Z",
     EndTime:   "2026-03-28T23:59:59Z",
     Limit:     50,
@@ -95,22 +95,21 @@ events, err := client.AuditLog.Query(ctx, &anima.AuditLogQueryParams{
 {
   "id": "evt_9x2m4k7p1n",
   "timestamp": "2026-03-15T14:32:01.234Z",
-  "category": "cards",
-  "action": "authorize",
+  "category": "email",
+  "action": "send",
   "actorId": "ag_8f3k2m9x1n4p7q6r",
   "actorType": "agent",
-  "resourceType": "card",
-  "resourceId": "card_abc123",
+  "resourceType": "message",
+  "resourceId": "msg_abc123",
   "podId": "pod_prod",
   "metadata": {
-    "amountCents": 4999,
-    "merchantName": "AWS",
-    "merchantMcc": "5734",
-    "decision": "approved",
+    "to": "ops@example.com",
+    "subject": "Deploy complete",
+    "decision": "delivered",
     "ruleEvaluations": [
-      { "rule": "per_transaction_limit", "result": "pass" },
-      { "rule": "daily_limit", "result": "pass" },
-      { "rule": "mcc_allowlist", "result": "pass" }
+      { "rule": "per_minute_rate_limit", "result": "pass" },
+      { "rule": "daily_send_quota", "result": "pass" },
+      { "rule": "domain_allowlist", "result": "pass" }
     ]
   },
   "ipAddress": "10.0.1.42",
@@ -176,7 +175,7 @@ print(f"Export job: {export_job.id}, Status: {export_job.status}")
 | -------------- | ------ | ---------------------------------------------------- |
 | `agentId`      | string | Filter by agent                                      |
 | `podId`        | string | Filter by pod                                        |
-| `category`     | string | Filter by category (e.g., `cards`, `email`, `auth`)  |
+| `category`     | string | Filter by category (e.g., `email`, `phone`, `vault`, `auth`)  |
 | `action`       | string | Filter by specific action                            |
 | `startTime`    | string | ISO 8601 start time                                  |
 | `endTime`      | string | ISO 8601 end time                                    |

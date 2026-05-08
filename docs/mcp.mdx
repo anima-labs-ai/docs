@@ -5,16 +5,15 @@ description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP cl
 
 # MCP Servers
 
-Anima exposes over 77 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, virtual cards, vault, phone, voice calls, and more.
+Anima exposes specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, and more.
 
-Tools are organized into **6 domain servers**, so you can install only what you need:
+Tools are organized into domain servers, so you can install only what you need:
 
 | Server | Package | Description |
 |--------|---------|-------------|
 | **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations, identity, registry, A2A |
 | **Email** | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
 | **Phone** | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
-| **Cards** | `@anima-labs/mcp-cards` | Virtual cards, wallet, funding, invoices, browser payments, x402 |
 | **Vault** | `@anima-labs/mcp-vault` | Encrypted credential storage, security policies |
 | **Platform** | `@anima-labs/mcp-platform` | Webhooks, pods, utilities |
 
@@ -191,16 +190,6 @@ anima setup-mcp install --all --server all
 | **Phone** | provision, list, get, release | Phone number management |
 | **Voice** | call, list-calls, get-call, hangup | Voice call operations |
 
-### mcp-cards
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Cards** | create, list, get, freeze, close, policies | Virtual card issuing |
-| **Wallet** | balance, list-transactions | Wallet operations |
-| **Funding** | list, create | Funding source management |
-| **Invoice** | create, list, match | Invoice tracking |
-| **Browser Payments** | detect, fill, pay | Automated checkout |
-| **x402** | payment protocols | HTTP 402 payment protocol |
-
 ### mcp-vault
 | Category | Tools | Description |
 |----------|-------|-------------|
@@ -223,8 +212,6 @@ The original monolith `@anima-labs/mcp` package is still supported but deprecate
 Once connected, ask your AI assistant natural language questions:
 
 - "Send an email from my agent to user@example.com" → **mcp-email**
-- "Create a virtual card with a $50 daily limit" → **mcp-cards**
 - "Store my CRM login credentials in the vault" → **mcp-vault**
 - "Make a voice call to +1-555-0123" → **mcp-phone**
-- "List all transactions on card **** 4242" → **mcp-cards**
 - "Register my agent in the public registry" → **mcp-agent**

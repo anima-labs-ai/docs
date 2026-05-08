@@ -30,7 +30,7 @@
 2. **Python SDK**: `_build_url()` in `_http.py` builds `{base_url}{path}` → missing `/api`
 3. **Go SDK**: `buildURL()` in `http.go` builds `{baseURL}{path}` → missing `/api`
 4. **CLI**: All commands hardcode `/api/v1/{resource}` paths → should be `/api/{resource}`
-5. **MCP**: Mixed — agent/email tools use `/{resource}` (missing `/api`), card tools use `/api/v1/{resource}` (extra `/v1`)
+5. **MCP**: Mixed — agent/email tools use `/{resource}` (missing `/api`), some tools use `/api/v1/{resource}` (extra `/v1`)
 
 ### P1 — Email send returns 500
 
@@ -59,7 +59,7 @@
 | `cli/src/lib/api-client.ts:53` | Add `/api` prefix in request method (centralized fix) |
 | `cli/src/commands/**/*.ts` (~67 files) | Strip `/api/v1/` → bare paths (e.g., `/agents`) |
 | `mcp/src/api-client.ts:58` | Add `/api` prefix in request method (centralized fix) |
-| `mcp/src/tools/{cards,funding,invoice}/*.ts` (3 files) | Strip `/api/v1/` → bare paths |
+| `mcp/src/tools/invoice/*.ts` | Strip `/api/v1/` → bare paths |
 | `anima/apps/api/src/routes/router-utils.ts:2415` | Wrap SES call in try-catch |
 
 ### Files to Test
@@ -266,11 +266,11 @@ git commit -m "fix(cli): centralize /api prefix in api-client, strip /api/v1/ fr
 
 ### Task 6: Fix MCP tool route prefixes (centralized fix)
 
-**Approach:** Like the SDK and CLI fixes, add `/api` in the MCP's central `api-client.ts`. Most tools (17 files) already use bare paths like `/agents` — these will just work. Only 3 files (cards, funding, invoice) use `/api/v1/` and need to be stripped to bare paths.
+**Approach:** Like the SDK and CLI fixes, add `/api` in the MCP's central `api-client.ts`. Most tools already use bare paths like `/agents` — these will just work. A few files use `/api/v1/` and need to be stripped to bare paths.
 
 **Files:**
 - Modify: `mcp/src/api-client.ts:58` (centralized fix)
-- Modify: `mcp/src/tools/cards/index.ts`, `mcp/src/tools/funding/index.ts`, `mcp/src/tools/invoice/index.ts` (strip `/api/v1/`)
+- Modify: `mcp/src/tools/invoice/index.ts` (strip `/api/v1/`)
 
 - [ ] **Step 1: Add /api prefix in mcp/src/api-client.ts**
 
@@ -285,8 +285,8 @@ const url = `${this.baseUrl}/api${path}`;
 - [ ] **Step 2: Strip /api/v1/ from the 3 affected files**
 
 ```bash
-# Cards, funding, and invoice tools use /api/v1/ — strip to bare paths
-sed -i '' 's|/api/v1/|/|g' mcp/src/tools/cards/index.ts mcp/src/tools/funding/index.ts mcp/src/tools/invoice/index.ts
+# Invoice tools use /api/v1/ — strip to bare paths
+sed -i '' 's|/api/v1/|/|g' mcp/src/tools/invoice/index.ts
 ```
 
 - [ ] **Step 3: Verify — check /health endpoint is handled**

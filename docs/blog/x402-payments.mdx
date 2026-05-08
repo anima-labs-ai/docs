@@ -199,20 +199,6 @@ console.log(`Spent today: $${balance.spentTodayCents / 100}`);
 console.log(`Spent this month: $${balance.spentMonthCents / 100}`);
 ```
 
-## x402 vs Virtual Cards
-
-Anima supports both x402 payments and virtual card issuing. They serve different use cases:
-
-| | x402 Payments | Virtual Cards |
-|---|---|---|
-| **Best for** | API payments, agent-to-agent, digital services | E-commerce, SaaS subscriptions, merchant payments |
-| **Protocol** | HTTP-native (402 status code) | Standard card rails (Visa/Mastercard) |
-| **Speed** | Milliseconds | Standard card authorization |
-| **Integration** | Zero integration on the agent side | Works with any merchant that accepts cards |
-| **Granularity** | Per-request pricing | Per-transaction limits |
-
-Many agents use both: x402 for API-to-API payments and virtual cards for merchant purchases. Both are governed by the same policy engine and appear in the same audit log.
-
 ## Security and Monitoring
 
 Payments are the highest-risk action an agent can take. Anima layers multiple controls:
@@ -228,7 +214,7 @@ Every payment passes through the policy engine before execution. Beyond budget g
 
 ### Anomaly Detection
 
-Anima's anomaly detection monitors spending patterns across all payment channels (x402 and cards). It flags unusual activity:
+Anima's anomaly detection monitors x402 payment patterns. It flags unusual activity:
 
 - Sudden increase in payment frequency
 - Payments to new vendors outside the agent's normal pattern

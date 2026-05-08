@@ -34,14 +34,6 @@ await anima.messages.sendEmail({
   subject: "Hello",
   body: "Sent by an AI agent",
 });
-
-// Issue a virtual card
-const card = await anima.cards.create({
-  agentId: agent.id,
-  label: "Research Card",
-  currency: "usd",
-  spendLimitDaily: 50000,
-});
 ```
 
 ## Python
@@ -71,14 +63,6 @@ anima.messages.send_email(
     subject="Hello",
     body="Sent by an AI agent",
 )
-
-# Issue a virtual card
-card = anima.cards.create(
-    agent_id=agent.id,
-    label="Research Card",
-    currency="usd",
-    spend_limit_daily=50000,
-)
 ```
 
 ### Async Usage
@@ -99,7 +83,6 @@ Both SDKs expose the same set of resources:
 | `agents` | Create and manage AI agents |
 | `messages` | Send and receive email messages |
 | `inboxes` | Manage email inboxes |
-| `cards` | Issue and manage virtual cards |
 | `vault` | Store and retrieve encrypted credentials |
 | `phone` | Manage phone numbers |
 | `webhooks` | Subscribe to real-time events |

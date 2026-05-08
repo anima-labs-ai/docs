@@ -1,11 +1,11 @@
 ---
 title: "Go SDK"
-description: "Quickstart and reference for the Anima Go SDK. Manage agents, email, cards, vault, identity, and A2A from Go applications."
+description: "Quickstart and reference for the Anima Go SDK. Manage agents, email, vault, identity, and A2A from Go applications."
 ---
 
 # Go SDK
 
-The official Anima Go SDK provides idiomatic Go access to the full Anima platform: agents, email, cards, vault, identity, wallet, registry, and A2A.
+The official Anima Go SDK provides idiomatic Go access to the full Anima platform: agents, email, vault, identity, registry, and A2A.
 
 ## Installation
 
@@ -127,29 +127,6 @@ messages, err := client.Messages.List(ctx, &anima.ListMessagesParams{
 
 // Get a message
 msg, err := client.Messages.Get(ctx, "msg_xyz789")
-```
-
-### Cards
-
-```go
-// Issue a card
-card, err := client.Cards.Create(ctx, &anima.CreateCardParams{
-    AgentID:        "ag_abc123",
-    Label:          "SaaS Subscriptions",
-    Currency:       "usd",
-    SpendLimitDaily: 50000, // cents
-})
-
-// Get card details
-card, err := client.Cards.Get(ctx, "card_abc123")
-
-// List transactions
-txns, err := client.Cards.ListTransactions(ctx, "card_abc123", &anima.ListTransactionsParams{
-    Limit: 20,
-})
-
-// Close a card
-err := client.Cards.Close(ctx, "card_abc123")
 ```
 
 ### Vault

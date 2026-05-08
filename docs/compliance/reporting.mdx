@@ -80,7 +80,7 @@ report, err := client.Compliance.Reports.Generate(ctx, &anima.GenerateReportPara
 | `agent-activity`      | Summary of agent actions, emails sent, transactions processed  |
 | `security-posture`    | Anomaly detection results, quarantine events, key rotations   |
 | `access-review`       | API key usage, permission changes, pod access                  |
-| `spending-summary`    | Wallet and card spending by agent, pod, and time period       |
+| `spending-summary`    | Wallet spending by agent, pod, and time period                |
 | `data-inventory`      | Inventory of data stored across vault, email, and attachments  |
 
 ## DSAR (Data Subject Access Requests)
@@ -137,7 +137,6 @@ When a DSAR is processed, data is collected across these categories:
 | Category           | Data Included                                           |
 | ------------------ | ------------------------------------------------------- |
 | `email_messages`   | Emails sent to or from the subject                     |
-| `card_transactions`| Transactions where the subject is the merchant/payee   |
 | `a2a_interactions` | A2A tasks involving the subject's agents               |
 | `audit_events`     | Audit log entries referencing the subject              |
 | `agent_metadata`   | Agent profiles associated with the subject             |

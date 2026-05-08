@@ -20,7 +20,5 @@ Docs site: https://docs.useanima.sh
 - Security
 - Encryption
 - Webhooks
-- KYB
-- Card Controls
 - Protocols
 - FAQ

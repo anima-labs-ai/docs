@@ -1,0 +1,72 @@
+---
+title: "Pricing & Limits"
+description: "Plan limits, phone/SMS/voice rates, MCP pricing, and call caps for Anima."
+---
+
+# Pricing & Limits
+
+The canonical pricing page is [useanima.sh/pricing](https://useanima.sh/pricing). Use this page as the docs summary for plan limits and phone/voice meters.
+
+## Plans
+
+| Plan | Price | Agent identities | Phone numbers | SMS | Voice minutes | Outbound calls | Vault |
+|------|-------|------------------|---------------|-----|---------------|----------------|-------|
+| Free | `$0/forever` | 3 | 1 local number | 10 out + 10 in / mo | 10 Basic min | 20 / mo hard cap | 20 credentials |
+| Starter | `$29/mo` | 25 | 1 included, then `$2/mo` each | 500 out + 500 in / mo | 100 Basic + 10 Premium min | 250 / mo | 500 credentials |
+| Growth | `$99/mo` | 100 | 3 included | 5K out + 5K in / mo | 500 Basic + 100 Premium min | 1,000 / mo | 5,000 credentials |
+| Scale | `$249/mo` | 500 | 10 included | 25K out + 25K in / mo | 1,500 Basic + 300 Premium min | 4,000 / mo | 25,000 credentials |
+| Enterprise | From `$999/mo + usage` | Unlimited | Pooled numbers | Negotiated | Negotiated | 20,000 / mo default | Negotiated |
+
+Free is hard-capped. Paid tiers use the unit rates below when usage exceeds the included quota.
+
+## Usage rate card
+
+| Meter | Rate | Notes |
+|-------|------|-------|
+| Email sent | `$0.50 / 1,000` | Inbound email is included. |
+| SMS sent, US 10DLC | `$0.015 / message` | Carrier and registration handling included in the published US rate. |
+| SMS received, US 10DLC | `$0.010 / message` | Applies to inbound replies. |
+| SMS sent, US toll-free | `$0.020 / message` | Toll-free numbers have separate carrier treatment. |
+| Voice, Basic | `$0.07 / min` | Promo through 2026-09-30. Steady-state `$0.08/min`. |
+| Voice, Premium | `$0.15 / min` | Promo through 2026-09-30. Steady-state `$0.18/min`. |
+| Phone number, US local | `$2 / mo each` | Above included quota. |
+| Phone number, US toll-free | `$3 / mo each` | Above included quota. |
+| Outbound voice calls | `$0.03 / call above included` | Includes the RND check cost. |
+| Vault stored credentials | `$0.001 / credential / mo` | Above tier cap. |
+| MCP tool calls | Included | No per-tool-call charge. |
+| Webhook deliveries | Included | Includes retry budget. |
+
+## Voice call caps
+
+Outbound voice calls are limited by both minutes and call count. The count cap exists because short-call loops can burn compliance checks before minute caps catch them.
+
+| Plan | Monthly outbound-call cap |
+|------|---------------------------|
+| Free | 20 |
+| Starter | 250 |
+| Growth | 1,000 |
+| Scale | 4,000 |
+| Enterprise | 20,000 default |
+
+Anima also enforces a per-second outbound-call rate limit to stop runaway loops.
+
+## Compliance gates
+
+Outbound calls run through server-side gates before dialing:
+
+- TCPA consent attestation
+- Reassigned Numbers Database checks
+- Time-of-day windows
+- Plan and monthly call caps
+
+If a gate blocks the call, the API rejects it before the telephony provider dials.
+
+## MCP pricing
+
+MCP access is included. You do not pay per MCP tool call. The underlying action can still consume a metered resource, such as SMS, voice minutes, a phone number, or stored vault credentials.
+
+## Related docs
+
+- [Phone & Voice](/docs/phone)
+- [Conversational Calls](/docs/conversational-calls)
+- [MCP Servers](/docs/mcp)

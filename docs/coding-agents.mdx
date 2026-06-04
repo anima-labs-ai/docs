@@ -1,0 +1,195 @@
+---
+title: "Coding Agents"
+description: "Connect Claude Code, Cursor, Windsurf, Claude Desktop, VS Code, and other coding agents to Anima."
+---
+
+# Coding Agents
+
+Give your coding agent access to Anima through `skill.md` and MCP. The fastest path is to ask the agent to read the public skill, then let it install the focused MCP servers it needs.
+
+## Start with this prompt
+
+Paste this into Claude Code, Cursor, Windsurf, Claude Desktop, Codex, or another MCP-aware coding agent:
+
+```text
+Read https://useanima.sh/skill.md and follow it.
+Use my Anima API key if I already have one.
+Create or select an agent identity with email, phone, voice, and vault.
+Then text me now from the agent number, and call me now only after confirming consent.
+```
+
+The agent should:
+
+1. Read the skill instructions.
+2. Check whether `ANIMA_API_KEY` is already available.
+3. Install the relevant MCP server or use the REST API.
+4. Provision or select an agent.
+5. Use mail, phone, voice, and vault only within the plan limits and consent rules.
+
+## MCP server selection
+
+| Need | Server | Typical request |
+|------|--------|-----------------|
+| Create or inspect agents | `@anima-labs/mcp-agent` | "Create an agent identity for support." |
+| Send and read mail | `@anima-labs/mcp-email` | "Email this customer from the agent inbox." |
+| Text or call a human | `@anima-labs/mcp-phone` | "Text me now, then call me now." |
+| Store secrets | `@anima-labs/mcp-vault` | "Store the CRM login in the vault." |
+| Create webhooks | `@anima-labs/mcp-platform` | "Send call.ended events to my app." |
+
+For most phone demos, install `agent`, `email`, `phone`, `vault`, and `platform`. That lets the agent create an identity, send mail, send SMS, place calls, store credentials, and subscribe to events.
+
+## Claude Code
+
+Local stdio mode:
+
+```bash
+claude mcp add anima-phone -- npx -y @anima-labs/mcp-phone
+claude mcp add anima-email -- npx -y @anima-labs/mcp-email
+claude mcp add anima-vault -- npx -y @anima-labs/mcp-vault
+```
+
+Hosted HTTP mode:
+
+```bash
+claude mcp add anima-phone --transport http \
+  --url https://mcp-phone-829045119779.us-central1.run.app/mcp \
+  --header "Authorization: Bearer ak_..."
+```
+
+Then ask:
+
+```text
+Use Anima to provision a phone-capable agent.
+Send an SMS to my number first, then place a basic voice call.
+Use the vault for any credentials you need, and do not print secrets.
+```
+
+## Cursor
+
+Add this to your Cursor MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "anima-phone": {
+      "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ak_..."
+      }
+    },
+    "anima-email": {
+      "url": "https://mcp-email-829045119779.us-central1.run.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ak_..."
+      }
+    },
+    "anima-vault": {
+      "url": "https://mcp-vault-829045119779.us-central1.run.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ak_..."
+      }
+    }
+  }
+}
+```
+
+## Claude Desktop
+
+For local stdio mode, add this to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "anima-phone": {
+      "command": "npx",
+      "args": ["-y", "@anima-labs/mcp-phone"],
+      "env": {
+        "ANIMA_API_KEY": "ak_..."
+      }
+    }
+  }
+}
+```
+
+For hosted HTTP mode, use `mcp-remote`:
+
+```json
+{
+  "mcpServers": {
+    "anima-phone": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "--header",
+        "Authorization:${ANIMA_TOKEN}"
+      ],
+      "env": {
+        "ANIMA_TOKEN": "Bearer ak_..."
+      }
+    }
+  }
+}
+```
+
+## Windsurf and VS Code
+
+Use the same hosted MCP server URLs as Cursor when your editor supports remote MCP. If your editor only supports stdio MCP, use the `npx -y @anima-labs/mcp-*` packages and pass `ANIMA_API_KEY` in the environment.
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "anima-phone": {
+        "type": "http",
+        "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "headers": {
+          "Authorization": "Bearer ${input:anima-key}"
+        }
+      }
+    },
+    "inputs": [
+      {
+        "id": "anima-key",
+        "type": "promptString",
+        "description": "Anima API Key",
+        "password": true
+      }
+    ]
+  }
+}
+```
+
+## Prompts that work
+
+```text
+Text me now from my agent's number.
+```
+
+```text
+Call me now using a basic voice call. Use my own number and confirm consent first.
+```
+
+```text
+Email the customer, then store the CRM credential in the Anima vault for the follow-up workflow.
+```
+
+```text
+Create a webhook for message.received and call.ended, then show me the signing-secret handling code.
+```
+
+## Safety rules for agents
+
+- Do not call or text people without the required consent.
+- Do not print raw vault secrets into the chat transcript.
+- Prefer the vault for credentials and tokens.
+- Treat Free-tier caps as hard caps.
+- Fetch transcripts after calls instead of relying on memory from the live conversation.
+
+## Related docs
+
+- [MCP Servers](/docs/mcp)
+- [Phone & Voice](/docs/phone)
+- [Conversational Calls](/docs/conversational-calls)
+- [Pricing & Limits](/docs/pricing-and-limits)

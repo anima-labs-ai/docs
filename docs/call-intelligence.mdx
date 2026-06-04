@@ -1,34 +1,27 @@
 ---
 title: "Call Intelligence"
-description: "Recording, transcription, sentiment analysis, call scoring, and RAG integration for AI voice calls."
+description: "Read call records, stream live transcription, fetch transcripts, and use post-call intelligence endpoints."
 ---
 
 # Call Intelligence
 
-Extract structured insights from every voice call. Anima Call Intelligence provides automatic recording, real-time transcription, sentiment analysis, call scoring, and RAG integration so your agents learn from every conversation.
+Anima stores voice call records under the same agent identity as email, SMS, and vault events. Use call intelligence to monitor calls while they run, fetch the finalized transcript after they end, and read post-call artifacts such as summaries, scores, recordings, and security scans when enabled for your account.
 
-## Recording
-
-Enable call recording to capture full audio for compliance, training, and review.
+## Start a call
 
 ```python
 from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-# Enable recording when creating a call
 call = anima.calls.create(
-    agent_id="ag_abc123",
-    to="+14155551234",
-    voice_id="voice_aria",
-    system_prompt="You are a helpful appointment scheduler.",
-    recording={
-        "enabled": True,
-        "format": "wav",          # "wav" or "mp3"
-        "dual_channel": True,     # separate tracks for agent and caller
-    },
+    agent_id="AGENT_ID",
+    to="+15551234567",
+    tier="basic",
+    greeting="Hi, this is my Anima agent. I am calling from my own number.",
 )
-print(f"Call {call['id']} started with recording enabled")
+
+print(call.call_id, call.state)
 ```
 
 ```ts
@@ -37,274 +30,119 @@ import { Anima } from "@anima-labs/sdk";
 const anima = new Anima({ apiKey: "ak_..." });
 
 const call = await anima.calls.create({
-  agentId: "ag_abc123",
-  to: "+14155551234",
-  voiceId: "voice_aria",
-  systemPrompt: "You are a helpful appointment scheduler.",
-  recording: {
-    enabled: true,
-    format: "wav",
-    dualChannel: true,
-  },
+  agentId: "AGENT_ID",
+  to: "+15551234567",
+  tier: "basic",
+  greeting: "Hi, this is my Anima agent. I am calling from my own number.",
 });
-console.log(`Call ${call.id} started with recording enabled`);
+
+console.log(call.callId, call.state);
 ```
 
-### Retrieve Recordings
+## Stream live transcription
 
-After a call ends, download the recording or get a signed URL.
+Use the voice WebSocket for live call events and bidirectional control.
 
 ```python
-recording = anima.calls.get_recording(call_id="call_abc123")
-print(f"Duration: {recording['durationSeconds']}s")
-print(f"Download: {recording['url']}")
+conn = anima.calls.connect(agent_id="AGENT_ID")
 
-# Download to file
-anima.calls.download_recording(
-    call_id="call_abc123",
-    path="./recordings/call_abc123.wav",
+def on_message(message: dict):
+    if message.get("type") == "call.transcription":
+        payload = message.get("data", message)
+        print(payload.get("text"))
+
+conn.on_message(on_message)
+conn.create_call(
+    "+15551234567",
+    tier="basic",
+    greeting="Hi, this is my Anima agent.",
 )
 ```
 
 ```ts
-const recording = await anima.calls.getRecording("call_abc123");
-console.log(`Duration: ${recording.durationSeconds}s`);
-console.log(`Download: ${recording.url}`);
-```
+const conn = anima.calls.connect({ agentId: "AGENT_ID" });
 
-## Transcription
-
-Anima produces real-time transcripts during the call and a finalized transcript after the call ends.
-
-### Real-Time Transcription
-
-Subscribe to live transcription events via WebSocket or webhook:
-
-```python
-from anima import Anima, fastapi_webhook_dependency
-from fastapi import FastAPI, Depends
-
-app = FastAPI()
-webhook_dep = fastapi_webhook_dependency("whsec_...")
-
-@app.post("/webhooks")
-async def handle(event=Depends(webhook_dep)):
-    if event.type == "call.transcription":
-        segment = event.data
-        print(f"[{segment['speaker']}] {segment['text']}")
-```
-
-```ts
-import express from "express";
-import { webhookMiddleware } from "@anima-labs/sdk";
-
-const app = express();
-app.use(express.json());
-
-app.post("/webhooks", webhookMiddleware("whsec_..."), (req, res) => {
-  const event = req.webhookEvent;
-  if (event.type === "call.transcription") {
-    const { speaker, text } = event.data;
-    console.log(`[${speaker}] ${text}`);
+conn.on("message", (message) => {
+  if (message.type === "call.transcription") {
+    console.log(message.data?.text);
   }
-  res.sendStatus(200);
+});
+
+conn.createCall("+15551234567", {
+  tier: "basic",
+  greeting: "Hi, this is my Anima agent.",
 });
 ```
 
-### Full Transcript
+## Fetch the transcript
 
-Retrieve the complete transcript after a call ends.
+After the call ends, fetch the finalized transcript.
 
 ```python
-transcript = anima.calls.get_transcript(call_id="call_abc123")
+transcript = anima.calls.get_transcript(call.call_id)
 
-print(f"Call duration: {transcript['durationSeconds']}s")
-print(f"Word count: {transcript['wordCount']}")
-
-for segment in transcript["segments"]:
-    speaker = segment["speaker"]  # "agent" or "caller"
-    text = segment["text"]
-    ts = segment["startTime"]
-    print(f"[{ts}s] {speaker}: {text}")
+for segment in transcript.segments:
+    print(f"[{segment.start_time}s] {segment.speaker}: {segment.text}")
 ```
 
 ```ts
-const transcript = await anima.calls.getTranscript("call_abc123");
-
-console.log(`Call duration: ${transcript.durationSeconds}s`);
-console.log(`Word count: ${transcript.wordCount}`);
+const transcript = await anima.calls.getTranscript(call.callId);
 
 for (const segment of transcript.segments) {
   console.log(`[${segment.startTime}s] ${segment.speaker}: ${segment.text}`);
 }
 ```
 
-## Sentiment Analysis
-
-Anima automatically analyzes sentiment for each transcript segment, producing a per-utterance score and an overall call sentiment.
+## List and inspect calls
 
 ```python
-analysis = anima.calls.get_sentiment(call_id="call_abc123")
+calls = anima.calls.list(agent_id="AGENT_ID", limit=20)
+for item in calls["calls"]:
+    print(item.id, item.state, item.duration_seconds)
 
-print(f"Overall sentiment: {analysis['overall']}")  # positive, neutral, negative
-print(f"Overall score: {analysis['score']}")         # -1.0 to 1.0
-
-for segment in analysis["segments"]:
-    print(f"[{segment['speaker']}] {segment['sentiment']} ({segment['score']:.2f}): {segment['text']}")
+detail = anima.calls.get(call.call_id)
+print(detail.state, detail.started_at, detail.ended_at)
 ```
 
 ```ts
-const analysis = await anima.calls.getSentiment("call_abc123");
-
-console.log(`Overall sentiment: ${analysis.overall}`);
-console.log(`Overall score: ${analysis.score}`);
-
-for (const segment of analysis.segments) {
-  console.log(
-    `[${segment.speaker}] ${segment.sentiment} (${segment.score.toFixed(2)}): ${segment.text}`
-  );
+const calls = await anima.calls.list({ agentId: "AGENT_ID", limit: 20 });
+for (const item of calls.calls) {
+  console.log(item.id, item.state, item.durationSeconds);
 }
+
+const detail = await anima.calls.get(call.callId);
+console.log(detail.state, detail.startedAt, detail.endedAt);
 ```
 
-### Sentiment Values
+## Post-call intelligence endpoints
 
-| Value | Score Range | Description |
-|-------|------------|-------------|
-| `positive` | 0.3 to 1.0 | Caller expressed satisfaction, agreement, or enthusiasm |
-| `neutral` | -0.3 to 0.3 | Factual exchange with no strong emotion |
-| `negative` | -1.0 to -0.3 | Caller expressed frustration, confusion, or dissatisfaction |
+Some post-call artifacts are exposed as REST endpoints and MCP tools even when a specific SDK helper is not present yet.
 
-## Call Scoring
+```bash
+curl https://api.useanima.sh/v1/voice/calls/CALL_ID/transcript \
+  -H "Authorization: Bearer ak_..."
 
-Score calls on configurable dimensions to measure agent effectiveness. Anima uses the transcript and sentiment data to evaluate each call automatically.
+curl https://api.useanima.sh/v1/voice/calls/CALL_ID/summary \
+  -H "Authorization: Bearer ak_..."
 
-```python
-score = anima.calls.get_score(call_id="call_abc123")
+curl https://api.useanima.sh/v1/voice/calls/CALL_ID/score \
+  -H "Authorization: Bearer ak_..."
 
-print(f"Overall score: {score['overall']}/100")
-for dimension in score["dimensions"]:
-    print(f"  {dimension['name']}: {dimension['score']}/100")
+curl https://api.useanima.sh/v1/voice/calls/CALL_ID/recording \
+  -H "Authorization: Bearer ak_..."
+
+curl https://api.useanima.sh/v1/voice/calls/CALL_ID/security \
+  -H "Authorization: Bearer ak_..."
 ```
 
-```ts
-const score = await anima.calls.getScore("call_abc123");
+MCP equivalents include `phone_call_get`, `phone_call_transcript_get`, `phone_call_recording_get`, `voice_get_summary`, `voice_get_score`, and `voice_get_security_scan` depending on the connected MCP server version.
 
-console.log(`Overall score: ${score.overall}/100`);
-for (const dimension of score.dimensions) {
-  console.log(`  ${dimension.name}: ${dimension.score}/100`);
-}
-```
+## Guardrails
 
-### Default Scoring Dimensions
+Outbound calls are gated server-side before dialing. The API enforces plan eligibility, TCPA consent posture, Reassigned Numbers Database checks, time-of-day windows, and per-tier call caps. If one of those checks fails, the call is rejected before reaching the telephony provider.
 
-| Dimension | Description |
-|-----------|-------------|
-| `resolution` | Did the agent resolve the caller's issue? |
-| `professionalism` | Was the agent courteous and professional? |
-| `clarity` | Was the agent's communication clear and concise? |
-| `empathy` | Did the agent acknowledge the caller's feelings? |
-| `efficiency` | Was the call handled without unnecessary delay? |
+## Next steps
 
-### Custom Scoring Criteria
-
-Define custom scoring dimensions tailored to your use case:
-
-```python
-score = anima.calls.get_score(
-    call_id="call_abc123",
-    criteria=[
-        {"name": "upsell_attempt", "description": "Did the agent attempt to upsell?"},
-        {"name": "compliance", "description": "Did the agent follow the required disclosures?"},
-    ],
-)
-```
-
-```ts
-const score = await anima.calls.getScore("call_abc123", {
-  criteria: [
-    { name: "upsell_attempt", description: "Did the agent attempt to upsell?" },
-    { name: "compliance", description: "Did the agent follow the required disclosures?" },
-  ],
-});
-```
-
-## RAG Integration
-
-Feed call transcripts into your agent's knowledge base so future conversations are informed by past interactions. This creates a feedback loop where your agent becomes more context-aware over time.
-
-### How It Works
-
-1. A call ends and a finalized transcript is produced
-2. The transcript is chunked, embedded, and indexed in the agent's vector store
-3. On the next call, the agent retrieves relevant past conversation context
-4. The system prompt is augmented with retrieved context before the agent responds
-
-### Enable RAG for Calls
-
-```python
-# Enable RAG when creating a call
-call = anima.calls.create(
-    agent_id="ag_abc123",
-    to="+14155551234",
-    voice_id="voice_aria",
-    system_prompt="You are a helpful support agent.",
-    rag={
-        "enabled": True,
-        "collection": "support_calls",     # group transcripts by topic
-        "max_context_chunks": 5,           # max chunks to inject per turn
-        "similarity_threshold": 0.75,      # minimum relevance score
-    },
-)
-```
-
-```ts
-const call = await anima.calls.create({
-  agentId: "ag_abc123",
-  to: "+14155551234",
-  voiceId: "voice_aria",
-  systemPrompt: "You are a helpful support agent.",
-  rag: {
-    enabled: true,
-    collection: "support_calls",
-    maxContextChunks: 5,
-    similarityThreshold: 0.75,
-  },
-});
-```
-
-### Query the Call Knowledge Base
-
-Search past call transcripts directly:
-
-```python
-results = anima.calls.search_transcripts(
-    agent_id="ag_abc123",
-    query="customer asked about refund policy",
-    collection="support_calls",
-    limit=5,
-)
-
-for result in results["items"]:
-    print(f"Call {result['callId']} (score: {result['score']:.2f})")
-    print(f"  {result['text']}")
-```
-
-```ts
-const results = await anima.calls.searchTranscripts({
-  agentId: "ag_abc123",
-  query: "customer asked about refund policy",
-  collection: "support_calls",
-  limit: 5,
-});
-
-for (const result of results.items) {
-  console.log(`Call ${result.callId} (score: ${result.score.toFixed(2)})`);
-  console.log(`  ${result.text}`);
-}
-```
-
-## Next Steps
-
-- [Voice Catalog](/docs/voice-catalog) -- Browse and select from available voices
-- [Voice WebSocket Protocol](/docs/protocols/voice-websocket) -- Real-time call event streaming
-- [Webhooks](/docs/webhooks) -- Configure webhook endpoints for call events
+- [Voice Catalog](/docs/voice-catalog) - List available voice tiers and catalog entries
+- [Voice WebSocket Protocol](/docs/protocols/voice-websocket) - Full real-time protocol reference
+- [Phone & Voice](/docs/phone) - Provision numbers, send SMS, and place calls

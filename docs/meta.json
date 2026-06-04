@@ -1,6 +1,7 @@
 {
 	"pages": [
 		"---Getting Started---",
+		"index",
 		"getting-started",
 		"install",
 		"quickstart-email",

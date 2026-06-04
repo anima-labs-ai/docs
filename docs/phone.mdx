@@ -1,95 +1,233 @@
 ---
-title: "Phone"
-description: "Provision phone numbers and send SMS from your AI agents."
+title: "Phone & Voice"
+description: "Provision phone numbers, send SMS, receive replies, and place voice calls from an AI agent identity."
 ---
 
-# Phone
+# Phone & Voice
 
-Give your AI agents real phone numbers with SMS capabilities.
+Give your AI agents real phone numbers for SMS and voice. The phone number belongs to the same agent identity as its email inbox, vault, addresses, and DID, so cross-channel workflows stay tied to one actor and one audit trail.
 
 ## Overview
 
-Anima Phone lets you provision phone numbers for AI agents, send SMS messages, and receive inbound communications. This is useful for 2FA verification, appointment reminders, urgent notifications, and customer outreach.
+Anima Phone lets you:
 
-## Search for Numbers
+- Search for available US numbers by area code and capability
+- Provision a dedicated number for an agent
+- Send a real "text me now" SMS from that agent
+- Receive inbound SMS through webhooks
+- Place outbound voice calls with server-side TCPA, RND, and time-of-day gates
+- Read call records and transcripts from the same identity surface
 
-Find available phone numbers by area code or region:
+Use this page when you already have an `agent_id`. If you are starting from zero, create an agent first in the console or through the agent API, then come back here with the agent ID.
+
+## 1. Search for a number
+
+Find available numbers by area code and requested capability:
 
 ```python
-# Python
-numbers = anima.phone.search(
-    country="US",
+from anima import Anima
+
+anima = Anima(api_key="ak_...")
+
+numbers = anima.phones.search(
+    country_code="US",
     area_code="415",
+    capabilities=["sms", "voice"],
+    limit=3,
 )
-for n in numbers:
-    print(f"{n.number} ({n.region})")
+
+for number in numbers["items"]:
+    print(number["phoneNumber"], number.get("region"))
 ```
 
 ```ts
-// TypeScript
-const numbers = await anima.phone.search({
-  country: "US",
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+
+const numbers = await anima.phones.search({
+  countryCode: "US",
   areaCode: "415",
+  capabilities: ["sms", "voice"],
+  limit: 3,
 });
+
+for (const number of numbers.items) {
+  console.log(number.phoneNumber, number.region);
+}
 ```
 
-## Provision a Number
+## 2. Provision a phone identity
 
-Assign a phone number to an agent:
+Provisioning assigns one number to one agent. Request both `sms` and `voice` when you want the number to support the full demo path.
 
 ```python
-phone = anima.phone.provision(
-    agent_id=agent.id,
-    number="+14155551234",
+agent_id = "AGENT_ID"
+
+phone = anima.phones.provision(
+    agent_id=agent_id,
+    country_code="US",
+    area_code="415",
+    capabilities=["sms", "voice"],
 )
-print(f"Provisioned: {phone.number}")
+
+print(f"Provisioned: {phone.phone_number}")
 ```
 
 ```ts
-const phone = await anima.phone.provision({
-  agentId: agent.id,
-  number: "+14155551234",
+const agentId = "AGENT_ID";
+
+const phone = await anima.phones.provision({
+  agentId,
+  countryCode: "US",
+  areaCode: "415",
+  capabilities: ["sms", "voice"],
 });
+
+console.log(`Provisioned: ${phone.phoneNumber}`);
 ```
 
-## Send SMS
+## 3. Text your human now
+
+Send the first SMS to a number you control. This is the fastest way to prove the agent has a real, reachable phone path.
 
 ```python
-message = anima.phone.send_sms(
-    agent_id=agent.id,
-    to="+15551234567",
-    body="Your appointment is confirmed for tomorrow at 2pm.",
+message = anima.messages.send_sms(
+    agent_id=agent_id,
+    to="+15551234567",  # your phone number
+    body="Hi - this is my Anima agent texting from its own number.",
 )
-print(f"SMS sent: {message.id}")
+
+print(f"SMS sent: {message.id} ({message.status})")
 ```
 
 ```ts
-const message = await anima.phone.sendSms({
-  agentId: agent.id,
-  to: "+15551234567",
-  body: "Your appointment is confirmed for tomorrow at 2pm.",
+const message = await anima.messages.sendSms({
+  agentId,
+  to: "+15551234567", // your phone number
+  body: "Hi - this is my Anima agent texting from its own number.",
 });
+
+console.log(`SMS sent: ${message.id} (${message.status})`);
 ```
 
-## List Numbers
+## 4. Receive replies
 
-```python
-numbers = anima.phone.list(agent_id=agent.id)
-for n in numbers:
-    print(f"{n.number} — {n.status}")
+Inbound SMS is delivered as a message event. Subscribe to `message.received`, then inspect the message channel/payload to distinguish SMS from email.
+
+```bash
+curl -X POST https://api.useanima.sh/v1/webhooks \
+  -H "Authorization: Bearer ak_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.example.com/webhooks/anima",
+    "events": ["message.received", "phone.provisioned", "call.ended"]
+  }'
 ```
 
-## Release a Number
+See [Webhooks](/docs/webhooks) for signature verification and delivery retries.
 
-When a number is no longer needed:
+## 5. Call your human now
+
+Outbound voice calls run through the voice gate before dialing. Use a number you control for the first call, and only call recipients where you have the required consent.
 
 ```python
-anima.phone.release(
-    agent_id=agent.id,
-    number="+14155551234",
+call = anima.calls.create(
+    agent_id=agent_id,
+    to="+15551234567",  # your phone number
+    tier="basic",
+    greeting="Hi, this is my Anima agent. I am calling from my own phone number.",
+)
+
+print(f"Call started: {call.call_id} ({call.state})")
+```
+
+```ts
+const call = await anima.calls.create({
+  agentId,
+  to: "+15551234567", // your phone number
+  tier: "basic",
+  greeting: "Hi, this is my Anima agent. I am calling from my own phone number.",
+});
+
+console.log(`Call started: ${call.callId} (${call.state})`);
+```
+
+Voice behavior comes from the configured agent and selected tier. Use `greeting` for the first spoken line; use the agent configuration and voice pipeline for deeper call behavior.
+
+## 6. Read the transcript
+
+After the call ends, fetch the transcript:
+
+```python
+transcript = anima.calls.get_transcript(call.call_id)
+
+for segment in transcript.segments:
+    print(f"{segment.speaker}: {segment.text}")
+```
+
+```ts
+const transcript = await anima.calls.getTranscript(call.callId);
+
+for (const segment of transcript.segments) {
+  console.log(`${segment.speaker}: ${segment.text}`);
+}
+```
+
+For live call events and bidirectional voice control, see the [Voice WebSocket Protocol](/docs/protocols/voice-websocket).
+
+## Phone, mail, and vault together
+
+The useful Anima pattern is not "a phone API in isolation." It is one agent identity using the right channel at each step:
+
+1. Email the human or customer with context.
+2. Text them if the workflow needs an immediate response.
+3. Place a voice call when the situation needs synchronous confirmation.
+4. Store credentials and tokens in the vault so the agent can act without exposing secrets to the LLM.
+5. Tie the full workflow together in audit logs and webhooks through the same agent ID.
+
+## Compliance guardrails
+
+For US outbound calls, Anima enforces guardrails server-side before the dial reaches the telephony provider. These include TCPA consent attestation, Reassigned Numbers Database checks, time-of-day windows, and per-tier call caps. The platform can reject a call before dialing when those requirements are not satisfied.
+
+For SMS, keep the same standard: do not send spam, honor opt-outs, and only contact recipients where you have a lawful basis to do so.
+
+## List or release numbers
+
+List numbers assigned to an agent:
+
+```python
+numbers = anima.phones.list(agent_id=agent_id)
+for phone in numbers:
+    print(phone.phone_number, phone.ten_dlc_status)
+```
+
+```ts
+const numbers = await anima.phones.list({ agentId });
+for (const phone of numbers.items) {
+  console.log(phone.phoneNumber, phone.tenDlcStatus);
+}
+```
+
+Release a number when the agent no longer needs it:
+
+```python
+anima.phones.release(
+    agent_id=agent_id,
+    phone_number="+14155551234",
 )
 ```
 
-## Webhooks
+```ts
+await anima.phones.release({
+  agentId,
+  phoneNumber: "+14155551234",
+});
+```
 
-Configure webhooks to receive inbound SMS and voice events. See [Webhooks](/docs/webhooks) for setup details.
+## Next steps
+
+- [Quickstart: Voice Calls](/docs/quickstart-voice) - Run the SMS-then-call demo end to end
+- [Voice Catalog](/docs/voice-catalog) - Browse voice tiers and options
+- [Call Intelligence](/docs/call-intelligence) - Summaries, scoring, transcripts, and recordings
+- [Vault](/docs/vault) - Store credentials without exposing raw secrets to the model

@@ -55,8 +55,12 @@ await anima.messages.send_email({
 });
 
 // Phone: provision a number and send SMS
-await anima.phone.provision({ agentId: agent.id, number: "+14155551234" });
-await anima.phone.sendSms({
+await anima.phones.provision({
+  agentId: agent.id,
+  countryCode: "US",
+  capabilities: ["sms", "voice"],
+});
+await anima.messages.sendSms({
   agentId: agent.id,
   to: "+15551234567",
   body: "Your order has shipped. Track at https://example.com/track/1042",
@@ -108,7 +112,7 @@ Anima ships SDKs for the ecosystems where agents run:
 | Node.js | `npm install @anima-labs/sdk` | GA |
 | Go | `go get github.com/anima-labs/anima-go` | GA |
 | CLI | `npm install -g @anima-labs/cli` | GA |
-| MCP Server | 160+ tools for Claude, GPT, and other LLM agents | GA |
+| MCP Server | 53 tools for Claude, GPT, and other LLM agents | GA |
 
 The MCP server is worth highlighting: it exposes every Anima capability as a tool that LLM agents can call directly. Your agent does not need custom integration code — it discovers and uses Anima through the Model Context Protocol.
 

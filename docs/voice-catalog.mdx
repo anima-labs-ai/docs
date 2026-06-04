@@ -1,63 +1,23 @@
 ---
 title: "Voice Catalog"
-description: "Browse available voice models from Eleven Labs, Play.ht, and Azure Neural for AI-powered phone calls."
+description: "List available voice tiers and catalog entries for AI-powered phone calls."
 ---
 
 # Voice Catalog
 
-Choose from a curated collection of high-quality voice models for your AI agent's phone calls. Anima supports multiple voice providers, giving you the flexibility to match the right voice to your use case.
+Use the voice catalog to inspect which voices are available for outbound phone calls. The current SDK exposes catalog listing and filtering; call creation uses the selected `tier` plus the agent's configured voice pipeline.
 
-## Providers
-
-Anima integrates with three industry-leading voice synthesis providers:
-
-| Provider | Strengths | Latency | Languages |
-|----------|-----------|---------|-----------|
-| **Eleven Labs** | Ultra-realistic, emotional range | ~200ms | 29 languages |
-| **Play.ht** | Fast, conversational tone | ~150ms | 20 languages |
-| **Azure Neural** | Enterprise-grade, consistent | ~180ms | 140+ languages |
-
-## Available Voices
-
-| Voice ID | Name | Provider | Gender | Language | Accent | Description |
-|----------|------|----------|--------|----------|--------|-------------|
-| `voice_aria` | Aria | Eleven Labs | Female | English | American | Warm, professional tone ideal for customer service |
-| `voice_marcus` | Marcus | Eleven Labs | Male | English | American | Confident baritone suited for sales and outreach |
-| `voice_priya` | Priya | Eleven Labs | Female | English | British-Indian | Clear, articulate delivery for technical support |
-| `voice_james` | James | Azure Neural | Male | English | British | Polished, authoritative voice for formal calls |
-| `voice_sofia` | Sofia | Play.ht | Female | English | American | Friendly, upbeat tone for casual conversations |
-| `voice_kenji` | Kenji | Azure Neural | Male | English | Japanese-accented | Calm, measured delivery for international calls |
-| `voice_elena` | Elena | Play.ht | Female | Spanish | Castilian | Native Spanish with warm conversational style |
-| `voice_omar` | Omar | Eleven Labs | Male | Arabic | Gulf | Rich vocal quality for Middle Eastern markets |
-| `voice_claire` | Claire | Azure Neural | Female | French | Parisian | Elegant, precise diction for Francophone callers |
-| `voice_lucas` | Lucas | Play.ht | Male | Portuguese | Brazilian | Energetic, friendly tone for Latin American outreach |
-| `voice_mei` | Mei | Azure Neural | Female | Mandarin | Standard | Clear Mandarin with neutral accent |
-| `voice_daniel` | Daniel | Eleven Labs | Male | English | Australian | Relaxed, approachable tone for support calls |
-| `voice_fatima` | Fatima | Azure Neural | Female | English | Middle Eastern | Professional, calm voice for healthcare and finance |
-| `voice_alex` | Alex | Play.ht | Non-binary | English | American | Neutral, balanced tone suitable for any context |
-
-## List Voices
-
-Retrieve all available voices programmatically, with optional filtering by provider, language, or gender.
+## List voices
 
 ```python
 from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-# List all voices
-voices = anima.voices.list()
-for voice in voices["items"]:
-    print(f"{voice['id']}: {voice['name']} ({voice['provider']}, {voice['gender']})")
+voices = anima.voices.list(tier="basic")
 
-# Filter by provider
-eleven_voices = anima.voices.list(provider="eleven_labs")
-
-# Filter by language
-spanish_voices = anima.voices.list(language="es")
-
-# Filter by gender
-male_voices = anima.voices.list(gender="male")
+for voice in voices["voices"]:
+    print(f"{voice.id}: {voice.name} ({voice.provider}, {voice.language})")
 ```
 
 ```ts
@@ -65,106 +25,72 @@ import { Anima } from "@anima-labs/sdk";
 
 const anima = new Anima({ apiKey: "ak_..." });
 
-// List all voices
-const voices = await anima.voices.list();
-for (const voice of voices.items) {
-  console.log(`${voice.id}: ${voice.name} (${voice.provider}, ${voice.gender})`);
+const voices = await anima.voices.list({ tier: "basic" });
+
+for (const voice of voices.voices) {
+  console.log(`${voice.id}: ${voice.name} (${voice.provider}, ${voice.language})`);
 }
-
-// Filter by provider
-const elevenVoices = await anima.voices.list({ provider: "eleven_labs" });
-
-// Filter by language
-const spanishVoices = await anima.voices.list({ language: "es" });
-
-// Filter by gender
-const maleVoices = await anima.voices.list({ gender: "male" });
 ```
 
-## Select a Voice for a Call
+## Filters
 
-Specify a `voice_id` when creating a call to use a particular voice.
+The catalog supports these optional filters:
+
+| Filter | Values |
+|--------|--------|
+| `tier` | `basic`, `premium` |
+| `gender` | `male`, `female`, `neutral` |
+| `language` | BCP-47 language code, such as `en-US` |
+
+```python
+premium_voices = anima.voices.list(tier="premium")
+female_voices = anima.voices.list(gender="female")
+english_voices = anima.voices.list(language="en-US")
+```
+
+```ts
+const premiumVoices = await anima.voices.list({ tier: "premium" });
+const femaleVoices = await anima.voices.list({ gender: "female" });
+const englishVoices = await anima.voices.list({ language: "en-US" });
+```
+
+## Place a call
+
+The public SDK call creation surface accepts `to`, optional `agentId`, `tier`, `greeting`, and optional `fromNumber`.
 
 ```python
 call = anima.calls.create(
-    agent_id="ag_abc123",
-    to="+14155551234",
-    voice_id="voice_aria",
-    system_prompt="You are a friendly customer support agent.",
-    greeting="Hi there! Thanks for calling. How can I help you today?",
+    agent_id="AGENT_ID",
+    to="+15551234567",
+    tier="basic",
+    greeting="Hi, this is my Anima agent calling from its own number.",
 )
+
+print(call.call_id, call.state)
 ```
 
 ```ts
 const call = await anima.calls.create({
-  agentId: "ag_abc123",
-  to: "+14155551234",
-  voiceId: "voice_aria",
-  systemPrompt: "You are a friendly customer support agent.",
-  greeting: "Hi there! Thanks for calling. How can I help you today?",
+  agentId: "AGENT_ID",
+  to: "+15551234567",
+  tier: "basic",
+  greeting: "Hi, this is my Anima agent calling from its own number.",
 });
+
+console.log(call.callId, call.state);
 ```
 
-## Get Voice Details
+Per-call `voiceId`, `voiceSettings`, and custom `systemPrompt` fields are not part of the current public SDK call input. Configure persistent agent behavior in the agent/voice pipeline, and use `greeting` for the opening line.
 
-Retrieve metadata for a specific voice, including supported languages and a sample audio URL.
+## REST endpoint
 
-```python
-voice = anima.voices.get("voice_aria")
-print(f"Name: {voice['name']}")
-print(f"Provider: {voice['provider']}")
-print(f"Sample: {voice['sampleUrl']}")
-print(f"Languages: {', '.join(voice['languages'])}")
+```bash
+curl "https://api.useanima.sh/v1/voice/catalog?tier=basic" \
+  -H "Authorization: Bearer ak_..."
 ```
 
-```ts
-const voice = await anima.voices.get("voice_aria");
-console.log(`Name: ${voice.name}`);
-console.log(`Provider: ${voice.provider}`);
-console.log(`Sample: ${voice.sampleUrl}`);
-console.log(`Languages: ${voice.languages.join(", ")}`);
-```
+## Next steps
 
-## Voice Settings
-
-Fine-tune voice behavior per call with optional settings:
-
-```python
-call = anima.calls.create(
-    agent_id="ag_abc123",
-    to="+14155551234",
-    voice_id="voice_marcus",
-    voice_settings={
-        "stability": 0.7,        # 0.0-1.0, higher = more consistent
-        "similarity_boost": 0.8,  # 0.0-1.0, higher = closer to original
-        "speed": 1.0,             # 0.5-2.0, playback speed
-        "pitch": 0,               # -12 to 12 semitones
-    },
-    system_prompt="You are a confident sales representative.",
-)
-```
-
-```ts
-const call = await anima.calls.create({
-  agentId: "ag_abc123",
-  to: "+14155551234",
-  voiceId: "voice_marcus",
-  voiceSettings: {
-    stability: 0.7,
-    similarityBoost: 0.8,
-    speed: 1.0,
-    pitch: 0,
-  },
-  systemPrompt: "You are a confident sales representative.",
-});
-```
-
-## Custom Voice Cloning
-
-> **Coming Soon** -- Custom voice cloning will let you create a unique voice model from audio samples. Upload 30+ seconds of clear speech to generate a voice that matches your brand identity. Contact [support@useanima.sh](mailto:support@useanima.sh) to join the early access waitlist.
-
-## Next Steps
-
-- [Quickstart: Voice Calls](/docs/quickstart-voice) -- Make your first AI-powered phone call
-- [Call Intelligence](/docs/call-intelligence) -- Recording, transcription, and scoring
-- [Voice WebSocket Protocol](/docs/protocols/voice-websocket) -- Real-time call event streaming
+- [Quickstart: Voice Calls](/docs/quickstart-voice) - Text yourself, then place the first call
+- [Call Intelligence](/docs/call-intelligence) - Transcripts, summaries, scores, and recordings
+- [Voice WebSocket Protocol](/docs/protocols/voice-websocket) - Real-time call event streaming

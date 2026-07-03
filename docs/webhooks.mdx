@@ -77,7 +77,7 @@ Configure these when you create or update a webhook, via the API, the [MCP `webh
 anima webhook create \
   --url https://example.com/hooks/anima \
   --events message.received,message.sent \
-  --auth-config '{"type":"bearer","token":"whsec_your_token"}' \
+  --auth-config '{"type":"bearer","token":"your-endpoint-token"}' \
   --rate-limit-per-minute 120 \
   --max-attempts 5
 ```

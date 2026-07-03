@@ -58,6 +58,16 @@ const policies = [
 
 AI scanning is rate limited to 100 req/min, uses an LRU cache with 1000 entries and a 5min TTL, and falls back to regex scanning when needed.
 
+## Attachment Scanning
+
+Email attachments are scanned both when an agent receives them and before an agent sends them, so malicious files are caught in either direction.
+
+- **Magic-byte detection:** the actual leading bytes are inspected, not the declared type or the file extension (both are trivially spoofed). An executable or script disguised as `invoice.pdf` is unmasked and blocked.
+- **Content scanning:** text attachments run through the same content scanner as message bodies, catching leaked credentials, PII, and risky file types.
+- **Verdict:** each attachment gets a `scanStatus` of `CLEAN`, `FLAGGED`, or `BLOCKED`, surfaced in the message's attachment metadata so an agent can decide before fetching the bytes.
+
+A `BLOCKED` attachment cannot be downloaded — the download endpoint returns `403`. Download URLs are short-lived (15 minutes) and scoped to the requesting agent.
+
 ## Webhook Security (HMAC Verification)
 
 Webhook payloads are protected with HMAC verification and freshness checks to prevent tampering and replay attacks.

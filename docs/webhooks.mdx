@@ -47,3 +47,37 @@ function verifyWebhook(payload: string, signature: string, secret: string) {
   return signature === digest;
 }
 ```
+
+## Advanced settings
+
+Every delivery is signed with `X-Anima-Signature` (see [Verification](#verification)). On top of that, you can control how Anima authenticates to your endpoint and how fast it delivers.
+
+### Endpoint authentication
+
+Have Anima present a credential your endpoint checks, so only Anima can invoke it. This is in addition to the HMAC signature, and it's handy when your gateway expects a header rather than a signature.
+
+| Type | What Anima sends |
+|---|---|
+| `bearer` | `Authorization: Bearer <token>` |
+| `basic` | `Authorization: Basic <base64(username:password)>` |
+| `custom_header` | A header you name, e.g. `X-My-Secret: <value>` |
+
+The credential is write-only. You set it on create or update, it's never returned by a read, and it's encrypted at rest.
+
+### Delivery throttling and retries
+
+- **Rate limit** — cap deliveries per minute to a single endpoint (`rateLimitPerMinute`). Over-limit deliveries are deferred to the next window, not dropped.
+- **Retries** — set the maximum delivery attempts before a delivery is dead-lettered (`maxAttempts`, default 3). Failed deliveries retry with exponential backoff, and an endpoint that keeps failing is auto-disabled.
+
+### Setting them
+
+Configure these when you create or update a webhook, via the API, the [MCP `webhook_set` tool](/docs/mcp), or the CLI:
+
+```bash
+anima webhook create \
+  --url https://example.com/hooks/anima \
+  --events message.received,message.sent \
+  --auth-config '{"type":"bearer","token":"your-endpoint-token"}' \
+  --rate-limit-per-minute 120 \
+  --max-attempts 5
+```

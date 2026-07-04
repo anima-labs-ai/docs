@@ -71,9 +71,10 @@ The credential is write-only. You set it on create or update, it's never returne
 
 ### Setting them
 
-Configure these when you create or update a webhook, via the API, the [MCP `webhook_set` tool](/docs/mcp), or the CLI:
+Configure these when you create or update a webhook — via the API, the [MCP `webhook_set` tool](/docs/mcp), the CLI, or any SDK:
 
 ```bash
+# CLI
 anima webhook create \
   --url https://example.com/hooks/anima \
   --events message.received,message.sent \
@@ -81,3 +82,45 @@ anima webhook create \
   --rate-limit-per-minute 120 \
   --max-attempts 5
 ```
+
+```python
+# Python
+from anima import Anima, WebhookAuthBearer
+
+anima = Anima(api_key="ak_...")
+anima.webhooks.create(
+    url="https://example.com/hooks/anima",
+    events=["message.received", "message.sent"],
+    auth_config=WebhookAuthBearer(token="your-endpoint-token"),
+    rate_limit_per_minute=120,
+    max_attempts=5,
+)
+```
+
+```ts
+// TypeScript
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: "ak_..." });
+await anima.webhooks.create({
+  url: "https://example.com/hooks/anima",
+  events: ["message.received", "message.sent"],
+  authConfig: { type: "bearer", token: "your-endpoint-token" },
+  rateLimitPerMinute: 120,
+  maxAttempts: 5,
+});
+```
+
+```go
+// Go
+rateLimit, maxAttempts := 120, 5
+client.Webhooks.Create(ctx, anima.CreateWebhookParams{
+    URL:                "https://example.com/hooks/anima",
+    Events:             []anima.WebhookEventType{anima.WebhookEventMessageReceived},
+    AuthConfig:         anima.NewBearerAuth("your-endpoint-token"),
+    RateLimitPerMinute: &rateLimit,
+    MaxAttempts:        &maxAttempts,
+})
+```
+
+The other schemes work the same way: `basic` (username + password) and `custom_header` (a header name + value) — in the SDKs, `WebhookAuthBasic` / `WebhookAuthCustomHeader` (Python), the matching `{ type: "basic", … }` union member (TypeScript), or `anima.NewBasicAuth` / `anima.NewCustomHeaderAuth` (Go). Pass `{"type":"none"}` on update to remove authentication.

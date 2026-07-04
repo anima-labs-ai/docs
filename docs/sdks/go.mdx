@@ -204,6 +204,25 @@ balance, err := client.Wallet.GetBalance(ctx, wallet.ID)
 fmt.Printf("Available: %d cents\n", balance.AvailableCents)
 ```
 
+### Webhooks
+
+```go
+// Create a webhook, with the auth Anima presents to your endpoint
+// (on top of the X-Anima-Signature HMAC) plus delivery throttling.
+rateLimit, maxAttempts := 120, 5
+wh, err := client.Webhooks.Create(ctx, anima.CreateWebhookParams{
+    URL:    "https://example.com/hooks/anima",
+    Events: []anima.WebhookEventType{anima.WebhookEventMessageReceived},
+    // Also: NewBasicAuth(user, pass), NewCustomHeaderAuth(name, value), NewNoAuth().
+    AuthConfig:         anima.NewBearerAuth("your-endpoint-token"),
+    RateLimitPerMinute: &rateLimit,  // omit for unlimited
+    MaxAttempts:        &maxAttempts, // 1-10, default 3
+})
+
+// The credential is write-only — only the scheme (wh.AuthType) is returned.
+fmt.Println(wh.ID, wh.AuthType)
+```
+
 ## Error Handling
 
 The SDK uses typed errors for common failure cases:

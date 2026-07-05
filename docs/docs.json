@@ -82,7 +82,7 @@
 			{
 				"group": "Protocols",
 				"pages": [
-					"protocols/index",
+					"protocols/overview",
 					"protocols/visa-tap",
 					"protocols/ap2",
 					"protocols/mastercard-vi",

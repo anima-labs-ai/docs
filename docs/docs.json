@@ -4,10 +4,12 @@
 	"name": "Anima",
 	"description": "Unified identity infrastructure for AI agents — email, phone, voice, vault, and agent-to-agent commerce.",
 	"colors": {
-		"primary": "#6B4FBB",
-		"light": "#EDE9F8",
-		"dark": "#2D1B69"
+		"primary": "#16a34a",
+		"light": "#22c55e",
+		"dark": "#16a34a"
 	},
+	"logo": "/logo.png",
+	"favicon": "/favicon.png",
 	"navigation": {
 		"groups": [
 			{

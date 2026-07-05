@@ -1,0 +1,120 @@
+{
+	"$schema": "https://mintlify.com/docs.json",
+	"theme": "mint",
+	"name": "Anima",
+	"description": "Unified identity infrastructure for AI agents — email, phone, voice, vault, and agent-to-agent commerce.",
+	"colors": {
+		"primary": "#16a34a",
+		"light": "#22c55e",
+		"dark": "#16a34a"
+	},
+	"logo": "/logo.png",
+	"favicon": "/favicon.png",
+	"navigation": {
+		"groups": [
+			{
+				"group": "Getting Started",
+				"pages": [
+					"getting-started",
+					"install",
+					"quickstart-email",
+					"quickstart-voice",
+					"quickstart-vault",
+					"sdks"
+				]
+			},
+			{
+				"group": "Platform",
+				"pages": [
+					"vault",
+					"phone",
+					"voice-catalog",
+					"call-intelligence",
+					"custom-domains",
+					"mcp",
+					"webhooks"
+				]
+			},
+			{
+				"group": "Agent Identity & Commerce",
+				"pages": [
+					{
+						"group": "Agent Identity",
+						"pages": [
+							"identity/did-method",
+							"identity/verifiable-credentials",
+							"identity/agent-cards"
+						]
+					},
+					{
+						"group": "Agent Registry",
+						"pages": ["registry/overview"]
+					},
+					{
+						"group": "Agent Wallet",
+						"pages": ["wallet/overview"]
+					},
+					{
+						"group": "Multi-Tenancy Pods",
+						"pages": ["pods/overview"]
+					},
+					{
+						"group": "A2A Protocol",
+						"pages": ["a2a/overview"]
+					}
+				]
+			},
+			{
+				"group": "Security",
+				"pages": [
+					"security",
+					"encryption",
+					{
+						"group": "Security Operations",
+						"pages": ["security/audit-log", "security/anomaly-detection"]
+					}
+				]
+			},
+			{
+				"group": "Compliance",
+				"pages": ["compliance/soc2-controls", "compliance/reporting"]
+			},
+			{
+				"group": "Protocols",
+				"pages": [
+					"protocols/index",
+					"protocols/visa-tap",
+					"protocols/ap2",
+					"protocols/mastercard-vi",
+					"protocols/voice-websocket"
+				]
+			},
+			{
+				"group": "SDK Reference",
+				"pages": ["sdks/go", "sdks/migration"]
+			},
+			{
+				"group": "Resources",
+				"pages": ["examples", "faq"]
+			},
+			{
+				"group": "Legal",
+				"pages": [
+					"legal/terms-of-service",
+					"legal/privacy-policy",
+					"legal/data-processing-agreement"
+				]
+			},
+			{
+				"group": "Blog",
+				"pages": [
+					"blog/introducing-anima",
+					"blog/anima-vs-agentmail",
+					"blog/agent-identity-did",
+					"blog/give-agent-phone-number",
+					"blog/x402-payments"
+				]
+			}
+		]
+	}
+}

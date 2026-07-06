@@ -7,18 +7,19 @@ Docs site: https://docs.useanima.sh
 ## Contributing
 
 1. Edit or add `.mdx` files in `docs/`.
-2. Update the relevant `meta.json` file when adding a page.
-3. Keep section order aligned with the navigation structure.
+2. Add the page to the navigation in [`docs/docs.json`](docs/docs.json) — the single source of truth for site structure.
+3. Give every page `title` and `description` frontmatter.
 4. Open a pull request after verifying the rendered content.
 
 ## Sections
 
 - Getting Started
-- Custom Domains
-- SDKs
-- MCP
+- Platform
+- Agent Identity & Commerce
 - Security
-- Encryption
-- Webhooks
+- Compliance
 - Protocols
-- FAQ
+- SDK Reference
+- Resources
+- Legal
+- Blog

@@ -38,7 +38,10 @@
 		{ "source": "/platform/:slug*", "destination": "/:slug*" },
 		{ "source": "/protocols", "destination": "/protocols/overview" },
 		{ "source": "/protocols/index", "destination": "/protocols/overview" },
-		{ "source": "/coding-agents", "destination": "/integrations" }
+		{ "source": "/coding-agents", "destination": "/integrations" },
+		{ "source": "/errors/:slug*", "destination": "/errors" },
+		{ "source": "/auth/master-key", "destination": "/security" },
+		{ "source": "/email/domains", "destination": "/custom-domains" }
 	],
 	"navigation": {
 		"tabs": [
@@ -141,7 +144,7 @@
 					{
 						"group": "Resources",
 						"icon": "book-open",
-						"pages": ["examples", "faq"]
+						"pages": ["errors", "examples", "faq"]
 					},
 					{
 						"group": "Legal",

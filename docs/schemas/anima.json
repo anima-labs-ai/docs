@@ -1,0 +1,93 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://docs.useanima.sh/schemas/anima.json",
+	"title": "Anima CLI configuration (anima.json)",
+	"description": "Project-level configuration for the Anima CLI (`anima` / `am`). Place it at the project root or any ancestor directory — the CLI walks up from the current working directory. Secret references are resolved at the edge by `anima vault exec|proxy|agent`; plaintext values never live in this file.",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"type": "string",
+			"description": "Optional pointer to this schema for editor completion and validation."
+		},
+		"secrets": {
+			"type": "object",
+			"description": "Map of logical name → secret reference. Keys are the variable names exposed to the consuming command (environment-variable style by convention, e.g. GH_TOKEN).",
+			"additionalProperties": { "$ref": "#/definitions/secretRef" }
+		}
+	},
+	"additionalProperties": true,
+	"definitions": {
+		"secretRef": {
+			"description": "A declarative pointer to a secret, resolved at execution time. Never a plaintext value.",
+			"oneOf": [
+				{ "$ref": "#/definitions/animaRef" },
+				{ "$ref": "#/definitions/envRef" },
+				{ "$ref": "#/definitions/execRef" }
+			]
+		},
+		"animaRef": {
+			"type": "object",
+			"description": "Fetch from the Anima vault by credential id + dotted field path. Resolution uses the single-use vault-token flow, so every access is a distinct audit-log entry.",
+			"properties": {
+				"source": { "const": "anima" },
+				"credentialId": {
+					"type": "string",
+					"description": "Vault credential id, e.g. \"cred_abc123\" — from the Anima console or `anima vault list`."
+				},
+				"field": {
+					"type": "string",
+					"description": "Dotted path into the credential object, e.g. \"login.password\" or \"apiKey.key\"."
+				},
+				"agentId": {
+					"type": "string",
+					"description": "Optional agent id override (useful for master-key access across agents). Defaults to the CLI's authenticated agent."
+				}
+			},
+			"required": ["source", "credentialId", "field"],
+			"additionalProperties": false
+		},
+		"envRef": {
+			"type": "object",
+			"description": "Resolve from a local environment variable. The CLI refuses to run if the variable is unset or empty — no silent fallback.",
+			"properties": {
+				"source": { "const": "env" },
+				"name": {
+					"type": "string",
+					"pattern": "^[A-Z][A-Z0-9_]{0,127}$",
+					"description": "Environment variable name — uppercase letters, digits, and underscores; must start with a letter."
+				}
+			},
+			"required": ["source", "name"],
+			"additionalProperties": false
+		},
+		"execRef": {
+			"type": "object",
+			"description": "Run a trusted binary (no shell) and capture stdout as the secret. 15-second timeout, 1 MiB output cap, trailing newline trimmed.",
+			"properties": {
+				"source": { "const": "exec" },
+				"command": {
+					"type": "string",
+					"minLength": 1,
+					"pattern": "^[^\\s;&|<>$`\\\\]+$",
+					"description": "Absolute path or bare name of a trusted binary. No shell expansion; whitespace and shell metacharacters (; & | < > $ ` \\) are rejected."
+				},
+				"args": {
+					"type": "array",
+					"items": { "type": "string" },
+					"description": "Arguments passed to the binary — each element is a literal argv slot, no globbing."
+				},
+				"passEnv": {
+					"type": "array",
+					"items": { "type": "string" },
+					"description": "Environment variable names passed through to the subprocess. Everything else is stripped (PATH is always included so the binary can be found)."
+				},
+				"cwd": {
+					"type": "string",
+					"description": "Optional working directory for the subprocess."
+				}
+			},
+			"required": ["source", "command"],
+			"additionalProperties": false
+		}
+	}
+}

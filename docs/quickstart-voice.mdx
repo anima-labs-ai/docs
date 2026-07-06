@@ -1,17 +1,22 @@
 ---
 title: "Quickstart: Voice Calls"
-description: "Make your first AI-powered phone call in under 5 minutes."
+description: "Text yourself, then place your first AI-powered phone call from an Anima agent."
 ---
 
 # Quickstart: Voice Calls
 
-Give your AI agent a real phone number and make its first voice call.
+Give your AI agent a real phone number, send yourself an SMS, then place the first voice call to a number you control.
 
 ## Prerequisites
 
 - An Anima API key from [console.useanima.sh](https://console.useanima.sh)
 - Python 3.10+ or Node.js 18+
-- A phone-enabled agent (or we'll create one below)
+- An existing `agent_id`
+- Phone access for SMS
+- Voice access for outbound calls
+- Consent to contact the destination number
+
+If you are testing for the first time, use your own phone number as the destination.
 
 ## Python
 
@@ -24,30 +29,42 @@ from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-# Create an agent with a phone number
-agent = anima.agents.create(name="Voice Agent")
+agent_id = "AGENT_ID"
+your_phone = "+15551234567"
 
-# Provision a phone number
+# 1. Provision a phone number for SMS and voice.
 phone = anima.phones.provision(
-    agent_id=agent["id"],
+    agent_id=agent_id,
     country_code="US",
     capabilities=["voice", "sms"],
 )
-print(f"Phone: {phone['phoneNumber']}")
+print(f"Phone: {phone.phone_number}")
 
-# List available voices
-voices = anima.voices.list()
-print(f"Available voices: {len(voices['items'])}")
-
-# Make an outbound call
-call = anima.calls.create(
-    agent_id=agent["id"],
-    to="+14155551234",
-    voice_id=voices["items"][0]["id"],
-    system_prompt="You are a friendly assistant calling to confirm an appointment.",
-    greeting="Hi! I'm calling from Dr. Smith's office to confirm your appointment tomorrow at 2 PM.",
+# 2. Text yourself first. This proves the number is real and reachable.
+sms = anima.messages.send_sms(
+    agent_id=agent_id,
+    to=your_phone,
+    body="Hi - this is my Anima agent texting before it calls.",
 )
-print(f"Call started: {call['id']}, status: {call['status']}")
+print(f"SMS sent: {sms.id} ({sms.status})")
+
+# 3. Confirm the voice catalog is available for your tier.
+voices = anima.voices.list(tier="basic")
+print(f"Available basic voices: {len(voices['voices'])}")
+
+# 4. Place the first outbound call.
+call = anima.calls.create(
+    agent_id=agent_id,
+    to=your_phone,
+    tier="basic",
+    greeting="Hi, this is my Anima agent. I am calling from my own phone number.",
+)
+print(f"Call started: {call.call_id}, state: {call.state}")
+
+# 5. After the call ends, fetch the transcript.
+transcript = anima.calls.get_transcript(call.call_id)
+for segment in transcript.segments:
+    print(f"{segment.speaker}: {segment.text}")
 ```
 
 ## Node.js / TypeScript
@@ -61,30 +78,43 @@ import { Anima } from "@anima-labs/sdk";
 
 const anima = new Anima({ apiKey: "ak_..." });
 
-// Create an agent with a phone number
-const agent = await anima.agents.create({ name: "Voice Agent" });
+const agentId = "AGENT_ID";
+const yourPhone = "+15551234567";
 
-// Provision a phone number
+// 1. Provision a phone number for SMS and voice.
 const phone = await anima.phones.provision({
-  agentId: agent.id,
+  agentId,
   countryCode: "US",
   capabilities: ["voice", "sms"],
 });
 console.log(`Phone: ${phone.phoneNumber}`);
 
-// List available voices
-const voices = await anima.voices.list();
-console.log(`Available voices: ${voices.items.length}`);
-
-// Make an outbound call
-const call = await anima.calls.create({
-  agentId: agent.id,
-  to: "+14155551234",
-  voiceId: voices.items[0].id,
-  systemPrompt: "You are a friendly assistant calling to confirm an appointment.",
-  greeting: "Hi! I'm calling from Dr. Smith's office to confirm your appointment tomorrow at 2 PM.",
+// 2. Text yourself first. This proves the number is real and reachable.
+const sms = await anima.messages.sendSms({
+  agentId,
+  to: yourPhone,
+  body: "Hi - this is my Anima agent texting before it calls.",
 });
-console.log(`Call started: ${call.id}, status: ${call.status}`);
+console.log(`SMS sent: ${sms.id} (${sms.status})`);
+
+// 3. Confirm the voice catalog is available for your tier.
+const voices = await anima.voices.list({ tier: "basic" });
+console.log(`Available basic voices: ${voices.voices.length}`);
+
+// 4. Place the first outbound call.
+const call = await anima.calls.create({
+  agentId,
+  to: yourPhone,
+  tier: "basic",
+  greeting: "Hi, this is my Anima agent. I am calling from my own phone number.",
+});
+console.log(`Call started: ${call.callId}, state: ${call.state}`);
+
+// 5. After the call ends, fetch the transcript.
+const transcript = await anima.calls.getTranscript(call.callId);
+for (const segment of transcript.segments) {
+  console.log(`${segment.speaker}: ${segment.text}`);
+}
 ```
 
 ## Environment Variables
@@ -110,7 +140,7 @@ const anima = new Anima();
 
 ## Handle Inbound Calls
 
-To handle incoming calls, set up a webhook endpoint:
+To react after calls complete, set up a webhook endpoint and subscribe to `call.ended`. Inbound real-time call control happens over the voice WebSocket.
 
 ```python
 from anima import Anima, fastapi_webhook_dependency
@@ -121,9 +151,7 @@ webhook_dep = fastapi_webhook_dependency("whsec_...")
 
 @app.post("/webhooks")
 async def handle(event=Depends(webhook_dep)):
-    if event.type == "call.incoming":
-        print(f"Incoming call from {event.data['from']}")
-    elif event.type == "call.ended":
+    if event.type == "call.ended":
         print(f"Call ended: {event.data['callId']}")
 ```
 
@@ -136,9 +164,7 @@ app.use(express.json());
 
 app.post("/webhooks", webhookMiddleware("whsec_..."), (req, res) => {
   const event = req.webhookEvent;
-  if (event.type === "call.incoming") {
-    console.log(`Incoming call from ${event.data.from}`);
-  } else if (event.type === "call.ended") {
+  if (event.type === "call.ended") {
     console.log(`Call ended: ${event.data.callId}`);
   }
   res.sendStatus(200);
@@ -147,32 +173,33 @@ app.post("/webhooks", webhookMiddleware("whsec_..."), (req, res) => {
 
 ## Real-Time Call Events (WebSocket)
 
-Monitor calls in real-time using WebSocket events:
+Monitor and control calls in real time over the voice WebSocket:
 
 ```ts
 const anima = new Anima({ apiKey: "ak_..." });
-const stream = anima.events.connect();
+const conn = anima.calls.connect({ agentId });
 
-stream.on("event", (event) => {
-  switch (event.type) {
+conn.on("message", (message) => {
+  switch (message.type) {
     case "call.started":
-      console.log("Call started:", event.data.callId);
+      console.log("Call started:", message.data?.callId);
       break;
     case "call.transcription":
-      console.log(`[${event.data.speaker}]: ${event.data.text}`);
+      console.log(`[${message.data?.speaker}]: ${message.data?.text}`);
       break;
     case "call.ended":
-      console.log("Call ended, duration:", event.data.durationSeconds);
+      console.log("Call ended:", message.data?.callId);
       break;
   }
 });
 
-stream.on("error", (err) => console.error("Stream error:", err));
+conn.createCall(yourPhone);
 ```
 
 ## What's Next?
 
 - [Voice Catalog](/docs/voice-catalog) — Browse all available voices with audio samples
 - [Call Intelligence](/docs/call-intelligence) — Recording, transcription, RAG, and scoring
-- [WebSocket Protocol](/docs/protocols/websocket) — Full protocol reference for real-time events
+- [Conversational Calls](/docs/conversational-calls) — REST hosted, realtime, and WebSocket call modes
+- [Voice WebSocket Protocol](/docs/protocols/voice-websocket) — Full protocol reference for real-time events
 - [MCP Setup](/docs/mcp) — Use voice calls from Claude Desktop and other AI tools

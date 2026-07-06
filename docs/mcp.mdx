@@ -5,7 +5,7 @@ description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP cl
 
 # MCP Servers
 
-Anima exposes specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, and more.
+Anima exposes 53 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, cards, and more.
 
 Tools are organized into domain servers, so you can install only what you need:
 
@@ -14,6 +14,7 @@ Tools are organized into domain servers, so you can install only what you need:
 | **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations, identity, registry, A2A |
 | **Email** | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
 | **Phone** | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
+| **Cards** | `@anima-labs/mcp-cards` | Agent cards and identity metadata |
 | **Vault** | `@anima-labs/mcp-vault` | Encrypted credential storage, security policies |
 | **Platform** | `@anima-labs/mcp-platform` | Webhooks, pods, utilities |
 
@@ -187,8 +188,13 @@ anima setup-mcp install --all --server all
 ### mcp-phone
 | Category | Tools | Description |
 |----------|-------|-------------|
-| **Phone** | provision, list, get, release | Phone number management |
-| **Voice** | call, list-calls, get-call, hangup | Voice call operations |
+| **Phone** | search, provision, list, release, send-sms | Phone number and SMS management |
+| **Voice** | catalog, call, list-calls, get-call, transcript, summary, score | Voice call operations and intelligence |
+
+### mcp-cards
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Cards** | get, publish, verify | Agent card and identity metadata |
 
 ### mcp-vault
 | Category | Tools | Description |
@@ -213,5 +219,8 @@ Once connected, ask your AI assistant natural language questions:
 
 - "Send an email from my agent to user@example.com" → **mcp-email**
 - "Store my CRM login credentials in the vault" → **mcp-vault**
+- "Text me now from my agent's number" → **mcp-phone**
 - "Make a voice call to +1-555-0123" → **mcp-phone**
 - "Register my agent in the public registry" → **mcp-agent**
+
+For editor-specific setup prompts and safety guidance, see [Coding Agents](/docs/coding-agents).

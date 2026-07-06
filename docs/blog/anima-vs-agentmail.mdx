@@ -38,7 +38,7 @@ With AgentMail, you get step one. The rest requires separate integrations with s
 | x402 payments | No | Yes |
 | A2A protocol support | No | Yes |
 | Policy engine | No | Yes |
-| MCP server (160+ tools) | No | Yes |
+| MCP server (53 tools) | No | Yes |
 | SOC 2 controls | Partial | Yes |
 | SDKs | Node, Python | Node, Python, Go, CLI |
 
@@ -96,7 +96,7 @@ await anima.messages.send_email({
 });
 
 // Send SMS confirmation
-await anima.phone.sendSms({
+await anima.messages.sendSms({
   agentId: agent.id,
   to: "+15551234567",
   body: "Refund of $45.00 processed. Check your email for details.",

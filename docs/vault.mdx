@@ -1,15 +1,24 @@
 ---
 title: "Vault"
-description: "Store and manage encrypted credentials for your AI agents."
+description: "Store, share, and inject encrypted credentials for your AI agents — with a hard guarantee that the LLM never sees raw secrets."
 ---
 
 # Vault
 
-The Anima Vault provides encrypted credential storage for AI agents. Each agent gets its own isolated vault backed by Bitwarden, supporting logins, API keys, payment cards, and identity data.
+The Anima Vault provides encrypted credential storage for AI agents, with a critical security guarantee: **the LLM never sees raw secrets**. Each agent gets its own isolated, per-agent-encrypted vault for logins, API keys, payment cards, and identity data. Agents reference credentials through opaque tokens, and the CLI or browser extension performs the last-mile substitution at execution time.
 
 ## Overview
 
-Agents often need to authenticate with external services — CRMs, booking platforms, merchant sites. The vault stores these credentials securely and makes them available to the agent at runtime, without exposing secrets in code or environment variables.
+Agents often need to authenticate with external services — CRMs, booking platforms, merchant sites. The vault stores these credentials securely and makes them available to the agent at runtime, without exposing secrets in code, environment variables, or the model's context.
+
+The core idea:
+
+```text
+Agent (LLM)        → composes a command containing a vtk_ token
+CLI / extension    → detects the token, exchanges it for the credential, substitutes
+Execution          → the real secret is used in the request
+Output             → matching secrets are redacted before returning to the LLM
+```
 
 ## Provisioning
 
@@ -25,21 +34,24 @@ anima.vault.provision(agent_id=agent.id)
 await anima.vault.provision({ agentId: agent.id });
 ```
 
-Check vault status:
+From the CLI:
 
-```python
-status = anima.vault.status(agent_id=agent.id)
-print(status.provisioned)  # True
+```bash
+anima vault provision --agent <agent-id>
+anima vault status --agent <agent-id>
 ```
 
 ## Credential Types
 
-| Type | Fields | Use Case |
-|------|--------|----------|
-| `login` | username, password, URIs, TOTP | Website logins |
-| `secure_note` | notes | API keys, tokens, free-form secrets |
-| `card` | cardholder, number, expiry, CVV | Payment card details |
-| `identity` | name, email, phone, address | Personal/business identity data |
+| Type | Primary secret | Use case |
+|------|----------------|----------|
+| `login` | password | Website logins, SSH credentials (username, password, URIs, TOTP) |
+| `api_key` | key | API keys (e.g. provider keys) |
+| `oauth_token` | accessToken | OAuth integrations |
+| `certificate` | privateKey | TLS / mTLS certificates |
+| `secure_note` | notes | Free-form secret text |
+| `card` | number | Payment card details |
+| `identity` | — | Personal / business identity data (not auto-injectable) |
 
 ## CRUD Operations
 
@@ -66,24 +78,14 @@ creds = anima.vault.get_credential(
 print(creds.username, creds.password)
 ```
 
-### List all credentials
+### List and search
 
 ```python
 all_creds = anima.vault.list(agent_id=agent.id)
-for c in all_creds:
-    print(f"{c.name} ({c.type})")
+results = anima.vault.search(agent_id=agent.id, query="crm")
 ```
 
-### Search credentials
-
-```python
-results = anima.vault.search(
-    agent_id=agent.id,
-    query="crm",
-)
-```
-
-### Update a credential
+### Update and delete
 
 ```python
 anima.vault.update_credential(
@@ -91,16 +93,27 @@ anima.vault.update_credential(
     credential_id=credential.id,
     password="new-p4ssw0rd",
 )
-```
 
-### Delete a credential
-
-```python
 anima.vault.delete_credential(
     agent_id=agent.id,
     credential_id=credential.id,
 )
 ```
+
+### REST endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/vault/credentials?agentId=` | List all credentials |
+| `GET` | `/vault/credentials/{id}?agentId=` | Get a single credential |
+| `POST` | `/vault/credentials` | Create a credential |
+| `PUT` | `/vault/credentials/{id}` | Update a credential |
+| `DELETE` | `/vault/credentials/{id}?agentId=` | Delete a credential |
+| `GET` | `/vault/search?agentId=&search=&type=` | Search credentials |
+| `POST` | `/vault/generate-password` | Generate a random password |
+| `GET` | `/vault/totp/{id}?agentId=` | Get the current TOTP code |
+| `GET` | `/vault/status?agentId=` | Vault connection status |
+| `POST` | `/vault/sync` | Trigger a vault sync |
 
 ## TOTP Support
 
@@ -129,6 +142,153 @@ password = anima.vault.generate_password(
 print(password.value)
 ```
 
+## Credential Sharing
+
+Share a credential from one agent to another, with a scoped permission and optional expiry. Sharing is one credential to one target agent at a time.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/vault/share` | Share a credential with another agent |
+| `GET` | `/vault/shares?agentId=&direction=` | List shares (granted or received) |
+| `POST` | `/vault/share/revoke` | Revoke a share |
+
+`POST /vault/share` takes `credentialId`, `sourceAgentId`, `targetAgentId`, a `permission`, and either `expiresAt` or `expiresInSeconds`. Revoke with a `shareId`.
+
+**Permissions:**
+
+| Permission | Grants |
+|------------|--------|
+| `READ` | View credential metadata only |
+| `USE` | Auto-fill the credential in the CLI or browser, without seeing its value |
+| `MANAGE` | Full read/update/delete access to the shared credential |
+
+## Ephemeral Tokens
+
+An ephemeral token is a short-lived, single-use handle to a credential. The agent puts the token in a command; the CLI or extension exchanges it for the real value at the moment of execution.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/vault/token` | Create an ephemeral token |
+| `POST` | `/vault/token/exchange` | Exchange a token for its credential |
+| `POST` | `/vault/token/revoke` | Revoke all tokens for a credential |
+
+`POST /vault/token` takes `credentialId`, a `scope`, and an optional `ttlSeconds` (and `agentId` / `taskId`). The token value (`vtk_<hex>`) is returned **only at creation time**.
+
+**Scopes:**
+
+| Scope | Purpose |
+|-------|---------|
+| `autofill` | CLI and browser-extension auto-fill |
+| `proxy` | Delegated access through the local proxy |
+| `export` | One-time credential reveal |
+
+**Token security:**
+
+- Tokens use the `vtk_` prefix with 32 bytes of entropy.
+- Only the token's hash is stored — the raw token is never persisted.
+- Tokens are single-use: consumed on first exchange.
+- Configurable TTL (10–3600 seconds).
+- Scope-bound: a token scoped to `autofill` cannot be used for `export`.
+
+## Secret Redaction
+
+Output from any command that used injected credentials is scanned and redacted before it returns to the LLM, so a secret that appears in a response body or error message never lands in the model's context.
+
+```bash
+some-command | anima vault redact --agent <agent-id>
+# any value matching a stored credential becomes [REDACTED]
+```
+
+`anima vault redact` fetches the agent's credentials, replaces any matching secret value in stdin with `[REDACTED]`, and can take extra literal strings via `--pattern`.
+
+## Template Substitution
+
+For structured references inside a block of text, use the template syntax and let the CLI resolve it at execution time:
+
+```text
+{{vault:credentialId:login.password}}
+{{vault:credentialId:apiKey.key}}
+{{vault:credentialId:oauthToken.accessToken}}
+```
+
+The CLI detects `{{vault:...}}` templates (and `vtk_` tokens) in input and exchanges them for real credentials before the command runs.
+
+## Zero-Knowledge Execution
+
+Ephemeral tokens, template substitution, and redaction protect against *accidental* plaintext exposure. For a tighter boundary — where the agent authors the call but can never read the secret — the CLI adds a set of execution primitives. All resolve credentials through [SecretRef & `anima.json`](/secret-ref).
+
+### `anima vault exec`
+
+Run a subprocess with resolved secrets injected as environment variables. The agent writes the command; the CLI resolves the `anima.json` references and spawns the child — the model's context never sees the values. Output is scrubbed by the redaction engine.
+
+```bash
+anima vault exec -- gh api /user
+anima vault exec -- psql -c "select count(*) from users"
+```
+
+### `anima vault proxy`
+
+A loopback-only HTTPS proxy that injects an `Authorization` header into outbound requests. The agent holds only a short-lived proxy token (`pxt_`); the credential lives in the CLI process and is never reachable from the network. Requests to any host not on `--allow-host` are rejected.
+
+```bash
+anima vault proxy --cred cred_github --allow-host api.github.com --port 19840 &
+# proxy_token=pxt_...  port=19840
+
+curl -H "X-Anima-Proxy: pxt_..." \
+  http://127.0.0.1:19840/https://api.github.com/user
+```
+
+### `anima vault agent` (keystroke injection)
+
+A local daemon that binds to a Unix socket (mode `0600`) and — on a user-confirmed hotkey — types a credential into the focused text field. Useful for apps that can't take a proxy, such as desktop SSH clients or native database UIs.
+
+```bash
+anima vault agent start
+anima vault type --cred GH_TOKEN   # press the hotkey to confirm; the daemon types the value
+```
+
+### `anima vault unlock`
+
+A master-key ceremony that mints a short-lived session for plaintext reveals. Without an active unlock, the CLI refuses any command that would print plaintext to the terminal, even if you hold a master key.
+
+```bash
+anima vault unlock                    # prompts for the master key, ~5-minute session
+anima vault get cred_github --unmask  # prints plaintext
+anima vault unlock --lock             # end the session early
+```
+
+### `anima vault audit`
+
+Scan the filesystem for leaked secrets, cross-referenced against the vault inventory. High-confidence key patterns are flagged by heuristic; literal values that match a stored credential are flagged by exact comparison.
+
+```bash
+anima vault audit .        # scan the current directory
+anima vault audit --check  # CI mode: exit non-zero on findings
+```
+
+<Note>
+  MCP vault tools never return plaintext to the model. They hand back a plan that a trusted local process (the CLI, the extension, or the keystroke daemon) executes — the LLM composes intent, and the local process enforces the secret boundary.
+</Note>
+
+## Browser Extension
+
+The Anima browser extension performs vault credential autofill for login forms, so an agent can log in without the password ever entering its context:
+
+1. The agent stores credential data ephemerally.
+2. The agent asks the extension to fill the detected login form.
+3. The extension detects the username, password, and TOTP fields.
+4. Credentials are injected and immediately zeroized from memory.
+
+## Access Log
+
+Every credential access — token mints, `exec` invocations, and masked reads — is recorded in the vault audit log.
+
+```bash
+anima vault audit   # (GET /vault/audit) — the vault access stream
+```
+
+In the console, the **Vault → Access Log** page filters this stream and highlights plaintext reveals (via a master key) with a warning banner, so compliance teams can confirm they were intentional. Masked accesses from agent keys are the common path and don't need review.
+
 ## Deprovision
 
 Remove an agent's vault and all stored credentials:
@@ -139,7 +299,7 @@ anima.vault.deprovision(agent_id=agent.id)
 
 ## Security
 
-- All credentials are encrypted at rest using AES-256-GCM
-- Each agent's vault is isolated — agents cannot access each other's credentials
-- Vault access is scoped to the agent's API key
-- See [Encryption](/encryption) for details on the encryption model
+- All credentials are encrypted at rest with AES-256-GCM.
+- Each agent's vault is isolated, with its own per-agent encryption key — agents cannot access each other's credentials.
+- Vault access is scoped to the agent's API key.
+- See [Encryption](/encryption) for the per-agent key-derivation model, and [SecretRef & `anima.json`](/secret-ref) for the reference schema used by `exec` and `proxy`.

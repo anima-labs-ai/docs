@@ -35,7 +35,8 @@
 	},
 	"redirects": [
 		{ "source": "/docs/:slug*", "destination": "/:slug*" },
-		{ "source": "/protocols/index", "destination": "/protocols/overview" }
+		{ "source": "/protocols/index", "destination": "/protocols/overview" },
+		{ "source": "/coding-agents", "destination": "/integrations" }
 	],
 	"navigation": {
 		"tabs": [
@@ -47,11 +48,12 @@
 						"icon": "rocket",
 						"pages": [
 							"getting-started",
+							"ai-agents",
+							"integrations",
 							"install",
 							"quickstart-email",
 							"quickstart-voice",
 							"quickstart-vault",
-							"coding-agents",
 							"sdks"
 						]
 					},
@@ -60,6 +62,7 @@
 						"icon": "layers",
 						"pages": [
 							"vault",
+							"secret-ref",
 							"phone",
 							"conversational-calls",
 							"voice-catalog",

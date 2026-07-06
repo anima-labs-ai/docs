@@ -5,7 +5,7 @@ description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP cl
 
 # MCP Servers
 
-Anima exposes 53 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, cards, and more.
+Anima exposes 53 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, identity cards, and more.
 
 Tools are organized into domain servers, so you can install only what you need:
 
@@ -30,16 +30,14 @@ npx @anima-labs/mcp-phone --api-key=ak_...
 
 ### Option B: Hosted (remote)
 
-Connect directly to Anima's hosted servers — no local install needed:
+Connect to Anima's hosted MCP endpoint — no local install needed:
 
 ```
-https://mcp-agent-829045119779.us-central1.run.app/mcp
-https://mcp-email-829045119779.us-central1.run.app/mcp
-https://mcp-phone-829045119779.us-central1.run.app/mcp
-https://mcp-cards-829045119779.us-central1.run.app/mcp
-https://mcp-vault-829045119779.us-central1.run.app/mcp
-https://mcp-platform-829045119779.us-central1.run.app/mcp
+https://mcp.useanima.sh/mcp
 ```
+
+Authenticate with your API key as a Bearer token (`Authorization: Bearer ak_...`). The hosted
+endpoint exposes the full tool surface, so there is nothing to install or keep updated.
 
 ## Configuration
 
@@ -77,7 +75,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y", "mcp-remote",
-        "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "https://mcp.useanima.sh/mcp",
         "--header", "Authorization:${ANIMA_TOKEN}"
       ],
       "env": {
@@ -95,7 +93,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "anima-phone": {
-      "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+      "url": "https://mcp.useanima.sh/mcp",
       "headers": {
         "Authorization": "Bearer ak_..."
       }
@@ -112,7 +110,7 @@ claude mcp add anima-phone -- npx -y @anima-labs/mcp-phone
 
 # Hosted
 claude mcp add anima-phone --transport http \
-  --url https://mcp-phone-829045119779.us-central1.run.app/mcp \
+  --url https://mcp.useanima.sh/mcp \
   --header "Authorization: Bearer ak_..."
 ```
 
@@ -126,7 +124,7 @@ Add to `.vscode/settings.json`:
     "servers": {
       "anima-phone": {
         "type": "http",
-        "url": "https://mcp-phone-829045119779.us-central1.run.app/mcp",
+        "url": "https://mcp.useanima.sh/mcp",
         "headers": {
           "Authorization": "Bearer ${input:anima-key}"
         }
@@ -223,4 +221,4 @@ Once connected, ask your AI assistant natural language questions:
 - "Make a voice call to +1-555-0123" → **mcp-phone**
 - "Register my agent in the public registry" → **mcp-agent**
 
-For editor-specific setup prompts and safety guidance, see [Coding Agents](/coding-agents).
+For editor-specific setup, see [Connect your AI client](/integrations).

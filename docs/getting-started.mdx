@@ -1,121 +1,252 @@
 ---
 title: "Getting Started"
-description: "Learn how to run Anima locally, create your first agent email identity, and configure production outbound mail."
+description: "Install the Anima CLI, provision an agent identity, and send its first email from the terminal — then call the same platform from your code."
 ---
+{/* SHIP GATE: requires CLI v0.6.5 published to npm (@anima-labs/cli) + v0.6.5 signed Linux binaries on GitHub Releases. Homebrew is NOT a channel (dead stub tap). */}
 
 # Getting Started
 
-Give your AI agents a real email address in under 5 minutes, then validate the same flow locally before you wire up production providers.
+Give an AI agent a real, owned identity — an email inbox, and optionally a phone number — and send its first message, all from the terminal. Anima is hosted; there is nothing to run locally and no infrastructure to stand up. This page takes you from zero to a working agent that can send email.
 
-## 1. Run Anima locally
+<Steps>
 
-The repository includes a startup script that boots the local stack for development:
+<Step title="Install the CLI">
+
+The `anima` CLI is the fastest way to provision and drive an agent.
+
+<Tabs>
+
+<Tab title="npm (recommended)">
 
 ```bash
-./start.sh
+npm install -g @anima-labs/cli
 ```
 
-That script starts Docker services for **Postgres**, **Redis**, **Stalwart**, and **Vaultwarden**, runs environment checks, applies Prisma migrations, and launches:
+Bun and pnpm work too: `bun add -g @anima-labs/cli` or `pnpm add -g @anima-labs/cli`. Use this on your development machine, and as a dependency of any Node/TypeScript agent project.
 
-- Web app: `http://localhost:4000`
-- API: `http://localhost:4001`
-- OpenAPI spec: `http://localhost:4001/openapi.json`
-
-### What works locally vs production
-
-- **Inbound mail** can be tested locally because Stalwart runs in Docker.
-- **Domain management UI** can be tested locally end-to-end.
-- **Outbound SES delivery** requires valid AWS SES credentials and a verified SES identity, so that part cannot be fully exercised with the local stack alone.
-
-If you only want to validate the custom-domain UX, DNS record generation, mailbox provisioning, and inbound pipeline, local development is enough.
-
-## 2. Installation
-
-<Tabs items={["Python", "Node.js"]}>
-<Tab value="Python">
-```bash
-pip install anima-labs
-```
 </Tab>
-<Tab value="Node.js">
+
+<Tab title="Signed Linux binary (containers / CI)">
+
+For containers, servers, and CI runners, download the signed static binary from [GitHub Releases](https://github.com/anima-labs-ai/cli/releases) (`anima-linux-x64` / `anima-linux-arm64`). Every release is signed with Sigstore keyless signing; verify it before installing:
+
+```bash
+VERSION="v0.6.5"
+ARCH="$(uname -m | sed 's/x86_64/x64/; s/aarch64/arm64/')"
+BIN="anima-linux-${ARCH}"
+BASE="https://github.com/anima-labs-ai/cli/releases/download/${VERSION}"
+
+curl -fsSL -O "${BASE}/${BIN}"
+curl -fsSL -O "${BASE}/${BIN}.sigstore.bundle"
+
+cosign verify-blob \
+  --bundle "${BIN}.sigstore.bundle" \
+  --certificate-identity-regexp 'https://github.com/anima-labs-ai/cli/\.github/workflows/release\.yml@refs/tags/v.+' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  "${BIN}"
+
+install -m 0755 "${BIN}" /usr/local/bin/anima
+```
+
+macOS and Windows binaries are not shipped — on those platforms use the npm package. See [Install the Anima CLI](/install) for the full verification chain, the `curl | sh` installer, and Dockerfile examples.
+
+</Tab>
+
+</Tabs>
+
+Confirm it's on your PATH:
+
+```bash
+anima --version
+```
+
+The primary binary is `anima`; `am` is a shorter alias for the same tool.
+
+</Step>
+
+<Step title="Onboard">
+
+Run the guided onboarding:
+
+```bash
+anima onboard
+```
+
+If you're not signed in yet, `anima onboard` starts setup for you. Choosing **Create a fresh agent identity** provisions an organization, an agent, and an email inbox in a single flow, and saves your credentials locally. You'll be asked for two things:
+
+- **The agent owner's email** — the human who owns this agent. A 6-digit verification code is sent here.
+- **A username for the agent** — this becomes the agent's address, `<username>@agents.useanima.sh`.
+
+Onboarding then shows your identity and plan tier, offers a couple of optional test-mode demos (no real email is sent), and offers to wire Anima into your AI client over MCP. When it finishes you have a working agent identity with an inbox, its credentials stored in `~/.anima`, and the commands to do everything else.
+
+<Note>
+  Already have an Anima organization and API key? Choose **Configure with an existing API key** instead, or run `anima init --non-interactive --api-key ak_...`.
+</Note>
+
+</Step>
+
+<Step title="Verify to unlock sending">
+
+A brand-new agent starts **unverified**, and an unverified agent may only email its own owner. To unlock sending to anyone, get the 6-digit code from the owner's inbox and submit it:
+
+```bash
+anima verify <code>
+```
+
+On success, the agent is verified and can send to any recipient. You can confirm your identity and tier at any time:
+
+```bash
+anima auth whoami
+```
+
+</Step>
+
+<Step title="Send the first email">
+
+Send an email from your agent. Until the agent is verified, send it to the owner's address — that always works and proves the inbox is live end to end. You'll need the agent's ID, which onboarding printed and stored; `anima auth whoami` shows your identity.
+
+```bash
+anima email send \
+  --agent <agent-id> \
+  --to you@example.com \
+  --subject "Hello from my Anima agent" \
+  --body "This email was sent by an AI agent."
+```
+
+The command prints the sent message's ID. To watch messages arrive and other events in real time, open the live event stream:
+
+```bash
+anima tail
+```
+
+</Step>
+
+<Step title="Provision a phone number (optional)">
+
+On a Starter tier or above, give the same agent a phone number for SMS and voice:
+
+```bash
+anima phone provision --agent <agent-id> --country US --capabilities sms,voice
+```
+
+Then text a number you control:
+
+```bash
+anima phone send-sms --agent <agent-id> --to +15551234567 --body "Texting from my Anima agent."
+```
+
+See [Phone & Voice](/phone) for the full SMS-then-call walkthrough.
+
+</Step>
+
+</Steps>
+
+## Use it from code
+
+The same platform is available from the official SDKs. Once onboarding has provisioned an agent, use its ID to send from your application. Set `ANIMA_API_KEY` in your environment (the CLI stored your key under `~/.anima`), or pass the key to the client directly.
+
+<Tabs>
+
+<Tab title="Node.js">
+
 ```bash
 npm install @anima-labs/sdk
 ```
-</Tab>
-</Tabs>
 
-## 3. Create an Agent & Send Email
-
-<Tabs items={["Python", "Node.js"]}>
-<Tab value="Python">
-```python
-from anima import Anima
-
-anima = Anima(api_key="ak_...")
-
-agent = anima.agents.create(name="Support Bot")
-print(f"Agent: {agent.id}")
-
-anima.messages.send_email(
-    agent_id=agent.id,
-    to="user@example.com",
-    subject="Hello from Anima",
-    body="This email was sent by an AI agent.",
-)
-print("Email sent!")
-```
-</Tab>
-<Tab value="Node.js">
 ```ts
 import { Anima } from "@anima-labs/sdk";
 
-const anima = new Anima({ apiKey: "ak_..." });
+const anima = new Anima({ apiKey: process.env.ANIMA_API_KEY });
 
-const agent = await anima.agents.create({ name: "Support Bot" });
-console.log(`Agent: ${agent.id}`);
-
-await anima.messages.sendEmail({
-  agentId: agent.id,
-  to: "user@example.com",
-  subject: "Hello from Anima",
+const message = await anima.messages.sendEmail({
+  agentId: "agent_...",
+  to: ["you@example.com"],
+  subject: "Hello from my Anima agent",
   body: "This email was sent by an AI agent.",
 });
-console.log("Email sent!");
+
+console.log(message.id, message.status);
 ```
+
 </Tab>
+
+<Tab title="Python">
+
+```bash
+pip install anima-labs
+```
+
+```python
+import os
+from anima import Anima
+
+anima = Anima(api_key=os.environ["ANIMA_API_KEY"])
+
+message = anima.messages.send_email(
+    agent_id="agent_...",
+    to=["you@example.com"],
+    subject="Hello from my Anima agent",
+    body="This email was sent by an AI agent.",
+)
+
+print(message.id, message.status)
+```
+
+</Tab>
+
+<Tab title="Go">
+
+```bash
+go get github.com/anima-labs/anima-go
+```
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	anima "github.com/anima-labs/anima-go"
+)
+
+func main() {
+	client := anima.NewClient(os.Getenv("ANIMA_API_KEY"))
+
+	msg, err := client.Messages.SendEmail(context.Background(), anima.SendEmailParams{
+		AgentID: "agent_...",
+		To:      []string{"you@example.com"},
+		Subject: "Hello from my Anima agent",
+		Body:    "This email was sent by an AI agent.",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(msg.ID, msg.Status)
+}
+```
+
+</Tab>
+
 </Tabs>
 
-## 5. Configure production outbound email
+The REST API lives at `https://api.useanima.sh/v1` and accepts your key as either a `Bearer` token or an `X-API-Key` header.
 
-Anima uses a **hybrid email architecture**:
+## Next steps
 
-- **Stalwart** receives inbound mail for agent mailboxes
-- **AWS SES** sends outbound mail and provides DKIM/SPF reputation
-- **Anima** stores message history in its own database and search index
-
-For custom domains, this means:
-
-- **MX** points to your Stalwart hostname (default `mail.useanima.sh`)
-- **SPF** includes `amazonses.com`
-- **MAIL FROM** uses `mail.<domain>` with an SES feedback MX + SPF TXT
-- **DKIM** uses SES Easy DKIM CNAME records
-
-Before production sending works, complete these AWS SES tasks in your chosen SES region:
-
-1. Create or use an AWS account with SES enabled.
-2. Create an SES domain identity for your sending domain.
-3. Configure a custom MAIL FROM subdomain such as `mail.<domain>` in SES.
-4. Add the SES Easy DKIM CNAME records plus the MAIL FROM MX/TXT records in your DNS provider.
-5. Publish or merge the apex SPF record with `include:amazonses.com`.
-6. Create an IAM user or role that can call `ses:SendEmail` and `ses:SendRawEmail`.
-7. Configure SNS bounce and complaint notifications.
-8. Request SES production access so you can send to non-verified recipients.
-
-For the DNS side of custom domains, see [Custom Domains](/custom-domains). For the AWS-side setup, use the [AWS SES Setup](/aws-ses-setup) runbook.
-
-## Next Steps
-
-- [Quickstart: Vault](/quickstart-vault) — Store credentials securely for your agents.
-- [Explore SDKs](/sdks) — Deep dive into the TypeScript and Python client libraries.
-- [MCP Server](/mcp) — Connect Anima to Claude Desktop or other MCP clients.
-- [Examples](/examples) — Complete runnable example agents.
+<CardGroup cols={2}>
+  <Card title="For AI Agents" icon="robot" href="/ai-agents">
+    Let your agent set itself up from `skill.md`, and connect the docs and product MCP servers.
+  </Card>
+  <Card title="Connect your AI client" icon="plug" href="/integrations">
+    Wire Anima's tools into Claude Code, Cursor, Claude Desktop, VS Code, and Windsurf.
+  </Card>
+  <Card title="Quickstart: Vault" icon="lock" href="/quickstart-vault">
+    Store credentials your agent can use without exposing raw secrets to the model.
+  </Card>
+  <Card title="SDKs" icon="code" href="/sdks">
+    Typed clients for Node.js, Python, and Go.
+  </Card>
+</CardGroup>

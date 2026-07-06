@@ -1,42 +1,47 @@
 ---
-title: "Anima Docs"
-description: "Identity infrastructure for AI agents: email, phone, voice, vault, cards, MCP tools, and audit trails."
+title: "Anima"
+description: "Identity and communication infrastructure for AI agents — email, phone, SMS, voice, vault, identity, A2A, and MCP, under one agent identity."
 ---
 
-# Anima Docs
+# Identity and communication infrastructure for AI agents
 
-Anima gives AI agents a real identity: email inboxes, phone numbers, SMS, voice calls, encrypted vault credentials, addresses, DID-based identity, and 53 MCP tools for agent runtimes.
+Anima gives every AI agent a real, owned identity and the channels to act through it: an email inbox it can send and receive from, a phone number for SMS and voice, an encrypted vault for the credentials it needs, a verifiable DID, agent-to-agent messaging, and a full set of MCP tools for agent runtimes. One agent, one identity, one audit trail across every channel — reachable from the CLI, the SDKs, the REST API, or straight from your coding agent.
 
-## Start here
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/getting-started">
+    Install the CLI, provision an agent, and send its first email from the terminal in a few minutes.
+  </Card>
+  <Card title="API Reference" icon="code" href="https://docs.useanima.sh/api-reference">
+    Every endpoint, request, and response for the `https://api.useanima.sh/v1` REST API.
+  </Card>
+  <Card title="For AI Agents" icon="robot" href="/ai-agents">
+    Point your agent at Anima: the one-line setup manifest, the docs MCP server, and machine-readable docs.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/install">
+    Install `anima` in a Node runtime, a container, or CI, with signatures verified end to end.
+  </Card>
+</CardGroup>
 
-| Path | Use it for |
-|------|------------|
-| [Quickstart: Email](/quickstart-email) | Send the first message from an agent inbox |
-| [Phone & Voice](/phone) | Provision a number, text yourself, and place the first call |
-| [Quickstart: Vault](/quickstart-vault) | Store credentials without exposing raw secrets to the model |
-| [Coding Agents](/coding-agents) | Connect Claude Code, Cursor, Windsurf, Claude Desktop, and other MCP clients |
-| [MCP Servers](/mcp) | Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP clients |
-| [Pricing & Limits](/pricing-and-limits) | Check plan caps, phone/SMS rates, voice minutes, and MCP pricing |
+## Channels
 
-## Core surfaces
+<CardGroup cols={2}>
+  <Card title="Email" icon="envelope" href="/quickstart-email">
+    Agent-owned inboxes that send and receive real mail, with custom domains and DKIM/SPF/DMARC handled for you.
+  </Card>
+  <Card title="Phone & Voice" icon="phone" href="/phone">
+    Dedicated numbers for SMS and outbound voice calls, with transcripts and compliance gates enforced server-side.
+  </Card>
+  <Card title="Vault" icon="lock" href="/vault">
+    Encrypted credential storage with TOTP and egress-time injection, so secrets never enter the model's context.
+  </Card>
+  <Card title="Identity" icon="fingerprint" href="/identity/did-method">
+    A verifiable DID per agent, agent cards, a public registry, and agent-to-agent messaging.
+  </Card>
+</CardGroup>
 
-- **Email** - agent-owned inboxes, outbound mail, inbound messages, custom domains
-- **Phone** - dedicated numbers, SMS, inbound replies, voice-capable provisioning
-- **Voice** - outbound calls, transcripts, summaries, call scoring, server-side voice guardrails
-- **Vault** - encrypted credential storage, TOTP, ephemeral handles, policy controls
-- **Identity** - DIDs, agent cards, registry, addresses, and audit trails
-- **MCP** - 53 tools across focused domain servers
+## Build the way you work
 
-## Fast demo
-
-The shortest real-world demo is:
-
-1. Create or select an agent.
-2. Provision a phone number with SMS and voice.
-3. Send yourself an SMS from the agent.
-4. Place a voice call to your phone.
-5. Fetch the transcript after the call ends.
-
-Start with [Phone & Voice](/phone) or run the focused [Voice Calls quickstart](/quickstart-voice).
-
-For agent-driven setup, start with [Coding Agents](/coding-agents). For call-mode choices, see [Conversational Calls](/conversational-calls).
+- **From your terminal** — the [`anima` CLI](/install) provisions identities, sends mail and SMS, places calls, and manages the vault. Start with [`anima onboard`](/getting-started).
+- **From code** — official [SDKs](/sdks) for Node.js, Python, and Go wrap the same API with typed clients.
+- **From your AI client** — wire Anima's tools into Claude Code, Cursor, Claude Desktop, and more. See [Connect your AI client](/integrations).
+- **From your agent** — hand your agent [`https://useanima.sh/skill.md`](/ai-agents) and it sets itself up.

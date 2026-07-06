@@ -104,6 +104,25 @@ anima --version
 anima vault --help
 ```
 
+## Configuration
+
+Every setting resolves in priority order — a flag wins, then an environment
+variable, then the active profile, then your saved defaults:
+
+1. **CLI flag** (e.g. `--org`, `--api-key`, `--api-url`)
+2. **Environment variable** (`ANIMA_API_KEY`, `ANIMA_API_URL`, `ANIMA_DEFAULT_ORG`, `ANIMA_DEFAULT_IDENTITY`, `ANIMA_OUTPUT_FORMAT`)
+3. **Active profile** (`anima config profile use <name>`)
+4. **Saved defaults** (`anima config set <key> <value>` or `anima init`)
+
+This keeps the CLI ergonomic in CI and containers — export your key and default
+org once, then drop the flags:
+
+```bash
+export ANIMA_API_KEY="ak_..."
+export ANIMA_DEFAULT_ORG="org_..."
+anima security scan   # resolves the org from the environment
+```
+
 ## Verify a binary manually
 
 Every release asset has a matching Sigstore bundle. To verify end-to-end without trusting the installer (e.g. in an air-gapped pipeline):

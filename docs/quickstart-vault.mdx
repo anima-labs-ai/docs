@@ -36,13 +36,26 @@ anima.vault.provision(agent_id=agent.id)
 # Store a login credential
 credential = anima.vault.create_credential(
     agent_id=agent.id,
-    name="CRM Login",
     type="login",
-    username="bot@company.com",
-    password="s3cur3-p4ssw0rd",
-    uris=["https://crm.company.com"],
+    name="CRM Login",
+    login={
+        "username": "bot@company.com",
+        "password": "s3cur3-p4ssw0rd",
+        "uris": [{"uri": "https://crm.company.com"}],
+    },
 )
 print(f"Stored: {credential.name}")
+
+# Or let the vault generate the password server-side — it is stored with
+# the credential and never returned; you get back only the credential ref.
+generated = anima.vault.create_credential(
+    agent_id=agent.id,
+    type="login",
+    name="Acme Portal",
+    login={"username": "bot@company.com"},
+    generate_password={},  # defaults: 24 chars, all character classes
+)
+print(f"Credential ref: {generated.id}")
 
 # Retrieve it later
 creds = anima.vault.get_credential(
@@ -83,13 +96,26 @@ await anima.vault.provision({ agentId: agent.id });
 // Store a login credential
 const credential = await anima.vault.createCredential({
   agentId: agent.id,
-  name: "CRM Login",
   type: "login",
-  username: "bot@company.com",
-  password: "s3cur3-p4ssw0rd",
-  uris: ["https://crm.company.com"],
+  name: "CRM Login",
+  login: {
+    username: "bot@company.com",
+    password: "s3cur3-p4ssw0rd",
+    uris: [{ uri: "https://crm.company.com" }],
+  },
 });
 console.log(`Stored: ${credential.name}`);
+
+// Or let the vault generate the password server-side — it is stored with
+// the credential and never returned; you get back only the credential ref.
+const generated = await anima.vault.createCredential({
+  agentId: agent.id,
+  type: "login",
+  name: "Acme Portal",
+  login: { username: "bot@company.com" },
+  generatePassword: {}, // defaults: 24 chars, all character classes
+});
+console.log(`Credential ref: ${generated.id}`);
 
 // Retrieve it later
 const creds = await anima.vault.getCredential({

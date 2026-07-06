@@ -58,15 +58,75 @@ anima vault status --agent <agent-id>
 ### Create a credential
 
 ```python
+# Python
 credential = anima.vault.create_credential(
     agent_id=agent.id,
-    name="CRM Login",
     type="login",
-    username="bot@company.com",
-    password="s3cur3-p4ssw0rd",
-    uris=["https://crm.company.com"],
+    name="CRM Login",
+    login={
+        "username": "bot@company.com",
+        "password": "s3cur3-p4ssw0rd",
+        "uris": [{"uri": "https://crm.company.com"}],
+    },
 )
 ```
+
+```ts
+// TypeScript
+const credential = await anima.vault.createCredential({
+  agentId: agent.id,
+  type: "login",
+  name: "CRM Login",
+  login: {
+    username: "bot@company.com",
+    password: "s3cur3-p4ssw0rd",
+    uris: [{ uri: "https://crm.company.com" }],
+  },
+});
+```
+
+### Create a login with a generated password
+
+For account provisioning, don't supply a password at all — ask the vault to
+generate one server-side in the same call. The password is created inside the
+vault, stored with the credential, and **never returned**: the response
+carries only the credential ref with masked fields. Your code (and, for MCP
+agents, the model's context) never sees the secret.
+
+```python
+# Python
+credential = anima.vault.create_credential(
+    agent_id=agent.id,
+    type="login",
+    name="Acme Portal",
+    login={"username": "bot@company.com", "uris": [{"uri": "https://acme.io/login"}]},
+    generate_password={},  # server defaults: 24 chars, all character classes
+)
+print(credential.id)              # store this ref
+print(credential.login.password)  # "****" — the plaintext stays in the vault
+```
+
+```ts
+// TypeScript
+const credential = await anima.vault.createCredential({
+  agentId: agent.id,
+  type: "login",
+  name: "Acme Portal",
+  login: { username: "bot@company.com", uris: [{ uri: "https://acme.io/login" }] },
+  generatePassword: { length: 32, special: false }, // tune per site policy
+});
+```
+
+Generation options: `length` (8–128, default 24) and the character-class
+toggles `uppercase` / `lowercase` / `number` / `special` (all default `true`).
+`generatePassword` is only valid for `login` credentials and is mutually
+exclusive with `login.password`.
+
+At fill time — for example when the Anima Chrome extension signs in to
+provision an account — the agent mints a single-use, audit-logged vault token
+(`POST /vault/token`, scope `autofill`) and exchanges it for the credential
+(see [Ephemeral Tokens](#ephemeral-tokens) below). The plaintext is revealed
+exactly once, to the component that needs it.
 
 ### Retrieve a credential
 
@@ -129,17 +189,24 @@ print(totp.code)  # Current 6-digit code
 
 ## Password Generation
 
-Generate strong passwords for new accounts:
+For agent flows, prefer the atomic
+[create-with-generated-password](#create-a-login-with-a-generated-password)
+above — it generates and stores the password in one call and never returns
+the plaintext.
 
-```python
-password = anima.vault.generate_password(
-    length=24,
-    uppercase=True,
-    lowercase=True,
-    numbers=True,
-    special=True,
-)
-print(password.value)
+The standalone generator remains available for interactive use. Note that it
+**returns the generated password to the caller**, so it should not be used in
+flows where the secret must stay inside the vault:
+
+```ts
+// TypeScript
+const { password } = await anima.vault.generatePassword({
+  length: 24,
+  uppercase: true,
+  lowercase: true,
+  number: true,
+  special: true,
+});
 ```
 
 ## Credential Sharing
@@ -302,4 +369,6 @@ anima.vault.deprovision(agent_id=agent.id)
 - All credentials are encrypted at rest with AES-256-GCM.
 - Each agent's vault is isolated, with its own per-agent encryption key — agents cannot access each other's credentials.
 - Vault access is scoped to the agent's API key.
+- Credential reads are masked by default; plaintext access requires a master-key `reveal` (audit-logged) or a single-use vault token exchange.
+- Vault-generated passwords never appear in any API response, audit log, or webhook payload — only the credential ref leaves the vault.
 - See [Encryption](/encryption) for the per-agent key-derivation model, and [SecretRef & `anima.json`](/secret-ref) for the reference schema used by `exec` and `proxy`.

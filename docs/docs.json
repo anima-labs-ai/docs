@@ -10,109 +10,154 @@
 	},
 	"logo": "/logo.png",
 	"favicon": "/favicon.png",
+	"icons": {
+		"library": "lucide"
+	},
+	"navbar": {
+		"links": [
+			{ "label": "useanima.sh", "href": "https://useanima.sh" },
+			{ "label": "Changelog", "href": "https://useanima.sh/changelog" }
+		],
+		"primary": {
+			"type": "button",
+			"label": "Open Console",
+			"href": "https://console.useanima.sh"
+		}
+	},
+	"contextual": {
+		"options": ["copy", "view", "claude", "cursor", "vscode", "mcp", "chatgpt"]
+	},
+	"footer": {
+		"socials": {
+			"github": "https://github.com/anima-labs-ai",
+			"x": "https://x.com/UseAnimaSh"
+		}
+	},
+	"redirects": [
+		{ "source": "/docs/:slug*", "destination": "/:slug*" },
+		{ "source": "/protocols/index", "destination": "/protocols/overview" }
+	],
 	"navigation": {
-		"groups": [
+		"tabs": [
 			{
-				"group": "Getting Started",
-				"pages": [
-					"getting-started",
-					"install",
-					"quickstart-email",
-					"quickstart-voice",
-					"quickstart-vault",
-					"sdks"
-				]
-			},
-			{
-				"group": "Platform",
-				"pages": [
-					"vault",
-					"phone",
-					"voice-catalog",
-					"call-intelligence",
-					"custom-domains",
-					"mcp",
-					"webhooks"
-				]
-			},
-			{
-				"group": "Agent Identity & Commerce",
-				"pages": [
+				"tab": "Documentation",
+				"groups": [
 					{
-						"group": "Agent Identity",
+						"group": "Getting Started",
+						"icon": "rocket",
 						"pages": [
-							"identity/did-method",
-							"identity/verifiable-credentials",
-							"identity/agent-cards"
+							"getting-started",
+							"install",
+							"quickstart-email",
+							"quickstart-voice",
+							"quickstart-vault",
+							"coding-agents",
+							"sdks"
 						]
 					},
 					{
-						"group": "Agent Registry",
-						"pages": ["registry/overview"]
+						"group": "Platform",
+						"icon": "layers",
+						"pages": [
+							"vault",
+							"phone",
+							"conversational-calls",
+							"voice-catalog",
+							"call-intelligence",
+							"custom-domains",
+							"mcp",
+							"pricing-and-limits",
+							"webhooks"
+						]
 					},
 					{
-						"group": "Agent Wallet",
-						"pages": ["wallet/overview"]
+						"group": "Agent Identity & Commerce",
+						"icon": "fingerprint",
+						"pages": [
+							{
+								"group": "Agent Identity",
+								"pages": [
+									"identity/did-method",
+									"identity/verifiable-credentials",
+									"identity/agent-cards"
+								]
+							},
+							{
+								"group": "Agent Registry",
+								"pages": ["registry/overview"]
+							},
+							{
+								"group": "Agent Wallet",
+								"pages": ["wallet/overview"]
+							},
+							{
+								"group": "Multi-Tenancy Pods",
+								"pages": ["pods/overview"]
+							},
+							{
+								"group": "A2A Protocol",
+								"pages": ["a2a/overview"]
+							}
+						]
 					},
 					{
-						"group": "Multi-Tenancy Pods",
-						"pages": ["pods/overview"]
+						"group": "Security",
+						"icon": "shield",
+						"pages": [
+							"security",
+							"encryption",
+							{
+								"group": "Security Operations",
+								"pages": ["security/audit-log", "security/anomaly-detection"]
+							}
+						]
 					},
 					{
-						"group": "A2A Protocol",
-						"pages": ["a2a/overview"]
+						"group": "Compliance",
+						"icon": "clipboard-check",
+						"pages": ["compliance/soc2-controls", "compliance/reporting"]
+					},
+					{
+						"group": "Protocols",
+						"icon": "network",
+						"pages": [
+							"protocols/overview",
+							"protocols/visa-tap",
+							"protocols/ap2",
+							"protocols/mastercard-vi",
+							"protocols/voice-websocket"
+						]
+					},
+					{
+						"group": "SDK Reference",
+						"icon": "code",
+						"pages": ["sdks/go", "sdks/migration"]
+					},
+					{
+						"group": "Resources",
+						"icon": "book-open",
+						"pages": ["examples", "faq"]
+					},
+					{
+						"group": "Legal",
+						"icon": "scale",
+						"pages": [
+							"legal/terms-of-service",
+							"legal/privacy-policy",
+							"legal/data-processing-agreement"
+						]
+					},
+					{
+						"group": "Blog",
+						"icon": "newspaper",
+						"pages": [
+							"blog/introducing-anima",
+							"blog/anima-vs-agentmail",
+							"blog/agent-identity-did",
+							"blog/give-agent-phone-number",
+							"blog/x402-payments"
+						]
 					}
-				]
-			},
-			{
-				"group": "Security",
-				"pages": [
-					"security",
-					"encryption",
-					{
-						"group": "Security Operations",
-						"pages": ["security/audit-log", "security/anomaly-detection"]
-					}
-				]
-			},
-			{
-				"group": "Compliance",
-				"pages": ["compliance/soc2-controls", "compliance/reporting"]
-			},
-			{
-				"group": "Protocols",
-				"pages": [
-					"protocols/overview",
-					"protocols/visa-tap",
-					"protocols/ap2",
-					"protocols/mastercard-vi",
-					"protocols/voice-websocket"
-				]
-			},
-			{
-				"group": "SDK Reference",
-				"pages": ["sdks/go", "sdks/migration"]
-			},
-			{
-				"group": "Resources",
-				"pages": ["examples", "faq"]
-			},
-			{
-				"group": "Legal",
-				"pages": [
-					"legal/terms-of-service",
-					"legal/privacy-policy",
-					"legal/data-processing-agreement"
-				]
-			},
-			{
-				"group": "Blog",
-				"pages": [
-					"blog/introducing-anima",
-					"blog/anima-vs-agentmail",
-					"blog/agent-identity-did",
-					"blog/give-agent-phone-number",
-					"blog/x402-payments"
 				]
 			}
 		]

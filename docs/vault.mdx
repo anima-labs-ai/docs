@@ -168,7 +168,7 @@ anima.vault.delete_credential(
 | `GET` | `/vault/credentials/{id}?agentId=` | Get a single credential |
 | `POST` | `/vault/credentials` | Create a credential |
 | `PUT` | `/vault/credentials/{id}` | Update a credential |
-| `DELETE` | `/vault/credentials/{id}?agentId=` | Delete a credential |
+| `DELETE` | `/vault/credentials/{id}` | Delete a credential (`agentId` in the JSON body) |
 | `GET` | `/vault/search?agentId=&search=&type=` | Search credentials |
 | `POST` | `/vault/generate-password` | Generate a random password |
 | `GET` | `/vault/totp/{id}?agentId=` | Get the current TOTP code |

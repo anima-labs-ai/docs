@@ -1,6 +1,6 @@
 ---
 title: "Encryption & Security"
-description: "Learn how Anima uses AES-256-GCM field-level encryption, envelope encryption, and key rotation to protect sensitive data."
+description: "Learn how Anima uses AES-256-GCM field-level encryption, envelope encryption, per-agent key derivation, and key rotation to protect sensitive data."
 ---
 
 # Encryption & Security
@@ -96,3 +96,23 @@ export { prisma };
 ```
 
 > **Warning:** Never log decrypted secrets, and never render plaintext credentials in client-side UI.
+
+## Vault Per-Agent Encryption
+
+The [Vault](/vault) extends this model with a unique Data Encryption Key (DEK) per agent, derived from the organization DEK with HKDF:
+
+```text
+HKDF-SHA256(
+  ikm  = orgDek,
+  salt = SHA256(agentId),
+  info = "anima-vault-agent-dek"
+) → agentDek (32 bytes)
+```
+
+This gives three properties:
+
+- **Cross-agent isolation** — Agent A cannot decrypt Agent B's credentials, because each derives a different DEK.
+- **No extra key storage** — the derivation is deterministic, so agent DEKs are computed on demand rather than stored.
+- **Rotation cascades** — rotating the organization DEK automatically re-derives (and so rotates) every agent DEK.
+
+See the [Vault documentation](/vault) for how these keys protect credential storage, sharing, and injection.

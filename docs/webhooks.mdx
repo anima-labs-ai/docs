@@ -1,15 +1,15 @@
 ---
 title: "Webhooks"
-description: "Configure webhooks to receive real-time updates for email events."
+description: "Configure webhooks to receive real-time updates for email, SMS, and call events — with signed, replay-protected deliveries."
 ---
 
 # Webhooks
 
-Subscribe to real-time events like incoming emails or delivery failures.
+Subscribe to real-time events like incoming emails, delivery failures, and completed calls.
 
 ## Configuration
 
-Configure webhooks in the dashboard to receive event payloads in real time.
+Configure webhooks in the dashboard, via the API, the CLI, the `webhook_set` MCP tool, or any SDK. Each delivery is a JSON POST to your endpoint:
 
 ```json
 {
@@ -29,32 +29,75 @@ Configure webhooks in the dashboard to receive event payloads in real time.
 
 | Event Name | Description |
 |---|---|
-| `message.received` | Triggered when an agent receives a new email. |
-| `message.sent` | Triggered when an email is successfully sent. |
-| `message.failed` | Triggered when an email fails to send or bounces. |
+| `message.received` | Triggered when an agent receives a new email or SMS. |
+| `message.sent` | Triggered when a message is successfully sent. |
+| `message.failed` | Triggered when a message fails to send or bounces. |
 | `agent.created` | Triggered when a new agent mailbox is created. |
+| `call.ended` | Triggered when a voice call completes. |
 
-## Verification
+The full, current list is available from `GET /webhooks/event-types`.
 
-Verify webhook requests using the `X-Anima-Signature` header.
+## Signing secret
+
+When you create a webhook, the API returns a `secret` **once**, in the create response. Store it securely — read endpoints (`GET /webhooks` and `GET /webhooks/{id}`) never return it again. If you lose it, rotate it:
+
+```bash
+curl -X POST https://api.useanima.sh/v1/webhooks/{id}/rotate-secret \
+  -H "Authorization: Bearer mk_..."
+# → { "id": "wh_...", "secret": "<new secret, shown once>" }
+```
+
+Rotating immediately invalidates the previous secret.
+
+## Verifying deliveries
+
+Every delivery carries a signature and a timestamp so you can confirm it came from Anima and reject replays:
+
+| Header | Description |
+|---|---|
+| `X-Anima-Signature` | `v1=<hex>` — HMAC-SHA256 of `{timestamp}.{rawBody}`, keyed by your signing secret. |
+| `X-Anima-Timestamp` | ISO-8601 time the delivery was signed; bound into the signature. |
+| `X-Anima-Event` | The event name (e.g. `message.received`). |
+| `X-Anima-Delivery-Id` | Stable id for this delivery, unchanged across retries. |
+
+Recompute the HMAC over `{timestamp}.{rawBody}`, compare it in constant time, and reject deliveries whose timestamp falls outside a tolerance window (for example, 5 minutes). The timestamp is part of the signed content specifically so you can stop replays.
 
 ```ts
-import crypto from "crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
-function verifyWebhook(payload: string, signature: string, secret: string) {
-  const hmac = crypto.createHmac("sha256", secret);
-  const digest = hmac.update(payload).digest("hex");
-  return signature === digest;
+const TOLERANCE_MS = 5 * 60 * 1000;
+
+export function verifyAnimaWebhook(
+  rawBody: string,
+  headers: { "x-anima-signature": string; "x-anima-timestamp": string },
+  secret: string,
+): boolean {
+  const timestamp = headers["x-anima-timestamp"];
+  // Reject stale or replayed deliveries.
+  if (Math.abs(Date.now() - Date.parse(timestamp)) > TOLERANCE_MS) return false;
+
+  const provided = headers["x-anima-signature"].replace(/^v1=/, "");
+  const expected = createHmac("sha256", secret)
+    .update(`${timestamp}.${rawBody}`)
+    .digest("hex");
+
+  const a = Buffer.from(provided, "hex");
+  const b = Buffer.from(expected, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 ```
 
+<Warning>
+  Verify against the **raw request body**, before any JSON parse or re-serialize — re-encoding can change bytes and break the signature.
+</Warning>
+
 ## Advanced settings
 
-Every delivery is signed with `X-Anima-Signature` (see [Verification](#verification)). On top of that, you can control how Anima authenticates to your endpoint and how fast it delivers.
+The `X-Anima-Signature` HMAC already proves a delivery came from Anima. On top of it, you can have Anima present a credential your endpoint checks, and control how fast it delivers.
 
 ### Endpoint authentication
 
-Have Anima present a credential your endpoint checks, so only Anima can invoke it. This is in addition to the HMAC signature, and it's handy when your gateway expects a header rather than a signature.
+Handy when your gateway expects a header rather than a signature. This is in addition to the HMAC.
 
 | Type | What Anima sends |
 |---|---|
@@ -62,16 +105,14 @@ Have Anima present a credential your endpoint checks, so only Anima can invoke i
 | `basic` | `Authorization: Basic <base64(username:password)>` |
 | `custom_header` | A header you name, e.g. `X-My-Secret: <value>` |
 
-The credential is write-only. You set it on create or update, it's never returned by a read, and it's encrypted at rest.
+The credential is write-only — set on create or update, never returned by a read, encrypted at rest.
 
 ### Delivery throttling and retries
 
-- **Rate limit** — cap deliveries per minute to a single endpoint (`rateLimitPerMinute`). Over-limit deliveries are deferred to the next window, not dropped.
-- **Retries** — set the maximum delivery attempts before a delivery is dead-lettered (`maxAttempts`, default 3). Failed deliveries retry with exponential backoff, and an endpoint that keeps failing is auto-disabled.
+- **`rateLimitPerMinute`** — cap deliveries per minute to a single endpoint. Over-limit deliveries defer to the next window rather than dropping.
+- **`maxAttempts`** — max delivery attempts before dead-lettering (default 3). Retries use exponential backoff, and an endpoint that keeps failing is auto-disabled.
 
-### Setting them
-
-Configure these when you create or update a webhook — via the API, the [MCP `webhook_set` tool](/mcp), the CLI, or any SDK:
+Set these when you create or update a webhook — via the API, the `webhook_set` MCP tool, the CLI, or any SDK:
 
 ```bash
 # CLI

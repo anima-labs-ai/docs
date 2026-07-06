@@ -1,0 +1,87 @@
+---
+title: "For AI Agents"
+description: "Anima is built to be operated by AI agents. Point your agent at the skill manifest, connect the docs MCP server, and read the docs as machine-readable markdown."
+---
+
+# For AI Agents
+
+Anima is designed to be set up and operated by an AI agent, not just a human clicking through a dashboard. If you are a coding agent — or you are handing this page to one — everything below is meant to be consumed directly.
+
+## Hand your agent the setup manifest
+
+The fastest path is to let the agent read Anima's skill manifest and follow it. Paste this into Claude Code, Cursor, Claude Desktop, or any MCP-aware agent:
+
+```text
+Read https://useanima.sh/skill.md and get me set up with Anima.
+```
+
+[`https://useanima.sh/skill.md`](https://useanima.sh/skill.md) is an executable, agent-facing manifest. It walks the agent through installing the CLI, authenticating, provisioning an agent identity, wiring Anima as an MCP server, and finishing onboarding — using your existing API key if you already have one.
+
+## Connect the docs MCP server
+
+Anima hosts a Model Context Protocol server for the documentation itself, so your agent can search and retrieve authoritative docs content instead of guessing from stale training data.
+
+| | |
+|---|---|
+| **Endpoint** | `https://docs.useanima.sh/mcp` |
+| **Transport** | Streamable HTTP |
+| **Auth** | None — the docs server is public and read-only |
+
+It exposes search and retrieval tools over the published documentation. Add it to any client that supports remote MCP.
+
+<CodeGroup>
+```bash Claude Code
+claude mcp add anima-docs --transport http --url https://docs.useanima.sh/mcp
+```
+
+```json Cursor / other HTTP clients
+{
+  "mcpServers": {
+    "anima-docs": {
+      "url": "https://docs.useanima.sh/mcp"
+    }
+  }
+}
+```
+</CodeGroup>
+
+<Note>
+  The docs MCP server answers questions about Anima from public documentation. To let an agent actually **do** things — send email, provision a number, place a call, use the vault — connect the product MCP servers described in [Connect your AI client](/integrations).
+</Note>
+
+## Give your agent the product tools
+
+Anima's capabilities are exposed as MCP tools your agent can call. Wire them into your client with the CLI:
+
+```bash
+anima setup-mcp install --all
+```
+
+This configures the Anima MCP servers for every supported client detected on the machine. See [Connect your AI client](/integrations) for per-client configuration, the hosted endpoint, and the full tool list.
+
+## Read the docs as markdown
+
+Every documentation page is available as raw markdown — just append `.md` to the URL. This is the cleanest way for an agent to ingest a page without parsing HTML.
+
+```bash
+curl https://docs.useanima.sh/getting-started.md
+curl https://docs.useanima.sh/webhooks.md
+```
+
+For a whole-site view, two indexes follow the [llms.txt](https://llmstxt.org) convention:
+
+| File | Contents |
+|------|----------|
+| [`https://docs.useanima.sh/llms.txt`](https://docs.useanima.sh/llms.txt) | A compact index of every documentation page, for discovery. |
+| [`https://docs.useanima.sh/llms-full.txt`](https://docs.useanima.sh/llms-full.txt) | The full documentation concatenated into one file, for ingestion. |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Connect your AI client" icon="plug" href="/integrations">
+    Wire Anima's tools into Claude Code, Cursor, Claude Desktop, VS Code, and Windsurf.
+  </Card>
+  <Card title="Getting Started" icon="rocket" href="/getting-started">
+    The CLI-first path: install, onboard, and send from the terminal.
+  </Card>
+</CardGroup>

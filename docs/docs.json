@@ -35,6 +35,8 @@
 	},
 	"redirects": [
 		{ "source": "/docs/:slug*", "destination": "/:slug*" },
+		{ "source": "/platform/:slug*", "destination": "/:slug*" },
+		{ "source": "/protocols", "destination": "/protocols/overview" },
 		{ "source": "/protocols/index", "destination": "/protocols/overview" },
 		{ "source": "/coding-agents", "destination": "/integrations" }
 	],
@@ -68,7 +70,7 @@
 							"voice-catalog",
 							"call-intelligence",
 							"custom-domains",
-							"mcp",
+							"mcp-servers",
 							"pricing-and-limits",
 							"webhooks"
 						]

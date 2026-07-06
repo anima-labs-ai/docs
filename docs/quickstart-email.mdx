@@ -9,7 +9,8 @@ Give your AI agent a real email address and send its first message.
 
 ## Prerequisites
 
-- An Anima API key from [console.useanima.sh](https://console.useanima.sh)
+- Your org's **master key** (`mk_...`) from [console.useanima.sh](https://console.useanima.sh) — creating agents is a master-key operation
+- Your organization ID (`org_...`), shown in the console
 - Python 3.10+ or Node.js 18+
 
 ## Python
@@ -21,16 +22,20 @@ pip install anima-labs
 ```python
 from anima import Anima
 
-anima = Anima(api_key="ak_...")
+anima = Anima(api_key="mk_...")  # master key — agent creation is admin-gated
 
 # Create an agent with an email inbox
-agent = anima.agents.create(name="My First Agent")
+agent = anima.agents.create(
+    org_id="org_...",  # your organization ID, from the console
+    name="My First Agent",
+    slug="my-first-agent",
+)
 print(f"Agent: {agent.id}")
 
 # Send an email
 anima.messages.send_email(
     agent_id=agent.id,
-    to="recipient@example.com",
+    to=["recipient@example.com"],
     subject="Hello from my AI agent",
     body="This email was sent by an AI agent powered by Anima.",
 )
@@ -46,16 +51,20 @@ npm install @anima-labs/sdk
 ```ts
 import { Anima } from "@anima-labs/sdk";
 
-const anima = new Anima({ apiKey: "ak_..." });
+const anima = new Anima({ apiKey: "mk_..." }); // master key — agent creation is admin-gated
 
 // Create an agent with an email inbox
-const agent = await anima.agents.create({ name: "My First Agent" });
+const agent = await anima.agents.create({
+  orgId: "org_...", // your organization ID, from the console
+  name: "My First Agent",
+  slug: "my-first-agent",
+});
 console.log(`Agent: ${agent.id}`);
 
 // Send an email
 await anima.messages.sendEmail({
   agentId: agent.id,
-  to: "recipient@example.com",
+  to: ["recipient@example.com"],
   subject: "Hello from my AI agent",
   body: "This email was sent by an AI agent powered by Anima.",
 });

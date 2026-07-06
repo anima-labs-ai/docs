@@ -54,6 +54,46 @@ const policies = [
 ];
 ```
 
+## Agent Capability Policies
+
+Separate from content scanning: each agent carries an optional **capability policy** — hard limits an org admin sets on what the agent may do, regardless of message content.
+
+Read it with `GET /v1/agents/{agentId}/policy` (any key in the org). Write it with `PUT /v1/agents/{agentId}/policy` (master key only):
+
+```bash
+curl -X PUT https://api.useanima.sh/v1/agents/agt_.../policy \
+  -H "Authorization: Bearer mk_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "policy": {
+      "email": {
+        "allowedRecipientDomains": ["example.com"],
+        "blockedRecipientDomains": [],
+        "maxPerHour": 20
+      },
+      "vault": { "readOnly": true, "blocked": false },
+      "phone": { "allowedCountries": ["US", "DE"], "maxSmsPerHour": 10, "blocked": false }
+    }
+  }'
+```
+
+| Field | Type | Meaning |
+|---|---|---|
+| `email.allowedRecipientDomains` | `string[]` | If non-empty, the agent may **only** send to these domains. Empty = no restriction. |
+| `email.blockedRecipientDomains` | `string[]` | The agent may **never** send to these domains. |
+| `email.maxPerHour` | `number` | Per-agent override of the emails-per-hour rate limit. |
+| `vault.readOnly` | `boolean` | Agent can read vault items but not create, update, or delete them. |
+| `vault.blocked` | `boolean` | Disable vault access for this agent entirely. |
+| `phone.allowedCountries` | `string[]` | ISO 3166-1 alpha-2 codes. If non-empty, the agent may only call/text these countries. |
+| `phone.maxSmsPerHour` | `number` | Per-agent override of the SMS-per-hour rate limit. |
+| `phone.blocked` | `boolean` | Disable phone/SMS for this agent entirely. |
+
+Every section is optional — omit one to leave that channel unrestricted. Validation is strict: unknown fields are rejected with a `400` rather than silently ignored, so typos can't create a policy that looks stricter than it is.
+
+An email send that violates the policy is refused and logged as a security event, so blocked attempts show up in the audit trail.
+
+> **Note:** Email constraints are enforced on every send today. Vault and phone constraints are validated and stored, but not yet enforced at request time.
+
 ## Rate Limiting for AI Scanning
 
 AI scanning is rate limited to 100 req/min, uses an LRU cache with 1000 entries and a 5min TTL, and falls back to regex scanning when needed.

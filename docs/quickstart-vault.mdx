@@ -21,10 +21,14 @@ pip install anima-labs
 ```python
 from anima import Anima
 
-anima = Anima(api_key="ak_...")
+anima = Anima(api_key="mk_...")  # master key — agent creation is admin-gated
 
 # Create an agent
-agent = anima.agents.create(name="Web Agent")
+agent = anima.agents.create(
+    org_id="org_...",  # your organization ID, from the console
+    name="Web Agent",
+    slug="web-agent",
+)
 
 # Provision a vault for the agent
 anima.vault.provision(agent_id=agent.id)
@@ -64,10 +68,14 @@ npm install @anima-labs/sdk
 ```ts
 import { Anima } from "@anima-labs/sdk";
 
-const anima = new Anima({ apiKey: "ak_..." });
+const anima = new Anima({ apiKey: "mk_..." }); // master key — agent creation is admin-gated
 
 // Create an agent
-const agent = await anima.agents.create({ name: "Web Agent" });
+const agent = await anima.agents.create({
+  orgId: "org_...", // your organization ID, from the console
+  name: "Web Agent",
+  slug: "web-agent",
+});
 
 // Provision a vault
 await anima.vault.provision({ agentId: agent.id });

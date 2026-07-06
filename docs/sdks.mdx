@@ -5,7 +5,7 @@ description: "Official TypeScript and Python SDKs for Anima."
 
 # Official SDKs
 
-Seamlessly integrate Anima into your Python and TypeScript applications. Both SDKs provide access to the full unified platform: agents, email, vault, phone, and webhooks.
+Seamlessly integrate Anima into your Python and TypeScript applications. Both SDKs provide access to the full unified platform: agents, email, vault, phone, and webhooks. Using Go? See the [Go SDK reference](/sdks/go).
 
 ## TypeScript / Node.js
 
@@ -22,15 +22,19 @@ npm install @anima-labs/sdk
 ```ts
 import { Anima } from "@anima-labs/sdk";
 
-const anima = new Anima({ apiKey: "ak_..." });
+const anima = new Anima({ apiKey: "mk_..." }); // agent creation needs the master key
 
 // Create an agent
-const agent = await anima.agents.create({ name: "Researcher" });
+const agent = await anima.agents.create({
+  orgId: "org_...",
+  name: "Researcher",
+  slug: "researcher",
+});
 
 // Send email
 await anima.messages.sendEmail({
   agentId: agent.id,
-  to: "user@example.com",
+  to: ["user@example.com"],
   subject: "Hello",
   body: "Sent by an AI agent",
 });
@@ -51,15 +55,19 @@ pip install anima-labs
 ```python
 from anima import Anima
 
-anima = Anima(api_key="ak_...")
+anima = Anima(api_key="mk_...")  # agent creation needs the master key
 
 # Create an agent
-agent = anima.agents.create(name="Researcher")
+agent = anima.agents.create(
+    org_id="org_...",
+    name="Researcher",
+    slug="researcher",
+)
 
 # Send email
 anima.messages.send_email(
     agent_id=agent.id,
-    to="user@example.com",
+    to=["user@example.com"],
     subject="Hello",
     body="Sent by an AI agent",
 )
@@ -70,8 +78,12 @@ anima.messages.send_email(
 ```python
 from anima import AsyncAnima
 
-anima = AsyncAnima(api_key="ak_...")
-agent = await anima.agents.create(name="Async Agent")
+anima = AsyncAnima(api_key="mk_...")
+agent = await anima.agents.create(
+    org_id="org_...",
+    name="Async Agent",
+    slug="async-agent",
+)
 ```
 
 ## Available Resources
@@ -81,11 +93,14 @@ Both SDKs expose the same set of resources:
 | Resource | Description |
 |----------|-------------|
 | `agents` | Create and manage AI agents |
-| `messages` | Send and receive email messages |
-| `inboxes` | Manage email inboxes |
+| `organizations` | Organization settings and profile |
+| `messages` | Send email and SMS as an agent |
+| `emails` | List an agent's mail and handle attachments |
 | `vault` | Store and retrieve encrypted credentials |
-| `phone` | Manage phone numbers |
+| `phones` | Provision and manage phone numbers |
+| `calls` | Place and manage voice calls |
 | `webhooks` | Subscribe to real-time events |
 | `domains` | Configure custom email domains |
-| `security` | Manage security policies |
-| `api_keys` | Create and rotate API keys |
+| `security` | Content scanning and security events |
+
+…plus `identity`, `registry`, `wallet`, `pods`, `a2a`, `audit`, `compliance`, `anomaly`, `voices`, `events`, and `addresses` — the same names in both SDKs (snake_case arguments in Python, camelCase in TypeScript).

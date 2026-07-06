@@ -176,24 +176,26 @@ anima_slow = Anima(api_key="ak_...", timeout=60)
 
 ```python
 # Python -- per-request options
+from anima import RequestOptions
+
 agent = anima.agents.create(
+    org_id="org_...",
     name="My Agent",
-    request_options={
-        "timeout": 60,
-        "idempotency_key": "create-agent-abc",
-        "headers": {"X-Custom-Header": "value"},
-    },
+    slug="my-agent",
+    options=RequestOptions(
+        timeout=60,
+        idempotency_key="create-agent-abc",
+    ),
 )
 ```
 
 ```ts
 // TypeScript -- per-request options
 const agent = await anima.agents.create(
-  { name: "My Agent" },
+  { orgId: "org_...", name: "My Agent", slug: "my-agent" },
   {
     timeout: 60_000,
     idempotencyKey: "create-agent-abc",
-    headers: { "X-Custom-Header": "value" },
   },
 );
 ```

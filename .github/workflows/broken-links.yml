@@ -1,0 +1,17 @@
+name: Docs checks
+
+on:
+  pull_request:
+
+jobs:
+  broken-links:
+    name: mint broken-links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check internal links
+        working-directory: docs
+        run: npx --yes mint broken-links

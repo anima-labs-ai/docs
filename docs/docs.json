@@ -68,6 +68,7 @@
 						"pages": [
 							"vault",
 							"secret-ref",
+							"extension-connect",
 							"phone",
 							"conversational-calls",
 							"voice-catalog",

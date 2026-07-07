@@ -346,6 +346,8 @@ The Anima browser extension performs vault credential autofill for login forms, 
 3. The extension detects the username, password, and TOTP fields.
 4. Credentials are injected and immediately zeroized from memory.
 
+To bind the extension to an agent from a headless browser — a Puppeteer worker, a scheduled job, no human to click — use [Headless Extension Connect](/extension-connect).
+
 ## Access Log
 
 Every credential access — token mints, `exec` invocations, and masked reads — is recorded in the vault audit log.

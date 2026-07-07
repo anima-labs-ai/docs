@@ -1,0 +1,182 @@
+---
+title: "Headless Extension Connect"
+description: "Connect the Anima browser extension to an agent with no human — mint a connect URL, open it in a headless browser (e.g. a Puppeteer worker), and the extension auto-binds its bridge."
+---
+
+# Headless Extension Connect
+
+The [Anima browser extension](/vault#browser-extension) links an agent to a real browser so it can autofill vault credentials and drive logins without any secret entering the model's context. Normally a person installs the extension and clicks **Connect**.
+
+For automation — a Puppeteer worker, a scheduled scraper, a partner integration — there is no person to click. **Headless connect** closes that gap: mint a one-time connect URL with the API, open it in the headless browser, and the extension binds its bridge to the agent automatically.
+
+<Note>
+  The connect response never contains a token or a secret. `connectUrl` itself carries a short-lived, single-use exchange code; the extension redeems it out of band. Nothing sensitive passes through the model.
+</Note>
+
+## The flow
+
+<Steps>
+<Step title="Mint a connect URL">
+  Call `POST /v1/extension/connect`. The API returns a `connectUrl` pointing at the console connect page, carrying a single-use `exc_auto_…` exchange code.
+</Step>
+<Step title="Open it in the headless browser">
+  Navigate the automation browser (with the Anima extension loaded) to `connectUrl`. The `exc_auto_` prefix tells the page to relay the code to the extension automatically — no click.
+</Step>
+<Step title="Wait for the bridge">
+  The page exposes `data-connect-status`, which transitions to `connected` once the extension has bound its bridge to the agent. Wait on `[data-connect-status="connected"]`, then run your automation.
+</Step>
+</Steps>
+
+## Auth model
+
+Who you authenticate as decides whether you pass `agentId`:
+
+| Credential | `agentId` | Behavior |
+|---|---|---|
+| **Master key** (`mk_`) | **Required** | Selects which agent the extension connects as. |
+| **Agent key** (`ak_`) | **Omit** | The server resolves the agent from the key. Passing another agent's id is rejected. |
+
+Two org policies support headless connect: **`session`** and **`pre_approved`**. The **`prompt_owner`** policy is **not supported** — there is no owner to approve an unattended connection, so the API rejects it:
+
+```
+Headless connect is not available under the prompt_owner policy — use session or pre_approved.
+```
+
+Under `pre_approved`, the target agent must be on the org's pre-approved allowlist (configure it under **Settings → Extension** in the console), or the request is rejected.
+
+### `ttl`
+
+`ttl` is optional and **shorten-only**: `"15m" | "1h" | "session"`. It may only be shorter than — or equal to — the org's configured maximum. A value **longer** than the org policy is rejected rather than silently downgraded, so you learn the org forbids that lifetime instead of quietly getting a shorter one. Omit `ttl` to use the org default. A `"session"` TTL has no wall-clock expiry, so `expiresAt` comes back `null`.
+
+The separate `exchangeExpiresAt` is the deadline for redeeming the connect URL itself (a single-use handoff window, ~60 seconds) — distinct from `expiresAt`, the lifetime of the resulting connection.
+
+## Mint a connect URL
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.useanima.sh/v1/extension/connect \
+  -H "Authorization: Bearer $ANIMA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"agentId": "agent_123", "ttl": "session"}'
+# → {
+#     "agentId": "agent_123",
+#     "connectUrl": "https://console.useanima.sh/extension/connect?code=exc_auto_…",
+#     "expiresAt": null,
+#     "exchangeExpiresAt": "2026-01-01T00:01:00.000Z",
+#     "policy": "session"
+#   }
+```
+
+```bash CLI
+# Master key: pass the agent.
+anima extension connect --agent agent_123 --ttl session
+
+# Agent key: omit it — the agent is resolved from the key.
+anima extension connect
+
+# Add --json for the full payload instead of the human-readable summary.
+anima extension connect --agent agent_123 --json
+```
+
+```typescript Node
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: process.env.ANIMA_API_KEY });
+
+const { connectUrl } = await anima.extension.connect({
+  agentId: "agent_123", // omit when using an agent key
+  ttl: "session",
+});
+```
+
+```python Python
+from anima import Anima
+
+client = Anima(api_key=os.environ["ANIMA_API_KEY"])
+
+result = client.extension.connect(agent_id="agent_123", ttl="session")
+connect_url = result.connect_url
+
+# Async: from anima import AsyncAnima
+#   result = await client.extension.connect(agent_id="agent_123", ttl="session")
+```
+
+```go Go
+import "github.com/anima-labs/anima-go"
+
+client := anima.NewClient("ak_...")
+
+res, err := client.Extension.Connect(ctx, anima.ConnectExtensionParams{
+    AgentID: "agent_123", // omit when using an agent key
+    TTL:     "session",
+})
+if err != nil {
+    log.Fatal(err)
+}
+connectURL := res.ConnectURL
+```
+
+```json MCP
+// Tool: extension_connect
+{
+  "agentId": "agent_123",
+  "ttl": "session"
+}
+```
+</CodeGroup>
+
+### Response
+
+| Field | Type | Description |
+|---|---|---|
+| `agentId` | `string` | The agent the extension will connect as. |
+| `connectUrl` | `string` | URL to open in the headless browser. Carries the single-use `exc_auto_…` code. |
+| `expiresAt` | `string \| null` | When the resulting connection expires. `null` for a `session` TTL. |
+| `exchangeExpiresAt` | `string` | Deadline to redeem `connectUrl` (single-use handoff window). |
+| `policy` | `"session" \| "pre_approved"` | The policy governing the session. |
+
+## Puppeteer worker recipe
+
+End to end: mint the URL, launch Chrome with the automation bundle loaded, open the URL, and wait for the bridge.
+
+```javascript
+import puppeteer from "puppeteer";
+import { Anima } from "@anima-labs/sdk";
+
+const anima = new Anima({ apiKey: process.env.ANIMA_API_KEY });
+const { connectUrl } = await anima.extension.connect({ agentId: "agent_123" });
+
+// The automation bundle: the extension built with the Chrome Web Store `key`
+// injected, so an unpacked --load-extension resolves to the SAME extension ID
+// the connect page targets. Built with `bun run build:automation` → dist-automation/.
+const EXT = "/path/to/anima-extension/dist-automation";
+
+const browser = await puppeteer.launch({
+  headless: "new", // old headless can't load extensions
+  args: [
+    `--disable-extensions-except=${EXT}`,
+    `--load-extension=${EXT}`,
+  ],
+});
+
+const page = await browser.newPage();
+await page.goto(connectUrl);                 // exc_auto_ code auto-relays, no click
+await page.waitForSelector('[data-connect-status="connected"]');
+// The extension bridge is now live for agent_123 — drive your automation here.
+```
+
+<Warning>
+  **Use the automation bundle, not the plain build.** The console connect page only ever messages the *published* Chrome Web Store extension ID — it never trusts a caller-supplied one. An ordinary unpacked build gets a different, per-path ID, so the relay silently never reaches it. The automation bundle (`dist-automation/`) injects the Chrome Web Store `key` into the manifest, pinning the unpacked extension to the production ID the page targets.
+</Warning>
+
+A few operational notes:
+
+- **`--headless=new` is required.** Chrome's old headless mode cannot load extensions at all.
+- **A fresh browser profile connects with no prompt.** The `exc_auto_` code auto-relays on page load.
+- **Re-connecting a profile that already holds a live bridge requires confirmation.** An unattended page must not silently replace an existing connection — the extension asks the owner to approve the re-pair, and denies otherwise. For a clean worker run, start from a fresh profile.
+
+## Related
+
+- [Vault — Browser Extension](/vault#browser-extension) — how the extension performs credential autofill without exposing secrets.
+- [Vault](/vault) — per-agent encrypted credential storage and the secret boundary.
+- [Security](/security) — key types (`mk_` vs `ak_`) and the master-key model.

@@ -12,12 +12,14 @@ The canonical pricing page is [useanima.sh/pricing](https://useanima.sh/pricing)
 | Plan | Price | Agent identities | Emails | Phone numbers | SMS | Voice minutes | Outbound calls | Vault |
 |------|-------|------------------|--------|---------------|-----|---------------|----------------|-------|
 | Free | `$0/forever` | 3 | 3,000 / mo | — | — | — | — | 3 vaults, 10 credentials |
-| Starter | `$29/mo` | 25 | 10K / mo | 1 included, then `$2/mo` each | 500 out + 500 in / mo | 100 Basic + 10 Premium min | 250 / mo | 500 credentials |
+| Starter | `$29/mo` | 25 | 10K / mo | 1 included, then `$2/mo` each | 50 out + 50 in / mo | 50 Basic min | Metered (see rate card) | 500 credentials |
 | Growth | `$99/mo` | 100 | 100K / mo | 3 included | 5K out + 5K in / mo | 500 Basic + 100 Premium min | 1,000 / mo | 5,000 credentials |
 | Scale | `$249/mo` | 500 | 500K / mo | 10 included | 25K out + 25K in / mo | 1,500 Basic + 300 Premium min | 4,000 / mo | 25,000 credentials |
 | Enterprise | From `$999/mo + usage` | Unlimited | Negotiated | Pooled numbers | Negotiated | Negotiated | 20,000 / mo default | Negotiated |
 
-Free is hard-capped and requires no credit card; it also includes 5 GB attachment storage and full MCP server access. Phone numbers, SMS, and voice start on Starter. Paid tiers use the unit rates below when usage exceeds the included quota.
+Free is hard-capped and requires no credit card; it also includes 5 GB attachment storage and full MCP server access. Phone numbers, SMS, and voice start on Starter. Starter also includes 10 custom domains.
+
+Paid tiers use the unit rates below when usage exceeds the included quota — there's no hard wall on Starter and above, so you can buy more SMS, voice, and other usage at the published rate-card prices. Outbound calls on Starter are metered per the rate card (`$0.03/call`) rather than bundled.
 
 ## Usage rate card
 
@@ -38,12 +40,12 @@ Free is hard-capped and requires no credit card; it also includes 5 GB attachmen
 
 ## Voice call caps
 
-Outbound voice calls are limited by both minutes and call count. The count cap exists because short-call loops can burn compliance checks before minute caps catch them.
+Outbound voice calls carry a monthly count ceiling on top of metered usage. This is an anti-abuse backstop, not an included allotment — short-call loops can burn compliance checks before minute-based billing catches them. Normal usage bills per the rate card well below these ceilings.
 
-| Plan | Monthly outbound-call cap |
-|------|---------------------------|
+| Plan | Monthly outbound-call ceiling |
+|------|-------------------------------|
 | Free | 0 — voice is not included on Free |
-| Starter | 250 |
+| Starter | 250 (anti-abuse ceiling) |
 | Growth | 1,000 |
 | Scale | 4,000 |
 | Enterprise | 20,000 default |

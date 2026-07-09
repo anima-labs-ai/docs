@@ -11,7 +11,7 @@ Tools are organized into domain servers, so you can install only what you need:
 
 | Server | Package | Description |
 |--------|---------|-------------|
-| **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations, identity, registry, A2A |
+| **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations |
 | **Email** | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
 | **Phone** | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
 | **Cards** | `@anima-labs/mcp-cards` | Agent cards and identity metadata |
@@ -171,9 +171,6 @@ anima setup-mcp install --all --server all
 |----------|-------|-------------|
 | **Agent** | create, list, get, delete, rotate-key | Manage AI agent identities |
 | **Organization** | get, update, create, delete, rotate-key | Organization settings |
-| **Identity** | create, list, get, verify | Agent identity management |
-| **Registry** | register, search, get, list | Agent registry / discovery |
-| **A2A** | send, receive, list | Agent-to-agent messaging |
 
 ### mcp-email
 | Category | Tools | Description |
@@ -219,6 +216,5 @@ Once connected, ask your AI assistant natural language questions:
 - "Store my CRM login credentials in the vault" → **mcp-vault**
 - "Text me now from my agent's number" → **mcp-phone**
 - "Make a voice call to +1-555-0123" → **mcp-phone**
-- "Register my agent in the public registry" → **mcp-agent**
 
 For editor-specific setup, see [Connect your AI client](/integrations).

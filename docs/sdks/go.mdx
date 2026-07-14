@@ -154,7 +154,7 @@ secrets, err := client.Vault.List(ctx, &anima.ListSecretsParams{
 
 ```go
 // Resolve DID
-doc, err := client.Identity.ResolveDID(ctx, "did:anima:ag_abc123")
+doc, err := client.Identity.ResolveDID(ctx, "did:web:agents.useanima.sh:org_abc123:ag_abc123")
 
 // Issue a credential
 cred, err := client.Identity.Credentials.Issue(ctx, &anima.IssueCredentialParams{
@@ -173,19 +173,27 @@ card, err := client.Identity.AgentCards.Publish(ctx, &anima.PublishAgentCardPara
 ### A2A
 
 ```go
-// Send a task
-task, err := client.A2A.SendTask(ctx, &anima.SendTaskParams{
-    FromAgentID: "ag_sender",
-    ToAgentDID:  "did:anima:ag_receiver",
-    Capability:  "data-analysis",
-    Input:       map[string]any{"dataset": "q1-sales"},
-    TimeoutMs:   300000,
+// Submit a task to one of your own agents
+task, err := client.A2A.SubmitTask(ctx, "ag_receiver", anima.SubmitA2ATaskParams{
+    Input: map[string]any{"dataset": "q1-sales"},
 })
 
 // Get task result
-task, err := client.A2A.GetTask(ctx, task.ID)
-fmt.Printf("Status: %s, Result: %v\n", task.Status, task.Result)
+task, err = client.A2A.GetTask(ctx, "ag_receiver", task.ID)
+fmt.Printf("Status: %s\n", task.Status)
+
+// Dispatch a signed task to another agent by DID
+task, err = client.A2A.Dispatch(ctx, "ag_sender", anima.DispatchA2ATaskParams{
+    ToDID: "did:web:agents.useanima.sh:org_xyz:ag_receiver",
+    Type:  "purchase-order",
+    Input: map[string]any{"budget": 200},
+})
+
+// Discover another agent's public Agent Card
+card, err := client.A2A.Discover(ctx, "https://receiver.useanima.sh")
 ```
+
+See [A2A Protocol](/a2a/overview) for the full task lifecycle and CLI equivalents.
 
 ### Wallet
 

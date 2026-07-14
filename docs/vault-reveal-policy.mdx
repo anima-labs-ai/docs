@@ -41,3 +41,5 @@ await anima.vault.updateCredential("cred_abc", {
 ## Human reveal (standard policy only)
 
 Org admins can reveal a `standard` credential in the console (the Copy action) or via the API with a master key (`reveal: true`). Every reveal is written to the access log as `access_reveal` with the actor — the [access log](/vault) flags plaintext reveals so compliance can review who looked at what. For `brokered` credentials the console offers rotation instead; there is nothing to reveal.
+
+**Step-up freshness.** Console reveals additionally require the session to have verified its first factor recently (default: within 10 minutes; `VAULT_REVEAL_FRESHNESS_MINUTES`, `0` disables). A stale browser session — the thing session theft steals — gets a `403` and the console pops Clerk's re-verification modal, then retries automatically; denied attempts are logged as `access_reveal_denied`. Downgrading a credential from `brokered` to `standard` demands the same freshness, since it re-opens the reveal path. Raw master API keys are bearer secrets, not sessions, so they are unaffected — they remain the automation escape hatch.

@@ -20,6 +20,16 @@ Execution          → the real secret is used in the request
 Output             → matching secrets are redacted before returning to the LLM
 ```
 
+## Use, never see
+
+Every agent surface reads credentials **masked**; there is no reveal path an agent can call. Agents exercise secrets through three mechanisms, all of which keep the plaintext out of the model:
+
+- **[Server-side use](/vault-server-side-use)** — Anima makes the outbound call and injects the credential on the server; the secret never reaches the agent's host.
+- **Browser autofill** — the [extension](/extension-connect) fills logins directly into web forms.
+- **Local injection** — `anima vault exec` / `anima vault proxy` substitute secrets into a local process at the last moment (see below).
+
+Whether a *human* can ever read the plaintext back is governed per credential by its **[reveal policy](/vault-reveal-policy)** — `brokered` credentials are use-only for everyone, forever. And when an agent needs a secret it doesn't have, it asks a human through **[credential requests](/vault-credential-requests)** instead of chat.
+
 ## Provisioning
 
 Before an agent can store credentials, its vault must be provisioned:

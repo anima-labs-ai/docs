@@ -20,6 +20,16 @@ Execution          → the real secret is used in the request
 Output             → matching secrets are redacted before returning to the LLM
 ```
 
+## Use, never see
+
+Every agent surface reads credentials **masked**; there is no reveal path an agent can call. Agents exercise secrets through three mechanisms, all of which keep the plaintext out of the model:
+
+- **[Server-side use](/vault-server-side-use)** — Anima makes the outbound call and injects the credential on the server; the secret never reaches the agent's host.
+- **Browser autofill** — the [extension](/extension-connect) fills logins directly into web forms.
+- **Local injection** — `anima vault exec` / `anima vault proxy` substitute secrets into a local process at the last moment (see below).
+
+Whether a *human* can ever read the plaintext back is governed per credential by its **[reveal policy](/vault-reveal-policy)** — `brokered` credentials are use-only for everyone, forever. And when an agent needs a secret it doesn't have, it asks a human through **[credential requests](/vault-credential-requests)** instead of chat.
+
 ## Provisioning
 
 Before an agent can store credentials, its vault must be provisioned:
@@ -314,15 +324,9 @@ anima vault agent start
 anima vault type --cred GH_TOKEN   # press the hotkey to confirm; the daemon types the value
 ```
 
-### `anima vault unlock`
+### Revealing plaintext
 
-A master-key ceremony that mints a short-lived session for plaintext reveals. Without an active unlock, the CLI refuses any command that would print plaintext to the terminal, even if you hold a master key.
-
-```bash
-anima vault unlock                    # prompts for the master key, ~5-minute session
-anima vault get cred_github --unmask  # prints plaintext
-anima vault unlock --lock             # end the session early
-```
+The CLI never prints secret plaintext. `anima vault get` always masks secret fields — there is no `--unmask` flag and no `unlock` command. To actually view a secret, a human uses the Anima console, where a reveal is audited and step-up gated. Agents and automation should *use* secrets, never read them: autofill via the browser extension, local injection via `anima vault exec` / `anima vault proxy`, or the server-side broker via `anima vault use`.
 
 ### `anima vault audit`
 

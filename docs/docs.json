@@ -67,6 +67,9 @@
 						"icon": "layers",
 						"pages": [
 							"vault",
+							"vault-server-side-use",
+							"vault-reveal-policy",
+							"vault-credential-requests",
 							"secret-ref",
 							"extension-connect",
 							"phone",

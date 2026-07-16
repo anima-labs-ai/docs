@@ -63,6 +63,13 @@
 						]
 					},
 					{
+						"group": "Framework Toolkits",
+						"icon": "plug",
+						"pages": [
+							"toolkits/langchain"
+						]
+					},
+					{
 						"group": "Platform",
 						"icon": "layers",
 						"pages": [

@@ -1,0 +1,124 @@
+---
+title: "LangChain"
+description: "Give your LangChain.js agent a real email identity — send, receive, and read email with @anima-labs/toolkit-langchain."
+---
+
+# LangChain
+
+`@anima-labs/toolkit-langchain` wraps the [Anima SDK](/sdks) as LangChain.js tools, so any LangChain agent can send and read real email from its own inbox.
+
+## Install
+
+```bash
+npm install @anima-labs/toolkit-langchain @langchain/core
+# plus `langchain` if you use createAgent as below
+```
+
+Requires LangChain.js 1.x (`@langchain/core >= 1.0`) and Node 20+.
+
+## Prerequisites
+
+- An Anima API key and an agent — create both in [console.useanima.sh](https://console.useanima.sh) or follow the [email quickstart](/quickstart-email)
+
+```bash
+export ANIMA_API_KEY=ak_...      # your agent (or org) API key
+export ANIMA_AGENT_ID=agent_...  # the agent to act as
+```
+
+## Bind the tools to an agent
+
+```ts
+import { createAgent } from "langchain";
+import { createAnimaTools } from "@anima-labs/toolkit-langchain";
+
+const agent = createAgent({
+  model: "openai:gpt-5",
+  tools: createAnimaTools(), // reads ANIMA_API_KEY / ANIMA_AGENT_ID
+});
+
+const result = await agent.invoke({
+  messages: [
+    { role: "user", content: "Check my inbox for new mail and summarize anything important." },
+  ],
+});
+```
+
+Or configure explicitly:
+
+```ts
+const tools = createAnimaTools({ apiKey: "ak_...", agentId: "agent_..." });
+```
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `get_agent` | The agent's identity: name, status, and its email addresses |
+| `send_email` | Send an email from the agent's inbox (`to`/`cc`/`bcc`, subject, body) |
+| `list_emails` | List received/sent email, newest first, with `direction`/`since`/`limit` filters |
+| `get_email` | Read one full email (body + attachment metadata) by message id |
+
+Every tool is backed by a live Anima API route and throws on API errors so your agent executor can react.
+
+## Runnable example: send a real email and read it back
+
+The tools work standalone too — no model key needed. This is the full
+[`examples/quickstart.ts`](https://github.com/anima-labs-ai/toolkit/blob/main/node/langchain/examples/quickstart.ts)
+flow, which also runs against a mock API in the toolkit repo's CI on every release:
+
+```bash
+export ANIMA_TO=you@example.com  # where to send — watch it arrive in your inbox
+```
+
+```ts
+import { createAnimaTools } from "@anima-labs/toolkit-langchain";
+
+const tools = createAnimaTools();
+const byName = Object.fromEntries(tools.map((t) => [t.name, t]));
+
+// Send a real email through the send_email tool
+const sent = JSON.parse(
+  (await byName.send_email.invoke({
+    to: [process.env.ANIMA_TO!],
+    subject: "Hello from my LangChain agent",
+    body: "This email was sent through the Anima LangChain toolkit.",
+  })) as string,
+);
+console.log(`Sent ${sent.id} (${sent.status})`);
+
+// Read it back from the agent's outbox
+const outbox = JSON.parse(
+  (await byName.list_emails.invoke({ direction: "OUTBOUND", limit: 5 })) as string,
+);
+const copy = outbox.emails.find((m: { id: string }) => m.id === sent.id);
+
+const full = JSON.parse((await byName.get_email.invoke({ messageId: copy.id })) as string);
+console.log(`Read back: "${full.subject}" -> ${full.to}`);
+```
+
+<Note>
+Anima blocks sending to the agent's <b>own</b> addresses server-side (anti-loop
+guard), so point `ANIMA_TO` at an external inbox — for example your personal
+one, and watch the email land there.
+</Note>
+
+## Reading received mail
+
+Incoming email to the agent's address is ingested automatically. List it with
+`direction: "INBOUND"`:
+
+```ts
+const inbox = JSON.parse(
+  (await byName.list_emails.invoke({
+    direction: "INBOUND",
+    since: "2026-07-16T00:00:00Z",
+    limit: 20,
+  })) as string,
+);
+```
+
+## Next steps
+
+- [Email quickstart](/quickstart-email) — create agents and inboxes
+- [Webhooks](/webhooks) — get pushed `message.received` events instead of polling
+- [SDK reference](/sdks) — the full Anima API surface beyond email

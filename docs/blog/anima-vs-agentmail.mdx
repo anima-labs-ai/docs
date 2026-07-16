@@ -1,14 +1,16 @@
 ---
 title: "Anima vs AgentMail: Why You Need More Than Just Email"
-description: "AgentMail provides email for AI agents. Anima provides email plus phone, vault, and cryptographic identity. Here is when to use each."
-date: "2026-03-28"
+description: "AgentMail provides excellent email for AI agents. Anima provides email plus phone, voice, vault, and cryptographic identity. Here is an honest comparison."
+date: "2026-07-16"
 author: "Anima Team"
 tags: ["comparison", "agentmail", "email", "identity"]
 ---
 
 # Anima vs AgentMail: Why You Need More Than Just Email
 
-AgentMail does one thing and does it well: email for AI agents. If all your agent needs is to send and receive email, AgentMail is a solid choice. But most production agents need more than an inbox.
+AgentMail does one thing and does it well: email for AI agents. If all your agent needs is to send and receive email, AgentMail is a solid choice — and this page will say so plainly. But most production agents need more than an inbox.
+
+> **How this comparison works.** Every claim about AgentMail cites their public documentation with the date we checked it (2026-07-16). Where their docs don't document something, we say "not documented" rather than "no". Where AgentMail is ahead of us, we say that too.
 
 ## The Problem with Email-Only
 
@@ -17,37 +19,41 @@ Consider a customer support agent. It receives a complaint via email, looks up t
 - **Email** (receive complaint, send resolution)
 - **Phone** (send SMS confirmation)
 - **Vault** (store merchant portal credentials)
-- **Identity** (prove to the merchant portal that it is an authorized agent)
+- **Identity** (prove which agent did what, sign agent-to-agent requests)
 
-With AgentMail, you get step one. The rest requires separate integrations with separate vendors, separate SDKs, and separate failure modes.
+With AgentMail, you get step one. The rest requires separate vendors, separate SDKs, and separate failure modes.
 
 ## Feature Comparison
+
+Checked against [docs.agentmail.to](https://docs.agentmail.to) and [agentmail.to](https://agentmail.to) on **2026-07-16**.
 
 | Capability | AgentMail | Anima |
 |---|---|---|
 | Agent email inboxes | Yes | Yes |
-| Custom domains | Yes | Yes |
-| Inbound webhooks | Yes | Yes |
-| Content scanning | Basic | Dual-layer (regex + AI) |
-| Phone numbers (SMS/voice) | No | Yes |
-| Encrypted credential vault | No | Yes (Bitwarden-backed) |
-| DID-based identity | No | Yes (did:anima) |
-| Verifiable Credentials | No | Yes (W3C VC) |
-| Agent Cards (/.well-known/agent.json) | No | Yes |
-| Agent Registry & discovery | No | Yes |
-| x402 payments | No | Yes |
-| A2A protocol support | No | Yes |
-| Policy engine | No | Yes |
-| MCP server (53 tools) | No | Yes |
-| SOC 2 controls | Partial | Yes |
-| SDKs | Node, Python | Node, Python, Go, CLI |
+| Custom domains | Yes ([docs](https://docs.agentmail.to/custom-domains), 2026-07-16) | Yes |
+| Email threading | Yes ([docs](https://docs.agentmail.to/threads), 2026-07-16) | Yes — RFC 5322 `Message-ID`/`References` threading on the wire, so replies thread in Gmail/Outlook too |
+| Drafts | Yes ([docs](https://docs.agentmail.to/drafts), 2026-07-16) | Yes |
+| Labels / message state | Yes ([docs](https://docs.agentmail.to/labels), 2026-07-16) | **Not yet** — on the roadmap |
+| Inbound webhooks | Yes ([docs](https://docs.agentmail.to/webhooks-overview), 2026-07-16) | Yes (signed, with delivery stats + retries) |
+| Semantic search over mail | Not documented (docs.agentmail.to, 2026-07-16) | Yes — `POST /v1/messages/search/semantic` (vector search, REST) |
+| Phone numbers (SMS) | No — email-only product ([agentmail.to](https://agentmail.to), 2026-07-16) | Yes |
+| Voice calls + transcripts | No — email-only product (same source) | Yes |
+| Encrypted credential vault | No (not offered; same source) | Yes (Bitwarden-backed, server-side "use-not-see" broker) |
+| Browser extension for logins | No (not offered; same source) | Yes (Chrome Web Store: Anima Vault) |
+| DID-based identity | No (not offered; same source) | Yes (standard `did:web`, world-readable DID documents) |
+| Signed agent-to-agent tasks | No (not offered; same source) | Yes — between Anima agents, DID-signature-verified |
+| MCP server | Yes ([docs](https://docs.agentmail.to/integrations/mcp), 2026-07-16) | Yes — hosted `mcp.useanima.sh/mcp`, 65 tools |
+| SDKs | Python, TypeScript ([agentmail.to](https://agentmail.to), 2026-07-16) | Node, Python, Go + CLI |
+| SOC 2 | **Type I + Type II** ([docs](https://docs.agentmail.to/documentation/resources/security-privacy/soc-2-compliance), 2026-07-16) | Not yet certified — audit logging, agent quarantine, and content scanning are built in |
+
+Two honest reads of that table: if you need labels or a SOC 2 report **today**, AgentMail is ahead. If your agent touches anything beyond email — a phone number, a login, a signature — Anima replaces a stack of vendors.
 
 ## When to Use AgentMail
 
 AgentMail is a reasonable choice if:
 
 - Your agent only sends and receives email
-- You do not need phone or identity capabilities
+- You need a SOC 2 Type II report today
 - You are building a prototype and email is the only channel
 - You prefer a narrowly scoped vendor for email specifically
 
@@ -55,11 +61,10 @@ AgentMail is a reasonable choice if:
 
 Anima is the right choice when:
 
-- Your agent operates across multiple channels (email + phone)
-- You need cryptographic identity for agent-to-agent trust
-- Your compliance requirements demand audit trails across all agent actions
-- You want a single SDK instead of integrating multiple separate services
-- You need vault storage or policy enforcement
+- Your agent operates across multiple channels (email + SMS + voice)
+- Your agent signs into things — the vault stores credentials agents can *use but never see*
+- You want cryptographic agent identity (`did:web`) and signed agent-to-agent tasks
+- You want one SDK and one audit log across every channel
 
 ## Code Comparison
 
@@ -88,9 +93,9 @@ const anima = new Anima({ apiKey: "ak_..." });
 const agent = await anima.agents.create({ name: "Support Agent" });
 
 // Send email
-await anima.messages.send_email({
+await anima.messages.sendEmail({
   agentId: agent.id,
-  to: "user@example.com",
+  to: ["user@example.com"],
   subject: "Your refund has been processed",
   body: "We've issued a $45.00 refund to your original payment method.",
 });
@@ -102,7 +107,7 @@ await anima.messages.sendSms({
   body: "Refund of $45.00 processed. Check your email for details.",
 });
 
-// Store the case credentials for follow-up
+// Store the case notes for follow-up
 await anima.vault.createCredential({
   agentId: agent.id,
   type: "secure_note",
@@ -120,24 +125,24 @@ Same agent. Same API key. No glue code between vendors.
 
 The deeper issue with using AgentMail alongside other point solutions is identity fragmentation. Your agent has one identity in AgentMail, another in your phone service. There is no single source of truth for "who is this agent and what is it authorized to do?"
 
-With Anima, every agent gets a `did:anima` identifier that spans all capabilities. The policy engine enforces rules across email and phone from a single configuration. Audit logs capture every action across every channel in one place.
+With Anima, every agent gets a standard [`did:web`](/identity/did-method) identifier that spans all capabilities. Security policy and [quarantine](/security/anomaly-detection) apply across email, SMS, and voice from a single configuration. Audit logs capture every action across every channel in one place.
 
 This matters for compliance. When an auditor asks "what did agent X do last month?", you query one system — not five.
 
 ## Migration Path
 
-If you are already on AgentMail and want to move to Anima, the process is straightforward:
+If you are already on AgentMail and want to move to Anima:
 
 1. Install the Anima SDK alongside AgentMail
 2. Create agents in Anima and set up custom domains
-3. Migrate email sending calls from AgentMail's API to `anima.messages.send_email()`
+3. Migrate email sending calls from AgentMail's API to `anima.messages.sendEmail()` — the attachment shape is modeled on AgentMail's, so payloads port with minimal changes
 4. Add phone and vault capabilities as needed
 5. Remove the AgentMail dependency
 
-The Anima email API is designed to be familiar. If you have used AgentMail, you will find the patterns similar — the main difference is that Anima uses `agentId` to scope everything to a unified agent identity.
+The main structural difference: Anima scopes everything to a unified agent identity via `agentId`.
 
 ## Bottom Line
 
-AgentMail is fine for email. But production agents do not just send email — they call, authenticate, and prove their identity. Anima provides the full stack so you can build agents that operate in the real world without stitching together multiple different services.
+AgentMail is genuinely good at email — better than most, and ahead of us on labels and certification today. But production agents do not just send email — they text, call, authenticate, and act. Anima provides the full stack so you can build agents that operate in the real world without stitching together five services.
 
 [Get started with Anima](/getting-started) | [See the full SDK reference](/sdks)

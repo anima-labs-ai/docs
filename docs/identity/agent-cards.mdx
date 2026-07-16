@@ -1,186 +1,65 @@
 ---
 title: "Agent Cards"
-description: "Publish machine-readable Agent Cards at .well-known/agent.json for agent discovery, capability declaration, and interoperability."
+description: "Machine-readable Agent Cards describing an agent's identity, capabilities, and contact endpoints — the discovery layer for A2A."
 ---
 
 # Agent Cards
 
-Agent Cards are machine-readable JSON documents that describe an agent's identity, capabilities, and communication endpoints. Published at a well-known URL, they enable other agents and services to discover and interact with your agents.
+An Agent Card is a machine-readable JSON document describing an agent's identity, capabilities, and contact endpoints. Cards are what other agents fetch during [A2A discovery](/a2a/overview) to learn who an agent is and what it can do.
 
-## Agent Card Format
+Anima generates a card automatically for every agent from its live state — its DID, provisioned channels (email, phone, vault, addresses), and contact identities. There is nothing to publish manually.
 
-An Agent Card follows the Agent Card specification and is served at:
+## Fetching a card
 
 ```
-https://<domain>/.well-known/agent.json
+GET https://api.useanima.sh/v1/agents/{agentId}/card
 ```
 
-### Example Agent Card
+Readable org-wide with an agent or master key. Cards are also served publicly at `/.well-known/agent.json` on hosts that publish one — the [A2A `discover`](/a2a/overview#discovering-an-agent) helpers fetch that URL from any domain, Anima-hosted or not.
+
+### Example card
 
 ```json
 {
   "name": "Acme Purchasing Agent",
-  "description": "Handles procurement and vendor payments for Acme Corp.",
-  "url": "https://purchasing.acme.com",
-  "did": "did:anima:ag_8f3k2m9x1n4p7q6r",
-  "version": "1.0.0",
-  "capabilities": [
-    {
-      "name": "purchase-order",
-      "description": "Create and manage purchase orders",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "vendor": { "type": "string" },
-          "items": { "type": "array" },
-          "budget": { "type": "number" }
-        }
-      }
-    },
-    {
-      "name": "invoice-processing",
-      "description": "Process and approve vendor invoices"
-    }
-  ],
-  "endpoints": {
-    "a2a": "https://api.useanima.sh/a2a/ag_8f3k2m9x1n4p7q6r",
-    "email": "purchasing@acme.com"
+  "description": "Handles procurement for Acme Corp.",
+  "url": "https://api.useanima.sh/v1/agents/cmb1xa3f50001abcd/card",
+  "did": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
+  "capabilities": {
+    "email": true,
+    "phone": true,
+    "vault": true,
+    "address": false,
+    "protocols": ["a2a"]
   },
-  "authentication": {
-    "schemes": ["did-auth", "bearer"]
+  "verification": {
+    "level": "basic",
+    "credentials": []
   },
-  "provider": {
-    "organization": "Acme Corp",
-    "url": "https://acme.com"
+  "trustScore": 50,
+  "contact": {
+    "email": "purchasing@agents.useanima.sh",
+    "phone": "+14155550142"
   }
 }
 ```
 
-## Publishing Agent Cards
+## Field reference
 
-<Tabs items={["Node.js", "Python", "Go"]}>
-<Tab value="Node.js">
-```ts
-import { Anima } from "@anima-labs/sdk";
+| Field | Meaning |
+| --- | --- |
+| `did` | The agent's [`did:web` DID](/identity/did-method). Resolve it to get the public key that signs the agent's A2A requests. |
+| `capabilities` | Which channels this agent actually has provisioned right now — derived from live state, not self-declared. |
+| `contact` | The agent's primary email address and phone number, when provisioned. |
+| `verification.level` / `verification.credentials` | **Reserved.** Derived from the agent's verifiable credentials; automatic credential issuance has not shipped yet, so today this reads `basic` with an empty list for all agents. Do not gate trust decisions on it. |
+| `trustScore` | **Reserved.** Not yet computed from real signals — treat it as a placeholder, not a ranking. |
 
-const anima = new Anima({ apiKey: "ak_..." });
-
-// Generate and publish an Agent Card
-const card = await anima.identity.agentCards.publish({
-  agentId: "ag_8f3k2m9x1n4p7q6r",
-  domain: "purchasing.acme.com",
-  capabilities: [
-    {
-      name: "purchase-order",
-      description: "Create and manage purchase orders",
-      inputSchema: {
-        type: "object",
-        properties: {
-          vendor: { type: "string" },
-          items: { type: "array" },
-          budget: { type: "number" },
-        },
-      },
-    },
-  ],
-});
-
-console.log(`Published at: ${card.url}`);
-// => https://purchasing.acme.com/.well-known/agent.json
-```
-</Tab>
-<Tab value="Python">
-```python
-from anima import Anima
-
-anima = Anima(api_key="ak_...")
-
-card = anima.identity.agent_cards.publish(
-    agent_id="ag_8f3k2m9x1n4p7q6r",
-    domain="purchasing.acme.com",
-    capabilities=[
-        {
-            "name": "purchase-order",
-            "description": "Create and manage purchase orders",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "vendor": {"type": "string"},
-                    "items": {"type": "array"},
-                    "budget": {"type": "number"},
-                },
-            },
-        },
-    ],
-)
-
-print(f"Published at: {card.url}")
-```
-</Tab>
-<Tab value="Go">
-```go
-import "github.com/anima-labs-ai/go"
-
-client := anima.NewClient("ak_...")
-
-card, err := client.Identity.AgentCards.Publish(ctx, &anima.PublishAgentCardParams{
-    AgentID: "ag_8f3k2m9x1n4p7q6r",
-    Domain:  "purchasing.acme.com",
-    Capabilities: []anima.Capability{
-        {
-            Name:        "purchase-order",
-            Description: "Create and manage purchase orders",
-        },
-    },
-})
-```
-</Tab>
-</Tabs>
-
-## Resolving Agent Cards
-
-Fetch another agent's card to discover its capabilities before initiating communication:
-
-<Tabs items={["Node.js", "Python"]}>
-<Tab value="Node.js">
-```ts
-const card = await anima.identity.agentCards.resolve("purchasing.acme.com");
-
-console.log(card.name);          // "Acme Purchasing Agent"
-console.log(card.capabilities);  // [{ name: "purchase-order", ... }]
-console.log(card.endpoints.a2a); // A2A endpoint URL
-```
-</Tab>
-<Tab value="Python">
-```python
-card = anima.identity.agent_cards.resolve("purchasing.acme.com")
-
-print(card.name)
-print(card.capabilities)
-print(card.endpoints["a2a"])
-```
-</Tab>
-</Tabs>
-
-## API Reference
-
-| Endpoint                                   | Method | Description                    |
-| ------------------------------------------ | ------ | ------------------------------ |
-| `https://api.useanima.sh/api/identity/agent-cards`                | POST   | Publish an Agent Card          |
-| `https://api.useanima.sh/api/identity/agent-cards/:agentId`       | GET    | Get an agent's card            |
-| `https://api.useanima.sh/api/identity/agent-cards/:agentId`       | PUT    | Update an Agent Card           |
-| `https://api.useanima.sh/api/identity/agent-cards/:agentId`       | DELETE | Unpublish an Agent Card        |
-| `https://api.useanima.sh/api/identity/agent-cards/resolve`        | GET    | Resolve a card by domain       |
-
-## Configuration
-
-| Variable                         | Default | Description                              |
-| -------------------------------- | ------- | ---------------------------------------- |
-| `ANIMA_AGENT_CARD_AUTO_PUBLISH`  | `true`  | Auto-publish cards on agent creation     |
-| `ANIMA_AGENT_CARD_CACHE_TTL`    | `600`   | Cache TTL for resolved cards in seconds  |
+<Note>
+  The honest way to establish trust in an Anima agent today is cryptographic, not score-based: resolve the agent's DID document and verify the signature on its [A2A messages](/a2a/overview). The `verification` and `trustScore` fields will start carrying signal when credential issuance ships.
+</Note>
 
 ## Next Steps
 
-- [DID Method](/identity/did-method) -- Understand agent DIDs
-- [Agent Registry](/registry/overview) -- Register for public discovery
-- [A2A Protocol](/a2a/overview) -- Communicate between agents
+- [DID Method](/identity/did-method) -- The identity layer underneath the card
+- [A2A Protocol](/a2a/overview) -- Discovery + signed task dispatch
+- [Agent Registry](/registry/overview) -- Org-wide agent search

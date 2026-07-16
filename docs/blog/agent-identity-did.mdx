@@ -1,6 +1,6 @@
 ---
 title: "How We Built Cryptographic Identity for AI Agents with DIDs"
-description: "A technical deep dive into the did:anima method — how Anima uses W3C Decentralized Identifiers and Verifiable Credentials to give AI agents provable, trustworthy identity."
+description: "A technical deep dive into Anima's agent identity: standard did:web Decentralized Identifiers, world-readable DID documents, and signed agent-to-agent requests."
 date: "2026-03-28"
 author: "Anima Team"
 tags: ["identity", "did", "verifiable-credentials", "technical", "security"]
@@ -8,11 +8,13 @@ tags: ["identity", "did", "verifiable-credentials", "technical", "security"]
 
 # How We Built Cryptographic Identity for AI Agents with DIDs
 
+> **Updated 2026-07:** Anima's DID method migrated from a custom `did:anima:` method to the standard [`did:web:`](https://w3c-ccg.github.io/did-method-web/) method, and this post has been updated to match what is shipped today. Where a capability is still on the roadmap (automatic credential issuance), it says so.
+
 When an AI agent sends an email, makes a purchase, or calls an API, the receiving party has a reasonable question: **who is this, and should I trust it?**
 
 Today, most agents authenticate with API keys or OAuth tokens. These prove authorization, not identity. They say "this request is allowed" but not "this is agent X, operated by company Y, with these specific capabilities and constraints." That distinction matters as agents start interacting with each other, with vendors, and with compliance systems.
 
-We built the `did:anima` method to solve this.
+We use the W3C-standard `did:web` method to solve this.
 
 ## Why Agents Need Verifiable Identity
 
@@ -30,177 +32,110 @@ Regulators are catching up to agentic systems. SOC 2 auditors want to know which
 
 As the agent ecosystem grows, services need to discover agent capabilities and verify their legitimacy. The combination of DIDs and Agent Cards gives every agent a machine-readable, cryptographically verifiable profile that other systems can query.
 
-## The `did:anima` Method
+## Standard `did:web`, not a custom method
 
-Every agent created on Anima is automatically assigned a DID following the W3C Decentralized Identifiers specification:
+Every agent created on Anima is automatically assigned a DID following the W3C Decentralized Identifiers specification, using the registered `did:web` method:
 
 ```
-did:anima:ag_8f3k2m9x1n4p7q6r
+did:web:agents.useanima.sh:<orgId>:<agentId>
 ```
 
-The DID resolves to a DID Document that contains the agent's public keys, authentication methods, and service endpoints:
+We deliberately chose `did:web` over inventing a custom method: `did:web` resolution is plain HTTPS, already supported by standard resolver tooling, with nothing bespoke to implement on the verifier side.
+
+The DID resolves to a DID Document containing the agent's public key and authentication methods:
 
 ```json
 {
   "@context": [
     "https://www.w3.org/ns/did/v1",
-    "https://w3id.org/security/suites/ed25519-2020/v1"
+    "https://w3id.org/security/suites/jws-2020/v1"
   ],
-  "id": "did:anima:ag_8f3k2m9x1n4p7q6r",
-  "authentication": [
+  "id": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
+  "verificationMethod": [
     {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#key-1",
-      "type": "Ed25519VerificationKey2020",
-      "controller": "did:anima:ag_8f3k2m9x1n4p7q6r",
-      "publicKeyMultibase": "z6Mkf5rGMoatrSj1f..."
+      "id": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
+      "publicKeyJwk": { "kty": "OKP", "crv": "Ed25519", "x": "…" }
     }
   ],
-  "service": [
-    {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#email",
-      "type": "AgentEmail",
-      "serviceEndpoint": "mailto:agent@acme.useanima.sh"
-    },
-    {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#a2a",
-      "type": "AgentToAgent",
-      "serviceEndpoint": "https://acme.useanima.sh/.well-known/agent.json"
-    }
-  ]
+  "authentication": ["did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1"],
+  "assertionMethod": ["did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1"]
 }
 ```
 
 ### Key Design Decisions
 
-**Ed25519 keys**: We use Ed25519 for signing because it is fast, produces compact signatures, and is widely supported across platforms. Each agent gets a dedicated key pair at creation time.
+**Ed25519 keys**: We use Ed25519 for signing because it is fast, produces compact signatures, and is widely supported across platforms. Each agent gets a dedicated key pair at creation time — and the private key is stored encrypted at rest.
 
-**Service endpoints**: The DID Document lists every communication channel the agent supports — email, A2A protocol, webhook URLs. Another agent or service can resolve the DID and know exactly how to reach this agent.
+**World-readable documents**: DID documents must be verifiable by parties who cannot authenticate to Anima, so they are served publicly with open CORS.
 
 **Automatic provisioning**: You do not need to manage keys or DID documents manually. Creating an agent automatically provisions the DID, generates keys, and publishes the document.
 
 ## Resolving and Verifying DIDs
 
-Any system can resolve an Anima DID to get the agent's public identity:
-
-```ts
-import { Anima } from "@anima-labs/sdk";
-
-const anima = new Anima({ apiKey: "ak_..." });
-
-// Resolve any agent's DID document
-const doc = await anima.identity.resolveDid("did:anima:ag_8f3k2m9x1n4p7q6r");
-console.log(doc.authentication); // Public keys
-console.log(doc.service);        // Communication endpoints
-```
-
-```python
-from anima import Anima
-
-anima = Anima(api_key="ak_...")
-
-doc = anima.identity.resolve_did("did:anima:ag_8f3k2m9x1n4p7q6r")
-print(doc.authentication)  # Public keys
-print(doc.service)         # Communication endpoints
-```
-
-Resolution is also available via HTTP for systems that do not use the SDK:
+Any system can fetch an Anima agent's DID document — no API key required:
 
 ```bash
-curl https://api.useanima.sh/v1/identity/did/did:anima:ag_8f3k2m9x1n4p7q6r
+curl https://api.useanima.sh/.well-known/did/<orgId>/<agentId>
 ```
 
-## W3C Verifiable Credentials
+The document is served as `application/did+json`. Authenticated callers can also fetch it through the API:
 
-DIDs establish identity. Verifiable Credentials (VCs) establish **attributes** of that identity. Anima issues VCs that attest to specific facts about an agent:
-
-```json
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://useanima.sh/credentials/v1"
-  ],
-  "type": ["VerifiableCredential", "AgentCapabilityCredential"],
-  "issuer": "did:anima:platform",
-  "credentialSubject": {
-    "id": "did:anima:ag_8f3k2m9x1n4p7q6r",
-    "organizationId": "org_acme_corp",
-    "capabilities": ["email", "phone", "vault"],
-    "complianceStatus": "verified"
-  },
-  "proof": {
-    "type": "Ed25519Signature2020",
-    "verificationMethod": "did:anima:platform#key-1",
-    "proofValue": "z58DAdFfa9SkqZMVPxAQp..."
-  }
-}
+```bash
+curl https://api.useanima.sh/v1/agents/<agentId>/did \
+  -H "Authorization: Bearer ak_..."
 ```
 
-These credentials are cryptographically signed by Anima and can be independently verified by any party. A vendor receiving a request from an agent can verify:
+This is what powers [signed A2A dispatch](/a2a/overview): Anima signs an outbound task with the sender's key, and the recipient verifies that signature against the sender's published DID document before accepting it.
 
-1. The agent's identity (via DID resolution)
-2. That the agent belongs to a specific organization
-3. What capabilities the agent has
+## Verifiable Credentials
 
-All without calling Anima's API — the proof is in the credential itself.
+DIDs establish identity. Verifiable Credentials (VCs) establish **attributes** of that identity — "this agent's email is verified", "this org passed billing verification".
 
-## Agent Cards: Discovery via `.well-known`
+Anima's identity layer verifies and revokes W3C VCs today (`POST /v1/identity/verify` checks signature, expiry, and revocation of a JWT VC). **Automatic credential issuance has not shipped yet** — agents don't accumulate credentials on real events (email verified, phone provisioned) until that lands, and Agent Cards honestly report `verification.level: "basic"` in the meantime. See [Verifiable Credentials](/identity/verifiable-credentials) for the current status.
 
-The final piece is discoverability. Every Anima agent can publish an Agent Card at a well-known URL:
+## Agent Cards: machine-readable agent profiles
 
-```
-https://purchasing.acme.com/.well-known/agent.json
-```
+Every Anima agent has an [Agent Card](/identity/agent-cards) — a machine-readable JSON profile generated from its live state:
 
 ```json
 {
   "name": "Acme Purchasing Agent",
-  "description": "Handles procurement for Acme Corp",
-  "url": "https://purchasing.acme.com",
-  "did": "did:anima:ag_8f3k2m9x1n4p7q6r",
-  "version": "1.0.0",
-  "capabilities": [
-    {
-      "name": "purchase-order",
-      "description": "Create and manage purchase orders",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "vendor": { "type": "string" },
-          "items": { "type": "array" },
-          "budget": { "type": "number" }
-        }
-      }
-    }
-  ],
-  "authentication": {
-    "schemes": ["did-auth", "x402"]
+  "did": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
+  "capabilities": {
+    "email": true,
+    "phone": true,
+    "vault": true,
+    "address": false,
+    "protocols": ["a2a"]
+  },
+  "contact": {
+    "email": "purchasing@agents.useanima.sh"
   }
 }
 ```
 
-Agent Cards serve the same role for agents that OpenAPI specs serve for APIs: a machine-readable description of what this agent can do and how to interact with it.
+Agent Cards serve the same role for agents that OpenAPI specs serve for APIs: a machine-readable description of what this agent can do and how to reach it. The `capabilities` block is derived from what the agent actually has provisioned — not self-declared.
 
 ## Agent Registry
 
-For agents that want to be discoverable beyond their own domain, Anima runs an Agent Registry. Think of it as DNS for agents — register your agent, and other agents can find it by capability, organization, or DID:
+For discovery across your organization, Anima runs an Agent Registry — register your agent, and other agents can find it by capability or DID:
 
 ```ts
 // Register an agent in the registry
 await anima.registry.register({
   agentId: agent.id,
   capabilities: ["procurement", "invoice-processing"],
-  public: true,
 });
 
 // Discover agents by capability
-const agents = await anima.registry.search({
-  capability: "invoice-processing",
-});
+const { items } = await anima.registry.search("invoice-processing");
 ```
 
 ## Putting It All Together
 
-Here is the flow when Agent A wants to interact with Agent B:
+Here is the flow when Agent A wants to hand a task to Agent B:
 
 ```mermaid
 sequenceDiagram
@@ -209,24 +144,22 @@ sequenceDiagram
     participant B as Agent B
 
     A->>Registry: Search for invoice-processing agents
-    Registry-->>A: Agent B (did:anima:ag_xyz)
-    A->>B: Fetch /.well-known/agent.json
-    B-->>A: Agent Card (capabilities, DID, auth)
-    A->>A: Resolve did:anima:ag_xyz, verify credentials
-    A->>B: Authenticated request (DID-Auth)
-    B->>B: Verify A's DID and credentials
-    B-->>A: Response
+    Registry-->>A: Agent B (did:web:…)
+    A->>B: Fetch Agent Card
+    B-->>A: Card (capabilities, DID, contact)
+    A->>B: Signed A2A task (Anima signs with A's key)
+    B->>B: Resolve A's DID document, verify signature
+    B-->>A: Task accepted → status updates
 ```
 
-Every step is verifiable. Every identity is cryptographic. No shared secrets. No API key exchange. Just DIDs, credentials, and open protocols.
+Every step is verifiable. Every identity is cryptographic. No shared secrets between agents.
 
 ## What This Enables
 
-- **Zero-trust agent networks**: Agents verify each other's identity before every interaction
-- **Compliance reporting**: Every action is tied to a verifiable identity with a clear audit trail
-- **Cross-platform portability**: A `did:anima` identifier works everywhere, not just on Anima
-- **Selective disclosure**: Agents can present specific credentials without revealing their full identity
-- **Revocation**: If an agent is compromised, its DID and credentials can be revoked instantly
+- **Signature-verified agent-to-agent tasks**: recipients verify the sender's signature against its published DID document before accepting work
+- **Compliance reporting**: every action is tied to an identity with a clear [audit trail](/security/audit-log)
+- **Standards-based portability**: `did:web` is a registered W3C method — verifiers need no Anima-specific code
+- **Key rotation and revocation**: rotate an agent's keypair (`POST /v1/agents/{agentId}/did/rotate`) or revoke credentials at any time
 
 ## Start Building
 
@@ -234,8 +167,7 @@ Agent identity is not optional anymore. As agents handle real money, real data, 
 
 ```ts
 const agent = await anima.agents.create({ name: "My Agent" });
-const did = `did:anima:${agent.id}`;
-// That's it. Your agent has a cryptographic identity.
+// That's it — the agent's did:web identity and DID document are provisioned automatically.
 ```
 
-[Read the DID method specification](/identity/did-method) | [Explore Verifiable Credentials](/identity/verifiable-credentials) | [Set up Agent Cards](/identity/agent-cards)
+[Read the DID method docs](/identity/did-method) | [Explore Verifiable Credentials](/identity/verifiable-credentials) | [Set up Agent Cards](/identity/agent-cards)

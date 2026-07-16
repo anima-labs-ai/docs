@@ -7,26 +7,26 @@ description: "Wire Anima's tools into Claude Code, Claude Desktop, Cursor, VS Co
 
 Anima's capabilities are exposed as [Model Context Protocol](https://modelcontextprotocol.io) tools, so any MCP-aware client can send email, provision numbers, place calls, and use the vault on your behalf.
 
-The tools are split into focused domain servers, so you install only what you need:
+One server carries the full tool surface, reachable two ways:
 
-| Server | Package | Covers |
-|--------|---------|--------|
-| Agent | `@anima-labs/mcp-agent` | Agents, organizations, identity, registry, A2A |
-| Email | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
-| Phone | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
-| Vault | `@anima-labs/mcp-vault` | Encrypted credential storage, security policies |
-| Platform | `@anima-labs/mcp-platform` | Webhooks, pods, utilities |
+| | Endpoint / package | Best for |
+|---|---|---|
+| **Hosted (recommended)** | `https://mcp.useanima.sh/mcp` | Nothing to install or keep updated; native HTTP clients |
+| **Local (stdio)** | [`@anima-labs/mcp`](https://www.npmjs.com/package/@anima-labs/mcp) via `npx` | Clients without remote-MCP support |
+
+The stdio server loads every tool group by default; pass `--tools=email,vault,phone` to register a subset (see [MCP Server](/mcp-servers) for the group list).
 
 ## Fastest path: let the CLI configure it
 
 The [Anima CLI](/install) detects your installed MCP clients and writes the right config for each one:
 
 ```bash
-# Configure every detected client
+# Configure every detected client (hosted gateway — the default)
 anima setup-mcp install --all
 
-# Or target a single client and a subset of servers
-anima setup-mcp install --client cursor --server email,phone
+# Or target a single client, or install the local stdio server instead
+anima setup-mcp install --client cursor
+anima setup-mcp install --all --mode stdio
 ```
 
 `setup-mcp install` auto-configures **Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf**. It backs up any existing config before writing, and stores your API key in the client's config. Check and confirm what it did:
@@ -40,7 +40,7 @@ To connect a client the CLI doesn't configure automatically (such as Codex or Ze
 
 ## Per-client setup
 
-Each tab shows the CLI command where it applies, plus the manual configuration in that client's native format. Every server takes your Anima API key (`ak_...`) as `ANIMA_API_KEY`.
+Each tab shows the CLI command where it applies, plus the manual configuration in that client's native format. Hosted configs authenticate with `Authorization: Bearer ak_...`; the stdio server takes your API key as `ANIMA_API_KEY`.
 
 <Tabs>
 
@@ -50,12 +50,16 @@ Each tab shows the CLI command where it applies, plus the manual configuration i
 anima setup-mcp install --client claude-code
 ```
 
-Or add a server manually:
+Or add the server manually:
 
 ```bash
-claude mcp add anima-email -- npx -y @anima-labs/mcp-email
-claude mcp add anima-phone -- npx -y @anima-labs/mcp-phone
-claude mcp add anima-vault -- npx -y @anima-labs/mcp-vault
+# Hosted
+claude mcp add anima --transport http \
+  --url https://mcp.useanima.sh/mcp \
+  --header "Authorization: Bearer ak_..."
+
+# Local (stdio)
+claude mcp add anima --env ANIMA_API_KEY=ak_... -- npx -y @anima-labs/mcp
 ```
 
 Claude Code stores MCP servers in `~/.claude.json`.
@@ -77,14 +81,9 @@ Or edit the config file directly:
 ```json
 {
   "mcpServers": {
-    "anima-email": {
+    "anima": {
       "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-email"],
-      "env": { "ANIMA_API_KEY": "ak_..." }
-    },
-    "anima-phone": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-phone"],
+      "args": ["-y", "@anima-labs/mcp"],
       "env": { "ANIMA_API_KEY": "ak_..." }
     }
   }
@@ -99,15 +98,14 @@ Or edit the config file directly:
 anima setup-mcp install --client cursor
 ```
 
-Or edit `~/.cursor/mcp.json`:
+Or edit `~/.cursor/mcp.json` (hosted, native HTTP):
 
 ```json
 {
   "mcpServers": {
-    "anima-email": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-email"],
-      "env": { "ANIMA_API_KEY": "ak_..." }
+    "anima": {
+      "url": "https://mcp.useanima.sh/mcp",
+      "headers": { "Authorization": "Bearer ak_..." }
     }
   }
 }
@@ -126,12 +124,20 @@ Or edit your user `mcp.json` (Command Palette → **MCP: Open User Configuration
 ```json
 {
   "servers": {
-    "anima-email": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-email"],
-      "env": { "ANIMA_API_KEY": "ak_..." }
+    "anima": {
+      "type": "http",
+      "url": "https://mcp.useanima.sh/mcp",
+      "headers": { "Authorization": "Bearer ${input:anima-key}" }
     }
-  }
+  },
+  "inputs": [
+    {
+      "id": "anima-key",
+      "type": "promptString",
+      "description": "Anima API Key",
+      "password": true
+    }
+  ]
 }
 ```
 
@@ -148,10 +154,9 @@ Or edit `~/.codeium/windsurf/mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "anima-email": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-email"],
-      "env": { "ANIMA_API_KEY": "ak_..." }
+    "anima": {
+      "serverUrl": "https://mcp.useanima.sh/mcp",
+      "headers": { "Authorization": "Bearer ak_..." }
     }
   }
 }
@@ -161,15 +166,15 @@ Or edit `~/.codeium/windsurf/mcp_config.json`:
 
 <Tab title="Codex / Zed">
 
-The CLI does not configure these clients automatically — add the servers using each client's MCP configuration. Both support stdio servers launched with `npx`:
+The CLI does not configure these clients automatically — add the server using each client's MCP configuration. Both support stdio servers launched with `npx`:
 
 ```
 command: npx
-args:    ["-y", "@anima-labs/mcp-email"]
+args:    ["-y", "@anima-labs/mcp"]
 env:     ANIMA_API_KEY=ak_...
 ```
 
-Repeat for each domain server you want (`@anima-labs/mcp-agent`, `-phone`, `-vault`, `-platform`), following your client's native config format.
+One entry is enough — the server registers every tool group (pass `--tools=email,vault` in `args` to load a subset).
 
 </Tab>
 

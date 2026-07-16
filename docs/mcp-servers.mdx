@@ -1,77 +1,71 @@
 ---
-title: "MCP Servers"
+title: "MCP Server"
 description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP clients via Model Context Protocol."
 ---
 
-# MCP Servers
+# MCP Server
 
-Anima exposes 53 specialized tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, identity cards, and more.
+Anima exposes 53 tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, identity, and more.
 
-Tools are organized into domain servers, so you can install only what you need:
+There are two ways to connect — both serve the same tool surface:
 
-| Server | Package | Description |
-|--------|---------|-------------|
-| **Agent** | `@anima-labs/mcp-agent` | Agent lifecycle, organizations |
-| **Email** | `@anima-labs/mcp-email` | Email, messages, domains, addresses |
-| **Phone** | `@anima-labs/mcp-phone` | Phone numbers, SMS, voice calls |
-| **Cards** | `@anima-labs/mcp-cards` | Agent cards and identity metadata |
-| **Vault** | `@anima-labs/mcp-vault` | Encrypted credential storage, security policies |
-| **Platform** | `@anima-labs/mcp-platform` | Webhooks, pods, utilities |
+| | Endpoint / package | Best for |
+|---|---|---|
+| **Hosted (recommended)** | `https://mcp.useanima.sh/mcp` | Nothing to install or keep updated; native HTTP clients |
+| **Local (stdio)** | [`@anima-labs/mcp`](https://www.npmjs.com/package/@anima-labs/mcp) via `npx` | Clients without remote-MCP support; air-gapped configs |
 
 ## Quick Start
 
-### Option A: Local (stdio)
+### Option A: Hosted (remote)
 
-Run one or more servers locally via `npx`:
-
-```bash
-npx @anima-labs/mcp-phone --api-key=ak_...
-```
-
-### Option B: Hosted (remote)
-
-Connect to Anima's hosted MCP endpoint — no local install needed:
+Point any client with remote-MCP support at the hosted endpoint and authenticate with your API key as a Bearer token:
 
 ```
 https://mcp.useanima.sh/mcp
+Authorization: Bearer ak_...
 ```
 
-Authenticate with your API key as a Bearer token (`Authorization: Bearer ak_...`). The hosted
-endpoint exposes the full tool surface, so there is nothing to install or keep updated.
+### Option B: Local (stdio)
+
+Run the server locally via `npx`:
+
+```bash
+ANIMA_API_KEY=ak_... npx -y @anima-labs/mcp
+```
+
+By default every tool group is registered. Use `--tools` to load a subset — fewer tools can improve the model's tool selection and reduce token usage:
+
+```bash
+npx -y @anima-labs/mcp --tools=email,vault,phone
+```
 
 ## Configuration
+
+### CLI Setup (all clients)
+
+The [Anima CLI](/install) auto-configures every detected MCP client (Claude Desktop, Claude Code, Cursor, Windsurf, VS Code):
+
+```bash
+# Configure all detected clients (hosted gateway — the default)
+anima setup-mcp install --all
+
+# Use the local stdio server instead
+anima setup-mcp install --all --mode stdio
+
+# Check what got written, then validate it
+anima setup-mcp status
+anima setup-mcp verify --ping
+```
 
 ### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
-**Local (stdio):**
-```json
-{
-  "mcpServers": {
-    "anima-phone": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-phone"],
-      "env": {
-        "ANIMA_API_KEY": "ak_..."
-      }
-    },
-    "anima-email": {
-      "command": "npx",
-      "args": ["-y", "@anima-labs/mcp-email"],
-      "env": {
-        "ANIMA_API_KEY": "ak_..."
-      }
-    }
-  }
-}
-```
-
 **Hosted (remote via mcp-remote bridge):**
 ```json
 {
   "mcpServers": {
-    "anima-phone": {
+    "anima": {
       "command": "npx",
       "args": [
         "-y", "mcp-remote",
@@ -86,13 +80,28 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-### Cursor
-
-**Hosted (remote — native HTTP support):**
+**Local (stdio):**
 ```json
 {
   "mcpServers": {
-    "anima-phone": {
+    "anima": {
+      "command": "npx",
+      "args": ["-y", "@anima-labs/mcp"],
+      "env": {
+        "ANIMA_API_KEY": "ak_..."
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+**Hosted (native HTTP):**
+```json
+{
+  "mcpServers": {
+    "anima": {
       "url": "https://mcp.useanima.sh/mcp",
       "headers": {
         "Authorization": "Bearer ak_..."
@@ -105,116 +114,72 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ### Claude Code
 
 ```bash
-# Local
-claude mcp add anima-phone -- npx -y @anima-labs/mcp-phone
-
 # Hosted
-claude mcp add anima-phone --transport http \
+claude mcp add anima --transport http \
   --url https://mcp.useanima.sh/mcp \
   --header "Authorization: Bearer ak_..."
+
+# Local
+claude mcp add anima --env ANIMA_API_KEY=ak_... -- npx -y @anima-labs/mcp
 ```
 
 ### VS Code
 
-Add to `.vscode/settings.json`:
+Add to your user `mcp.json` (Command Palette → **MCP: Open User Configuration**):
 
 ```json
 {
-  "mcp": {
-    "servers": {
-      "anima-phone": {
-        "type": "http",
-        "url": "https://mcp.useanima.sh/mcp",
-        "headers": {
-          "Authorization": "Bearer ${input:anima-key}"
-        }
+  "servers": {
+    "anima": {
+      "type": "http",
+      "url": "https://mcp.useanima.sh/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:anima-key}"
       }
-    },
-    "inputs": [
-      {
-        "id": "anima-key",
-        "type": "promptString",
-        "description": "Anima API Key",
-        "password": true
-      }
-    ]
-  }
+    }
+  },
+  "inputs": [
+    {
+      "id": "anima-key",
+      "type": "promptString",
+      "description": "Anima API Key",
+      "password": true
+    }
+  ]
 }
 ```
 
-### CLI Setup (all clients)
+## Environment Variables (stdio)
 
-The Anima CLI can auto-configure all detected MCP clients:
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ANIMA_API_KEY` | Yes | Agent API key (`ak_...`) |
+| `ANIMA_MASTER_KEY` | No | Master key (`mk_...`) — unlocks admin tools |
+| `ANIMA_API_URL` | No | API base URL (defaults to `https://api.useanima.sh`) |
 
-```bash
-# Install for all detected clients (local mode)
-anima setup-mcp install --all
+## Tool Groups
 
-# Install specific server for a specific client (remote mode)
-anima setup-mcp install --client cursor --mode remote --server phone
+All groups load by default; pass `--tools=<group,...>` to the stdio server to load a subset.
 
-# Install all servers
-anima setup-mcp install --all --server all
-```
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `ANIMA_API_KEY` | Your Anima API key (required) |
-| `ANIMA_API_URL` | Custom API base URL (optional) |
-
-## Available Tools by Server
-
-### mcp-agent
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Agent** | create, list, get, delete, rotate-key | Manage AI agent identities |
-| **Organization** | get, update, create, delete, rotate-key | Organization settings |
-
-### mcp-email
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Email** | send, reply, search, list | Send and manage email |
-| **Message** | send, list, get | Inbox messaging operations |
-| **Domain** | create, verify, list, delete | Custom email domain management |
-| **Address** | create, list, get | Email address management |
-
-### mcp-phone
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Phone** | search, provision, list, release, send-sms | Phone number and SMS management |
-| **Voice** | catalog, call, list-calls, get-call, transcript, summary, score | Voice call operations and intelligence |
-
-### mcp-cards
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Cards** | get, publish, verify | Agent card and identity metadata |
-
-### mcp-vault
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Vault** | provision, create, get, search, list, delete | Encrypted credential storage |
-| **Security** | policies, audit, update | Security policy configuration |
-
-### mcp-platform
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Webhook** | set (upsert), get, list, delete, test | Real-time event subscriptions, with endpoint auth and delivery throttle |
-| **Pod** | create, list, get | Pod management |
-| **Utility** | search, status, health | Utility and status tools |
-
-## Legacy Monolith Server
-
-The original monolith `@anima-labs/mcp` package is still supported but deprecated. Migrate to the split servers for better performance and selective loading.
+| Group | Covers |
+|-------|--------|
+| `workspace` | Account overview and usage rollups |
+| `agent` | Agent CRUD and address/identity management |
+| `email` | Email send/receive, threads, drafts, attachments |
+| `domain` | Custom sending domains: DNS, verification, zone files |
+| `phone` | Phone number provisioning and release |
+| `phone_call` | Outbound calls, transcripts, recordings, voices |
+| `sms` | SMS/MMS send and conversation history |
+| `vault` | Credential vault management and TOTP |
+| `webhook` | Webhook subscription management and testing |
 
 ## Example Usage
 
 Once connected, ask your AI assistant natural language questions:
 
-- "Send an email from my agent to user@example.com" → **mcp-email**
-- "Store my CRM login credentials in the vault" → **mcp-vault**
-- "Text me now from my agent's number" → **mcp-phone**
-- "Make a voice call to +1-555-0123" → **mcp-phone**
+- "Send an email from my agent to user@example.com"
+- "Store my CRM login credentials in the vault"
+- "Text me now from my agent's number"
+- "Make a voice call to +1-555-0123"
 
 For editor-specific setup, see [Connect your AI client](/integrations).

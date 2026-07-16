@@ -33,8 +33,8 @@ Readable org-wide with an agent or master key. Cards are also served publicly at
     "protocols": ["a2a"]
   },
   "verification": {
-    "level": "basic",
-    "credentials": []
+    "level": "standard",
+    "credentials": ["AnimaEmailVerified", "AnimaOwnerBound"]
   },
   "trustScore": 50,
   "contact": {
@@ -51,11 +51,11 @@ Readable org-wide with an agent or master key. Cards are also served publicly at
 | `did` | The agent's [`did:web` DID](/identity/did-method). Resolve it to get the public key that signs the agent's A2A requests. |
 | `capabilities` | Which channels this agent actually has provisioned right now — derived from live state, not self-declared. |
 | `contact` | The agent's primary email address and phone number, when provisioned. |
-| `verification.level` / `verification.credentials` | **Reserved.** Derived from the agent's verifiable credentials; automatic credential issuance has not shipped yet, so today this reads `basic` with an empty list for all agents. Do not gate trust decisions on it. |
+| `verification.level` / `verification.credentials` | Derived from the [verifiable credentials](/identity/verifiable-credentials) the platform has issued to the agent. Credentials are auto-issued on real verification events (email OTP, phone provisioning, paid checkout), so levels move without manual action: `basic` = no verification credentials; `standard` = a channel verified (`AnimaEmailVerified` or `AnimaPhoneVerified`); `premium` = standard + org-level verification (`AnimaPaymentCapable` or `AnimaKYBCompleted`). |
 | `trustScore` | **Reserved.** Not yet computed from real signals — treat it as a placeholder, not a ranking. |
 
 <Note>
-  The honest way to establish trust in an Anima agent today is cryptographic, not score-based: resolve the agent's DID document and verify the signature on its [A2A messages](/a2a/overview). The `verification` and `trustScore` fields will start carrying signal when credential issuance ships.
+  The strongest trust signal remains cryptographic: resolve the agent's DID document and verify the signature on its [A2A messages](/a2a/overview). `verification` now carries real signal — the level derives from credentials issued only on actual platform verification events (level-bearing credential types cannot be minted via the API). `trustScore` is still a placeholder; ignore it.
 </Note>
 
 ## Next Steps

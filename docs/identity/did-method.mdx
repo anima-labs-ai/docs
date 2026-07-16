@@ -1,136 +1,89 @@
 ---
-title: "DID Method (did:anima)"
-description: "Decentralized identifiers for AI agents using the did:anima method. Document structure, resolution, and lifecycle management."
+title: "DID Method (did:web)"
+description: "Decentralized identifiers for AI agents using the standard did:web method. Document structure, resolution, and key rotation."
 ---
 
-# DID Method (did:anima)
+# DID Method (did:web)
 
-Anima assigns every agent a globally unique decentralized identifier (DID) using the `did:anima` method. DIDs provide a self-sovereign identity foundation that agents can use across protocols and platforms.
+Anima assigns every agent a globally unique decentralized identifier (DID) using the standard [`did:web`](https://w3c-ccg.github.io/did-method-web/) method — a W3C-registered method that resolves over plain HTTPS, with no bespoke method support required.
 
 ## DID Format
 
-Every agent DID follows the W3C DID specification:
-
 ```
-did:anima:<agent-id>
+did:web:agents.useanima.sh:<orgId>:<agentId>
 ```
 
-For example: `did:anima:ag_8f3k2m9x1n4p7q6r`
+For example: `did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd`
 
-## DID Document Structure
+## Resolution
 
-Each DID resolves to a DID Document containing the agent's public keys, service endpoints, and authentication methods.
+Every agent's DID document is world-readable — no API key required — at:
 
-<Tabs items={["Node.js", "Python", "Go"]}>
-<Tab value="Node.js">
-```ts
-import { Anima } from "@anima-labs/sdk";
-
-const anima = new Anima({ apiKey: "ak_..." });
-
-// Resolve a DID document
-const doc = await anima.identity.resolveDid("did:anima:ag_8f3k2m9x1n4p7q6r");
-console.log(doc);
 ```
-</Tab>
-<Tab value="Python">
-```python
-from anima import Anima
-
-anima = Anima(api_key="ak_...")
-
-doc = anima.identity.resolve_did("did:anima:ag_8f3k2m9x1n4p7q6r")
-print(doc)
+GET https://api.useanima.sh/.well-known/did/<orgId>/<agentId>
 ```
-</Tab>
-<Tab value="Go">
-```go
-import "github.com/anima-labs-ai/go"
 
-client := anima.NewClient("ak_...")
-
-doc, err := client.Identity.ResolveDID(ctx, "did:anima:ag_8f3k2m9x1n4p7q6r")
-```
-</Tab>
-</Tabs>
+The document is served with the `application/did+json` media type, a 60-second public cache, and open CORS, so agents in other orgs (and third-party tooling) can fetch and verify it. The spec-canonical `did:web` HTTPS mapping (`https://agents.useanima.sh/<orgId>/<agentId>/did.json`) is not yet routed — until it is, fetch the document from the API host above.
 
 ### Example DID Document
 
 ```json
 {
-  "@context": ["https://www.w3.org/ns/did/v1"],
-  "id": "did:anima:ag_8f3k2m9x1n4p7q6r",
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
   "verificationMethod": [
     {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#key-1",
-      "type": "Ed25519VerificationKey2020",
-      "controller": "did:anima:ag_8f3k2m9x1n4p7q6r",
-      "publicKeyMultibase": "z6Mkf5rG..."
+      "id": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd",
+      "publicKeyJwk": { "kty": "OKP", "crv": "Ed25519", "x": "…" }
     }
   ],
-  "authentication": ["did:anima:ag_8f3k2m9x1n4p7q6r#key-1"],
-  "service": [
-    {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#email",
-      "type": "AgentEmail",
-      "serviceEndpoint": "mailto:agent@useanima.sh"
-    },
-    {
-      "id": "did:anima:ag_8f3k2m9x1n4p7q6r#a2a",
-      "type": "AgentToAgent",
-      "serviceEndpoint": "https://api.useanima.sh/a2a/ag_8f3k2m9x1n4p7q6r"
-    }
+  "authentication": [
+    "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1"
+  ],
+  "assertionMethod": [
+    "did:web:agents.useanima.sh:cmb1x9k2l0000abcd:cmb1xa3f50001abcd#key-1"
   ]
 }
 ```
 
+The agent's Ed25519 key signs [A2A requests](/a2a/overview); receivers verify the signature against the public key in this document.
+
 ## API Reference
 
-### Resolve DID
+DIDs are created automatically when an agent is provisioned — there is no separate "create DID" call.
+
+### Get an agent's DID document
 
 ```
-GET https://api.useanima.sh/api/identity/did/:did
+GET https://api.useanima.sh/v1/agents/{agentId}/did
 ```
 
-Resolves a `did:anima` identifier to its DID Document.
+Returns the same DID document served at the public resolution URL. Readable org-wide with an agent or master key (public discovery works via the `did.json` URL above without any key).
 
-| Parameter | Type   | Description                        |
-| --------- | ------ | ---------------------------------- |
-| `did`     | string | The full DID, e.g. `did:anima:...` |
-
-### Create DID
-
-DIDs are created automatically when an agent is provisioned. To explicitly create or rotate keys:
+### Rotate keys
 
 ```
-POST https://api.useanima.sh/api/identity/did
+POST https://api.useanima.sh/v1/agents/{agentId}/did/rotate
 ```
 
-```json
-{
-  "agentId": "ag_8f3k2m9x1n4p7q6r",
-  "keyType": "Ed25519"
-}
-```
+Generates a new keypair for the agent and republishes the DID document. Master key required. Signatures made with the old key stop verifying once the document no longer lists it — coordinate rotation with any party that pinned the old key.
 
-### Rotate Keys
+## Related endpoints
 
-```
-POST https://api.useanima.sh/api/identity/did/:did/rotate
-```
-
-Rotates the agent's verification key. The previous key is added to the document's `keyAgreement` section for a configurable grace period.
-
-## Configuration
-
-| Variable                     | Default    | Description                                  |
-| ---------------------------- | ---------- | -------------------------------------------- |
-| `ANIMA_DID_KEY_TYPE`         | `Ed25519`  | Default key type for new DIDs                |
-| `ANIMA_DID_ROTATION_GRACE`   | `72h`      | Grace period before old keys expire           |
-| `ANIMA_DID_CACHE_TTL`        | `300`      | DID document cache TTL in seconds             |
+| Endpoint | Method | Description |
+| --- | --- | --- |
+| `/v1/agents/{agentId}/did` | GET | DID document for an agent |
+| `/v1/agents/{agentId}/did/rotate` | POST | Rotate the agent's keypair (master key) |
+| `/v1/agents/{agentId}/card` | GET | Public [Agent Card](/identity/agent-cards) |
+| `/v1/identity/verify` | POST | Verify a JWT Verifiable Credential |
 
 ## Next Steps
 
-- [Verifiable Credentials](/identity/verifiable-credentials) -- Issue and verify credentials for your agents
-- [Agent Cards](/identity/agent-cards) -- Publish discoverable agent metadata
+- [Verifiable Credentials](/identity/verifiable-credentials) -- Verify and revoke credentials
+- [Agent Cards](/identity/agent-cards) -- Machine-readable agent metadata
 - [A2A Protocol](/a2a/overview) -- Agent-to-agent communication using DIDs

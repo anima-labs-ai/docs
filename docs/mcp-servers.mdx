@@ -5,14 +5,14 @@ description: "Connect Anima to Claude Desktop, Cursor, VS Code, and other MCP cl
 
 # MCP Server
 
-Anima exposes 53 tools via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, vault, phone, voice calls, identity, and more.
+Anima exposes its platform via the [Model Context Protocol](https://modelcontextprotocol.io) (MCP), giving AI assistants direct access to agent email, inboxes, vault, phone, voice calls, and more.
 
-There are two ways to connect — both serve the same tool surface:
+There are two ways to connect:
 
-| | Endpoint / package | Best for |
-|---|---|---|
-| **Hosted (recommended)** | `https://mcp.useanima.sh/mcp` | Nothing to install or keep updated; native HTTP clients |
-| **Local (stdio)** | [`@anima-labs/mcp`](https://www.npmjs.com/package/@anima-labs/mcp) via `npx` | Clients without remote-MCP support; air-gapped configs |
+| | Endpoint / package | Tools | Best for |
+|---|---|---|---|
+| **Hosted (recommended)** | `https://mcp.useanima.sh/mcp` | 65 — the full surface, always current (includes inbox management) | Nothing to install or keep updated; native HTTP clients |
+| **Local (stdio)** | [`@anima-labs/mcp`](https://www.npmjs.com/package/@anima-labs/mcp) via `npx` | 53 core tools | Clients without remote-MCP support; pinned/air-gapped configs |
 
 ## Quick Start
 

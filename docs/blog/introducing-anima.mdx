@@ -77,9 +77,9 @@ await anima.vault.createCredential({
   uris: ["https://vendor.example.com/login"],
 });
 
-// Identity: resolve the agent's DID
-const did = await anima.identity.resolveDid(`did:anima:${agent.id}`);
-console.log(did);
+// Identity: every agent gets a did:web DID + world-readable DID document
+// GET https://api.useanima.sh/.well-known/did/{orgId}/{agentId}
+console.log(agent.did); // did:web:agents.useanima.sh:…
 ```
 
 That is one SDK, one API key, one agent ID. No glue code. No multi-vendor orchestration.
@@ -88,11 +88,7 @@ That is one SDK, one API key, one agent ID. No glue code. No multi-vendor orches
 
 ### Cryptographic Identity (DIDs)
 
-Every Anima agent gets a `did:anima` decentralized identifier. This is not just a database row — it is a W3C-compliant DID with public keys, service endpoints, and verifiable credentials. Agents can prove who they are to other agents, services, and compliance systems.
-
-### x402 Payments
-
-Agents encounter paywalls and paid APIs constantly. Anima implements the x402 protocol: when a server returns `HTTP 402 Payment Required`, the agent's wallet automatically negotiates and pays — within budget guards you define. No checkout flows.
+Every Anima agent gets a standard `did:web` decentralized identifier. This is not just a database row — it is a W3C-compliant DID with a world-readable DID document and signing keys. Agents prove who they are to other agents and services via signed A2A requests.
 
 ### Policy Engine
 
@@ -100,7 +96,7 @@ Every action goes through a configurable policy engine. You define rules like "n
 
 ### SOC 2 Controls
 
-Anima is built for production. Dual-layer content scanning (regex + AI classification), API key scoping (master keys vs. agent keys), encrypted vault storage, and full audit logging.
+Anima is built for production. Rule-based content + injection scanning on every inbound and outbound message, API key scoping (master keys vs. agent keys), encrypted vault storage, and full audit logging.
 
 ## SDKs and Tools
 

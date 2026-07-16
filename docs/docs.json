@@ -2,7 +2,7 @@
 	"$schema": "https://mintlify.com/docs.json",
 	"theme": "mint",
 	"name": "Anima",
-	"description": "Unified identity infrastructure for AI agents — email, phone, voice, vault, and agent-to-agent commerce.",
+	"description": "Unified identity infrastructure for AI agents — email, phone, voice, credential vault, and agent-to-agent task exchange.",
 	"colors": {
 		"primary": "#16a34a",
 		"light": "#22c55e",
@@ -36,8 +36,15 @@
 	"redirects": [
 		{ "source": "/docs/:slug*", "destination": "/:slug*" },
 		{ "source": "/platform/:slug*", "destination": "/:slug*" },
-		{ "source": "/protocols", "destination": "/protocols/overview" },
-		{ "source": "/protocols/index", "destination": "/protocols/overview" },
+		{ "source": "/protocols", "destination": "/protocols/voice-websocket" },
+		{ "source": "/protocols/index", "destination": "/protocols/voice-websocket" },
+		{ "source": "/protocols/overview", "destination": "/protocols/voice-websocket" },
+		{ "source": "/protocols/visa-tap", "destination": "/getting-started" },
+		{ "source": "/protocols/ap2", "destination": "/getting-started" },
+		{ "source": "/protocols/mastercard-vi", "destination": "/getting-started" },
+		{ "source": "/pods/:slug*", "destination": "/getting-started" },
+		{ "source": "/wallet/:slug*", "destination": "/getting-started" },
+		{ "source": "/blog/x402-payments", "destination": "/blog/introducing-anima" },
 		{ "source": "/coding-agents", "destination": "/integrations" },
 		{ "source": "/errors/:slug*", "destination": "/errors" },
 		{ "source": "/auth/master-key", "destination": "/security" },
@@ -90,7 +97,7 @@
 						]
 					},
 					{
-						"group": "Agent Identity & Commerce",
+						"group": "Agent Identity & A2A",
 						"icon": "fingerprint",
 						"pages": [
 							{
@@ -104,14 +111,6 @@
 							{
 								"group": "Agent Registry",
 								"pages": ["registry/overview"]
-							},
-							{
-								"group": "Agent Wallet",
-								"pages": ["wallet/overview"]
-							},
-							{
-								"group": "Multi-Tenancy Pods",
-								"pages": ["pods/overview"]
 							},
 							{
 								"group": "A2A Protocol",
@@ -140,10 +139,6 @@
 						"group": "Protocols",
 						"icon": "network",
 						"pages": [
-							"protocols/overview",
-							"protocols/visa-tap",
-							"protocols/ap2",
-							"protocols/mastercard-vi",
 							"protocols/voice-websocket"
 						]
 					},
@@ -173,8 +168,7 @@
 							"blog/introducing-anima",
 							"blog/anima-vs-agentmail",
 							"blog/agent-identity-did",
-							"blog/give-agent-phone-number",
-							"blog/x402-payments"
+							"blog/give-agent-phone-number"
 						]
 					}
 				]

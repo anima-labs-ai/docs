@@ -18966,6 +18966,175 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "identity.issueCredential",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-z]+$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                }
+              ],
+              "description": "Agent identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "AnimaEmailVerified",
+                      "AnimaPhoneVerified",
+                      "AnimaAddressVerified",
+                      "AnimaKYBCompleted",
+                      "AnimaPaymentCapable",
+                      "AnimaOwnerBound",
+                      "AnimaTrustScore"
+                    ],
+                    "type": "string",
+                    "description": "Credential type to issue"
+                  },
+                  "claims": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Additional claims for the credential subject (the subject id is always the agent's DID)"
+                  },
+                  "expiresInSeconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 315360000,
+                    "description": "Optional credential lifetime in seconds (omit for non-expiring)"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "description": "Input for issuing a verifiable credential to an agent (master key). Platform verification events (email OTP, phone provisioning, Stripe checkout) auto-issue AnimaEmailVerified/AnimaOwnerBound, AnimaPhoneVerified, and AnimaPaymentCapable; those types (plus AnimaKYBCompleted) derive the agent card's public verification.level and are platform-reserved — issuing them here returns 403. This endpoint issues the org-attestation types (AnimaAddressVerified, AnimaTrustScore), recorded with metadata.source=api, distinct from the platform's source=platform-auto."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "agentId": {
+                      "type": "string"
+                    },
+                    "orgId": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "jwtVc": {
+                      "type": "string"
+                    },
+                    "issuerDid": {
+                      "type": "string"
+                    },
+                    "subjectDid": {
+                      "type": "string"
+                    },
+                    "issuedAt": {
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revoked": {
+                      "type": "boolean"
+                    },
+                    "revokedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revocationIndex": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "metadata": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "agentId",
+                    "orgId",
+                    "type",
+                    "jwtVc",
+                    "issuerDid",
+                    "subjectDid",
+                    "issuedAt",
+                    "expiresAt",
+                    "revoked",
+                    "revokedAt",
+                    "revocationIndex",
+                    "metadata",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "description": "A Verifiable Credential record"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/identity/verify": {

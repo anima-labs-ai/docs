@@ -22,8 +22,32 @@ To refresh it after API contract changes (from a checkout of the `anima` monorep
 2. Copy that file over this repo's `docs/openapi.json`.
 3. Open a PR. Sanity checks: exactly one server entry `https://api.useanima.sh/v1`; no
    `animalabs.ai` strings.
+4. `node docs/scripts/check-agent-surfaces.mjs` — CI runs this too. **A refresh publishes
+   whatever the monorepo currently exposes**, and Mintlify turns every operation into an
+   API-reference page that lands in `llms.txt`. This is how six `pods` endpoints came to be
+   advertised to every model ingesting our docs, months after pods were scrapped and the
+   pods prose pages were deleted. If the script fails, the monorepo is still exposing
+   something this product does not sell — delete the paths from the snapshot, and fix it
+   upstream.
 
 (Automating this with a GitHub Action is a listed follow-up.)
+
+## Agent-facing surfaces
+
+Anima is meant to be operated by agents, so these are product surfaces, not
+afterthoughts — all four are live and all four are served by Mintlify, not hand-built:
+
+| Surface | What it is |
+|---|---|
+| `https://docs.useanima.sh/llms.txt` | Compact index of every page, [llms.txt convention](https://llmstxt.org). |
+| `https://docs.useanima.sh/llms-full.txt` | Whole site concatenated, for ingestion. |
+| `https://docs.useanima.sh/<page>.md` | Any page as raw markdown — append `.md` to the URL. |
+| `https://docs.useanima.sh/mcp` | Docs MCP server (Streamable HTTP, public, read-only). |
+
+They are documented for users in [`docs/ai-agents.mdx`](docs/ai-agents.mdx). `llms.txt` is
+generated from the `docs.json` navigation plus `openapi.json`, so **anything in either is
+taught verbatim to every model that reads our docs** — which is what
+`scripts/check-agent-surfaces.mjs` guards.
 
 ## Sections
 

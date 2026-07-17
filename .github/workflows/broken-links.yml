@@ -15,3 +15,21 @@ jobs:
       - name: Check internal links
         working-directory: docs
         run: npx --yes mint broken-links
+
+  agent-surfaces:
+    name: agent surfaces (llms.txt inputs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # openapi.json is a committed snapshot refreshed by hand from the monorepo
+      # (README, "API Reference"), and Mintlify turns every operation in it into
+      # an API-reference page that lands in llms.txt. A refresh therefore
+      # publishes whatever the monorepo happens to expose, straight to every
+      # model that ingests our docs — which is how six scrapped `pods` endpoints
+      # came to be advertised there. Deleting them once does not hold; this does.
+      - name: Check agent-facing surfaces
+        working-directory: docs
+        run: node scripts/check-agent-surfaces.mjs

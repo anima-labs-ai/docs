@@ -36,7 +36,7 @@ Readable org-wide with an agent or master key. Cards are also served publicly at
     "level": "standard",
     "credentials": ["AnimaEmailVerified", "AnimaOwnerBound"]
   },
-  "trustScore": 50,
+  "trustScore": 20,
   "contact": {
     "email": "purchasing@agents.useanima.sh",
     "phone": "+14155550142"
@@ -52,7 +52,7 @@ Readable org-wide with an agent or master key. Cards are also served publicly at
 | `capabilities` | Which channels this agent actually has provisioned right now — derived from live state, not self-declared. |
 | `contact` | The agent's primary email address and phone number, when provisioned. |
 | `verification.level` / `verification.credentials` | Derived from the [verifiable credentials](/identity/verifiable-credentials) the platform has issued to the agent. Credentials are auto-issued on real verification events (email OTP, phone provisioning, paid checkout), so levels move without manual action: `basic` = no verification credentials; `standard` = a channel verified (`AnimaEmailVerified` or `AnimaPhoneVerified`); `premium` = standard + org-level verification (`AnimaPaymentCapable` or `AnimaKYBCompleted`). |
-| `trustScore` | **Reserved.** Not yet computed from real signals — treat it as a placeholder, not a ranking. |
+| `trustScore` | **Reserved.** A fixed placeholder (`20`), identical for every agent — not computed from any signal. Do not sort, filter, or gate on it. The registry's `trustMin` parameter is accepted but ignored for the same reason. |
 
 <Note>
   The strongest trust signal remains cryptographic: resolve the agent's DID document and verify the signature on its [A2A messages](/a2a/overview). `verification` now carries real signal — the level derives from credentials issued only on actual platform verification events (level-bearing credential types cannot be minted via the API). `trustScore` is still a placeholder; ignore it.

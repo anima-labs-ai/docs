@@ -5912,6 +5912,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -6153,6 +6165,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -6252,6 +6265,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -6493,6 +6518,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -6553,6 +6579,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -6794,6 +6832,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -6943,6 +6982,37 @@
             "explode": true,
             "allowEmptyValue": true,
             "allowReserved": true
+          },
+          {
+            "name": "inboxId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "description": "Filter to one inbox — messages delivered to it (inbound) or sent from it (outbound). The precise way to read a single mailbox when an agent owns several."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "fromAddress",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Filter by sender address, matched exactly (case-sensitive). On inbound mail this is the counterparty; on outbound it is the agent identity the mail was sent from."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "toAddress",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Filter by recipient address, matched exactly (case-sensitive). Note that outbound messages store every recipient in one comma-joined value, so an exact filter matches a multi-recipient send only when given that same joined string — prefer `inboxId` to scope outbound mail to a mailbox."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
           }
         ],
         "responses": {
@@ -6967,6 +7037,18 @@
                             "type": "string",
                             "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                             "description": "ID of the agent that sent or received the message"
+                          },
+                          "inboxId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
                           },
                           "channel": {
                             "enum": [
@@ -7209,6 +7291,7 @@
                         "required": [
                           "id",
                           "agentId",
+                          "inboxId",
                           "channel",
                           "direction",
                           "status",
@@ -7341,6 +7424,19 @@
                           }
                         },
                         "description": "Filter results within a date range"
+                      },
+                      "inboxId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                        "description": "Filter to one inbox — messages delivered to it (inbound) or sent from it (outbound). The precise way to read a single mailbox when an agent owns several."
+                      },
+                      "fromAddress": {
+                        "type": "string",
+                        "description": "Filter by sender address, matched exactly (case-sensitive). On inbound mail this is the counterparty; on outbound it is the agent identity the mail was sent from."
+                      },
+                      "toAddress": {
+                        "type": "string",
+                        "description": "Filter by recipient address, matched exactly (case-sensitive). Note that outbound messages store every recipient in one comma-joined value, so an exact filter matches a multi-recipient send only when given that same joined string — prefer `inboxId` to scope outbound mail to a mailbox."
                       }
                     },
                     "description": "Optional filters to narrow search results"
@@ -7397,6 +7493,18 @@
                             "type": "string",
                             "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                             "description": "ID of the agent that sent or received the message"
+                          },
+                          "inboxId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
                           },
                           "channel": {
                             "enum": [
@@ -7639,6 +7747,7 @@
                         "required": [
                           "id",
                           "agentId",
+                          "inboxId",
                           "channel",
                           "direction",
                           "status",
@@ -8597,6 +8706,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -8838,6 +8959,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -16095,6 +16217,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -16336,6 +16470,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -16601,6 +16736,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -16842,6 +16989,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -16931,6 +17079,18 @@
                             "type": "string",
                             "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                             "description": "ID of the agent that sent or received the message"
+                          },
+                          "inboxId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
                           },
                           "channel": {
                             "enum": [
@@ -17173,6 +17333,7 @@
                         "required": [
                           "id",
                           "agentId",
+                          "inboxId",
                           "channel",
                           "direction",
                           "status",
@@ -18102,6 +18263,18 @@
                       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
                       "description": "ID of the agent that sent or received the message"
                     },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
                     "channel": {
                       "enum": [
                         "EMAIL",
@@ -18343,6 +18516,7 @@
                   "required": [
                     "id",
                     "agentId",
+                    "inboxId",
                     "channel",
                     "direction",
                     "status",
@@ -19522,7 +19696,7 @@
                   "agentId": {
                     "type": "string",
                     "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-                    "description": "ID of the agent to associate with this inbox"
+                    "description": "ID of the agent to associate with this inbox. With an agent-scoped key, defaults to the calling agent and may only name that agent; naming a different agent requires a master key. With a master key, omitting it creates a dedicated backing agent for the inbox."
                   }
                 },
                 "description": "Request body for creating a new inbox"
@@ -27536,7 +27710,7 @@
                     },
                     "trustScore": {
                       "type": "integer",
-                      "description": "Trust score (0-100)"
+                      "description": "Reserved — a fixed placeholder, not a ranking. Not computed from any signal; do not sort, filter, or gate on it. Verify an agent cryptographically instead: resolve its DID document and check the signatures on its verifiable credentials."
                     },
                     "kyaLevel": {
                       "type": "string",
@@ -27651,7 +27825,7 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 100,
-              "description": "Minimum trust score threshold"
+              "description": "Reserved — accepted for backward compatibility but not used as a filter. `trustScore` is not computed yet, so filtering on it would silently return an empty directory rather than a trusted subset."
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -27754,7 +27928,7 @@
                           },
                           "trustScore": {
                             "type": "integer",
-                            "description": "Trust score (0-100)"
+                            "description": "Reserved — a fixed placeholder, not a ranking. Not computed from any signal; do not sort, filter, or gate on it. Verify an agent cryptographically instead: resolve its DID document and check the signatures on its verifiable credentials."
                           },
                           "kyaLevel": {
                             "type": "string",
@@ -27920,7 +28094,7 @@
                     },
                     "trustScore": {
                       "type": "integer",
-                      "description": "Trust score (0-100)"
+                      "description": "Reserved — a fixed placeholder, not a ranking. Not computed from any signal; do not sort, filter, or gate on it. Verify an agent cryptographically instead: resolve its DID document and check the signatures on its verifiable credentials."
                     },
                     "kyaLevel": {
                       "type": "string",
@@ -28096,7 +28270,7 @@
                     },
                     "trustScore": {
                       "type": "integer",
-                      "description": "Trust score (0-100)"
+                      "description": "Reserved — a fixed placeholder, not a ranking. Not computed from any signal; do not sort, filter, or gate on it. Verify an agent cryptographically instead: resolve its DID document and check the signatures on its verifiable credentials."
                     },
                     "kyaLevel": {
                       "type": "string",

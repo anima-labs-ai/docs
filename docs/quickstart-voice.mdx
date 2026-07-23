@@ -48,15 +48,14 @@ sms = anima.messages.send_sms(
 )
 print(f"SMS sent: {sms.id} ({sms.status})")
 
-# 3. Confirm the voice catalog is available for your tier.
-voices = anima.voices.list(tier="basic")
-print(f"Available basic voices: {len(voices['voices'])}")
+# 3. Confirm the voice catalog is available.
+voices = anima.voices.list()
+print(f"Available voices: {len(voices['voices'])}")
 
 # 4. Place the first outbound call.
 call = anima.calls.create(
     agent_id=agent_id,
     to=your_phone,
-    tier="basic",
     greeting="Hi, this is my Anima agent. I am calling from my own phone number.",
 )
 print(f"Call started: {call.call_id}, state: {call.state}")
@@ -97,15 +96,14 @@ const sms = await anima.messages.sendSms({
 });
 console.log(`SMS sent: ${sms.id} (${sms.status})`);
 
-// 3. Confirm the voice catalog is available for your tier.
-const voices = await anima.voices.list({ tier: "basic" });
-console.log(`Available basic voices: ${voices.voices.length}`);
+// 3. Confirm the voice catalog is available.
+const voices = await anima.voices.list();
+console.log(`Available voices: ${voices.voices.length}`);
 
 // 4. Place the first outbound call.
 const call = await anima.calls.create({
   agentId,
   to: yourPhone,
-  tier: "basic",
   greeting: "Hi, this is my Anima agent. I am calling from my own phone number.",
 });
 console.log(`Call started: ${call.callId}, state: ${call.state}`);

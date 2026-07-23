@@ -1,11 +1,11 @@
 ---
 title: "Voice Catalog"
-description: "List available voice tiers and catalog entries for AI-powered phone calls."
+description: "Browse available voices and set an agent's voice for AI-powered phone calls."
 ---
 
 # Voice Catalog
 
-Use the voice catalog to inspect which voices are available for outbound phone calls. The current SDK exposes catalog listing and filtering; call creation uses the selected `tier` plus the agent's configured voice pipeline.
+Every Anima agent speaks with a single, high-quality voice. Use the voice catalog to browse the available voices, then set one on your agent — it is used for all of that agent's calls.
 
 ## List voices
 
@@ -14,10 +14,10 @@ from anima import Anima
 
 anima = Anima(api_key="ak_...")
 
-voices = anima.voices.list(tier="basic")
+voices = anima.voices.list()
 
 for voice in voices["voices"]:
-    print(f"{voice.id}: {voice.name} ({voice.provider}, {voice.language})")
+    print(f"{voice.id}: {voice.name} ({voice.gender}, {voice.accent})")
 ```
 
 ```ts
@@ -25,12 +25,14 @@ import { Anima } from "@anima-labs/sdk";
 
 const anima = new Anima({ apiKey: "ak_..." });
 
-const voices = await anima.voices.list({ tier: "basic" });
+const voices = await anima.voices.list();
 
 for (const voice of voices.voices) {
-  console.log(`${voice.id}: ${voice.name} (${voice.provider}, ${voice.language})`);
+  console.log(`${voice.id}: ${voice.name} (${voice.gender}, ${voice.accent})`);
 }
 ```
+
+Each voice has an `id` (e.g. `thalia`), a display `name`, a `gender`, an `accent`, a set of `descriptors` (tone words such as "warm" or "smooth"), suggested `useCases`, and a `language`.
 
 ## Filters
 
@@ -38,31 +40,39 @@ The catalog supports these optional filters:
 
 | Filter | Values |
 |--------|--------|
-| `tier` | `basic`, `premium` |
 | `gender` | `male`, `female`, `neutral` |
-| `language` | BCP-47 language code, such as `en-US` |
+| `language` | language code, such as `en` |
 
 ```python
-premium_voices = anima.voices.list(tier="premium")
 female_voices = anima.voices.list(gender="female")
-english_voices = anima.voices.list(language="en-US")
+english_voices = anima.voices.list(language="en")
 ```
 
 ```ts
-const premiumVoices = await anima.voices.list({ tier: "premium" });
 const femaleVoices = await anima.voices.list({ gender: "female" });
-const englishVoices = await anima.voices.list({ language: "en-US" });
+const englishVoices = await anima.voices.list({ language: "en" });
+```
+
+## Set an agent's voice
+
+A voice is a property of the agent, not the call. Set `voiceId` when you create or update an agent, and every call that agent places or receives uses it. Omit it to use the system default voice.
+
+```python
+agent = anima.agents.update(id="AGENT_ID", voice_id="thalia")
+```
+
+```ts
+const agent = await anima.agents.update({ id: "AGENT_ID", voiceId: "thalia" });
 ```
 
 ## Place a call
 
-The public SDK call creation surface accepts `to`, optional `agentId`, `tier`, `greeting`, and optional `fromNumber`.
+Call creation takes `to`, an optional `agentId`, an optional `greeting`, and an optional `fromNumber` — the voice comes from the agent.
 
 ```python
 call = anima.calls.create(
     agent_id="AGENT_ID",
     to="+15551234567",
-    tier="basic",
     greeting="Hi, this is my Anima agent calling from its own number.",
 )
 
@@ -73,19 +83,16 @@ print(call.call_id, call.state)
 const call = await anima.calls.create({
   agentId: "AGENT_ID",
   to: "+15551234567",
-  tier: "basic",
   greeting: "Hi, this is my Anima agent calling from its own number.",
 });
 
 console.log(call.callId, call.state);
 ```
 
-Per-call `voiceId`, `voiceSettings`, and custom `systemPrompt` fields are not part of the current public SDK call input. Configure persistent agent behavior in the agent/voice pipeline, and use `greeting` for the opening line.
-
 ## REST endpoint
 
 ```bash
-curl "https://api.useanima.sh/v1/voice/catalog?tier=basic" \
+curl "https://api.useanima.sh/v1/voice/catalog" \
   -H "Authorization: Bearer ak_..."
 ```
 

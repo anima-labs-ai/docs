@@ -135,7 +135,6 @@ Outbound voice calls run through the voice gate before dialing. Use a number you
 call = anima.calls.create(
     agent_id=agent_id,
     to="+15551234567",  # your phone number
-    tier="basic",
     greeting="Hi, this is my Anima agent. I am calling from my own phone number.",
 )
 
@@ -146,14 +145,13 @@ print(f"Call started: {call.call_id} ({call.state})")
 const call = await anima.calls.create({
   agentId,
   to: "+15551234567", // your phone number
-  tier: "basic",
   greeting: "Hi, this is my Anima agent. I am calling from my own phone number.",
 });
 
 console.log(`Call started: ${call.callId} (${call.state})`);
 ```
 
-Voice behavior comes from the configured agent and selected tier. Use `greeting` for the first spoken line; use the agent configuration and voice pipeline for deeper call behavior.
+Voice behavior comes from the configured agent. Use `greeting` for the first spoken line; use the agent configuration and voice pipeline for deeper call behavior.
 
 ## 6. Read the transcript
 
@@ -188,7 +186,7 @@ The useful Anima pattern is not "a phone API in isolation." It is one agent iden
 
 ## Compliance guardrails
 
-For US outbound calls, Anima enforces guardrails server-side before the dial reaches the telephony provider. These include TCPA consent attestation, Reassigned Numbers Database checks, time-of-day windows, and per-tier call caps. The platform can reject a call before dialing when those requirements are not satisfied.
+For US outbound calls, Anima enforces guardrails server-side before the dial reaches the telephony provider. These include TCPA consent attestation, Reassigned Numbers Database checks, time-of-day windows, and per-plan call caps. The platform can reject a call before dialing when those requirements are not satisfied.
 
 For SMS, keep the same standard: do not send spam, honor opt-outs, and only contact recipients where you have a lawful basis to do so.
 
@@ -228,8 +226,8 @@ await anima.phones.release({
 ## Next steps
 
 - [Quickstart: Voice Calls](/quickstart-voice) - Run the SMS-then-call demo end to end
-- [Conversational Calls](/conversational-calls) - Choose REST hosted, realtime, or WebSocket-controlled calls
-- [Voice Catalog](/voice-catalog) - Browse voice tiers and options
+- [Conversational Calls](/conversational-calls) - Choose REST hosted or WebSocket-controlled calls
+- [Voice Catalog](/voice-catalog) - Browse available voices
 - [Call Intelligence](/call-intelligence) - Summaries, scoring, transcripts, and recordings
 - [Pricing & Limits](/pricing-and-limits) - Check included phone, SMS, and voice quotas
 - [Vault](/vault) - Store credentials without exposing raw secrets to the model

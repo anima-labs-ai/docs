@@ -1,21 +1,20 @@
 ---
 title: "Conversational Calls"
-description: "Understand Anima's REST-hosted, realtime, and WebSocket-controlled voice-call modes."
+description: "Understand Anima's REST-hosted and WebSocket-controlled voice-call modes."
 ---
 
 # Conversational Calls
 
-Anima supports three voice-call modes. Pick the mode based on who should drive the live conversation: Anima's hosted loop, the realtime voice pipeline, or your own agent over WebSocket.
+Anima supports two voice-call modes. Pick the mode based on who should drive the live conversation: Anima's hosted loop, or your own agent over WebSocket.
 
 ## Modes
 
 | Mode | How to start | Who drives the conversation | Best for |
 |------|--------------|-----------------------------|----------|
-| REST hosted, Basic/Premium | `POST /v1/voice/calls` with `tier: "basic"` or `tier: "premium"` | Anima attaches a server-side conversation loop after dialing | "Call me now" demos, scripted follow-up calls, quick production calls |
-| REST realtime | `POST /v1/voice/calls` with `tier: "realtime"` | The realtime pipeline drives STT, LLM, TTS, tools, and barge-in | Low-latency calls with a custom per-call `systemPrompt` |
+| REST hosted | `POST /v1/voice/calls` | Anima attaches a server-side conversation loop after dialing | "Call me now" demos, scripted follow-up calls, quick production calls |
 | WebSocket BYO agent | Voice WebSocket / SDK connection | Your agent runtime accepts calls, streams events, and sends speech/control messages | Custom agents, complex routing, external memory, custom tool orchestration |
 
-All modes still use the same phone identity, call records, transcripts, guardrails, and plan caps.
+Both modes use the same voice pipeline, phone identity, call records, transcripts, guardrails, and plan caps. The agent speaks with its configured voice — see the [Voice Catalog](/voice-catalog) to set one.
 
 ## REST hosted calls
 
@@ -28,35 +27,15 @@ curl -X POST https://api.useanima.sh/v1/voice/calls \
   -d '{
     "agentId": "agt_...",
     "to": "+15551234567",
-    "tier": "basic",
     "greeting": "Hi, this is my Anima agent. I am calling from my own number."
   }'
 ```
 
-For `basic` and `premium`, Anima attaches the hosted conversation loop. The first spoken line comes from `greeting`. Deeper behavior comes from the agent configuration and the hosted voice loop.
-
-## Realtime calls
-
-Use `realtime` when you want the low-latency realtime pipeline. This mode accepts an optional per-call `systemPrompt`.
-
-```bash
-curl -X POST https://api.useanima.sh/v1/voice/calls \
-  -H "Authorization: Bearer ak_..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agentId": "agt_...",
-    "to": "+15551234567",
-    "tier": "realtime",
-    "greeting": "Hi, I can help with your appointment.",
-    "systemPrompt": "You are a concise scheduling assistant. Confirm the caller identity before discussing appointment details."
-  }'
-```
-
-`systemPrompt` is for the realtime tier. Basic and Premium use the hosted conversation loop and agent configuration instead.
+Anima attaches the hosted conversation loop after dialing. The first spoken line comes from `greeting`; deeper behavior comes from the agent configuration and the hosted voice loop.
 
 ## WebSocket-controlled calls
 
-Use the Voice WebSocket when your own agent runtime needs full control over the call.
+Use the Voice WebSocket when your own agent runtime needs full control over the call — you bring the brain (your own LLM) and Anima handles the voice I/O.
 
 ```ts
 const conn = anima.calls.connect({ agentId: "agt_..." });
@@ -68,7 +47,6 @@ conn.on("message", (message) => {
 });
 
 conn.createCall("+15551234567", {
-  tier: "basic",
   greeting: "Hi, this is my Anima agent.",
 });
 ```
@@ -78,7 +56,7 @@ The WebSocket path is the right choice when you need custom memory, custom tool 
 ## What Anima handles
 
 - Number ownership and call placement
-- Voice pipeline selection
+- The voice pipeline (speech-to-text, speech, barge-in)
 - TCPA, RND, time-of-day, and plan-cap gates
 - Call lifecycle records
 - Transcripts and post-call artifacts

@@ -35406,19 +35406,6 @@
         "operationId": "voice.catalog",
         "parameters": [
           {
-            "name": "tier",
-            "in": "query",
-            "schema": {
-              "enum": [
-                "basic",
-                "premium"
-              ],
-              "type": "string"
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
             "name": "gender",
             "in": "query",
             "schema": {
@@ -35461,21 +35448,6 @@
                           "name": {
                             "type": "string"
                           },
-                          "provider": {
-                            "enum": [
-                              "telnyx",
-                              "elevenlabs",
-                              "aws-polly"
-                            ],
-                            "type": "string"
-                          },
-                          "tier": {
-                            "enum": [
-                              "basic",
-                              "premium"
-                            ],
-                            "type": "string"
-                          },
                           "gender": {
                             "enum": [
                               "male",
@@ -35484,30 +35456,37 @@
                             ],
                             "type": "string"
                           },
-                          "language": {
-                            "type": "string"
-                          },
                           "accent": {
                             "type": "string"
                           },
-                          "style": {
+                          "age": {
                             "type": "string"
                           },
-                          "ageRange": {
+                          "descriptors": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "useCases": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "language": {
                             "type": "string"
                           },
-                          "description": {
-                            "type": "string"
-                          },
-                          "previewUrl": {
+                          "sampleUrl": {
                             "type": "string"
                           }
                         },
                         "required": [
                           "id",
                           "name",
-                          "provider",
-                          "tier",
+                          "gender",
+                          "descriptors",
+                          "useCases",
                           "language"
                         ]
                       }

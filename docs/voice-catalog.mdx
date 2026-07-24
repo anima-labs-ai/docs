@@ -5,7 +5,7 @@ description: "Browse available voices and set an agent's voice for AI-powered ph
 
 # Voice Catalog
 
-Every Anima agent speaks with a single, high-quality voice. Use the voice catalog to browse the available voices, then set one on your agent — it is used for all of that agent's calls.
+Every Anima agent speaks with a single, high-quality voice. The catalog is **multilingual** — voices span English, Spanish, French, German, Italian, Japanese, and Dutch, each with its own accent and tone. Use the voice catalog to browse the available voices, then set one on your agent — it is used for all of that agent's calls.
 
 ## List voices
 
@@ -32,7 +32,7 @@ for (const voice of voices.voices) {
 }
 ```
 
-Each voice has an `id` (e.g. `thalia`), a display `name`, a `gender`, an `accent`, a set of `descriptors` (tone words such as "warm" or "smooth"), suggested `useCases`, and a `language`.
+Each voice has an `id` (e.g. `thalia`), a display `name`, a `gender`, an `accent`, an optional `age`, a set of `descriptors` (tone words such as "warm" or "smooth"), suggested `useCases`, a `language`, and a `sampleUrl` — a short audio preview you can play to hear the voice.
 
 ## Filters
 
@@ -41,7 +41,7 @@ The catalog supports these optional filters:
 | Filter | Values |
 |--------|--------|
 | `gender` | `male`, `female`, `neutral` |
-| `language` | language code, such as `en` |
+| `language` | language code — one of `en`, `es`, `fr`, `de`, `it`, `ja`, `nl` |
 
 ```python
 female_voices = anima.voices.list(gender="female")
@@ -52,6 +52,28 @@ english_voices = anima.voices.list(language="en")
 const femaleVoices = await anima.voices.list({ gender: "female" });
 const englishVoices = await anima.voices.list({ language: "en" });
 ```
+
+## Preview a voice
+
+Each voice carries a `sampleUrl` — a short audio clip you can play to hear how it sounds before assigning it. The preview is served from the Anima API, so you can embed or fetch it directly.
+
+```python
+voices = anima.voices.list(language="es")
+for voice in voices["voices"]:
+    if voice.sample_url:
+        print(f"{voice.name}: {voice.sample_url}")
+```
+
+```ts
+const { voices } = await anima.voices.list({ language: "es" });
+for (const voice of voices) {
+  if (voice.sampleUrl) console.log(`${voice.name}: ${voice.sampleUrl}`);
+}
+```
+
+<Note>
+`sampleUrl` appears once a preview clip has been generated for a voice; a voice without a generated clip omits the field.
+</Note>
 
 ## Set an agent's voice
 

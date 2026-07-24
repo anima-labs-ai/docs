@@ -188,6 +188,16 @@ The useful Anima pattern is not "a phone API in isolation." It is one agent iden
 
 For US outbound calls, Anima enforces guardrails server-side before the dial reaches the telephony provider. These include TCPA consent attestation, Reassigned Numbers Database checks, time-of-day windows, and per-plan call caps. The platform can reject a call before dialing when those requirements are not satisfied.
 
+### Enable outbound calling and SMS
+
+Placing calls and sending SMS is gated on a one-time **consent attestation** that you complete yourself in the console — no manual review or support ticket. In **Settings → Outbound Calling & SMS**:
+
+1. Choose the **basis for contact** — for example, the recipient contacted you first, gave prior express consent, or the message is transactional.
+2. Confirm that your organization **scrubs recipients against Do-Not-Call (DNC) registries** and honors opt-out and STOP requests.
+3. Save. Outbound is enabled for your organization on the **Starter plan and above**, and the panel shows the attested basis and date.
+
+By attesting, you confirm you have a lawful basis to contact these recipients and accept responsibility for TCPA and related compliance. Receiving calls needs no attestation — inbound works as soon as an agent has a number.
+
 For SMS, keep the same standard: do not send spam, honor opt-outs, and only contact recipients where you have a lawful basis to do so.
 
 ## List or release numbers

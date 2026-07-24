@@ -46,7 +46,21 @@ const FORBIDDEN_SEGMENTS = new Map([
 	["mpp", "x402/MPP crypto billing is explicitly out of scope"],
 ]);
 
-const spec = JSON.parse(readFileSync(openapiPath, "utf8"));
+/**
+ * Voice-synthesis vendor names that must NEVER appear anywhere in the spec.
+ * The customer-facing voice catalog is deliberately vendor-neutral — the API
+ * strips the underlying provider/model. A snapshot refresh once re-added a
+ * voice `provider` enum (`telnyx | elevenlabs | aws-polly`), which then rendered
+ * on the API-reference tab and in llms.txt: every model ingesting our docs was
+ * taught our voice vendors. These tokens have no legitimate place in customer
+ * docs. (Telnyx is intentionally NOT here: it is a real telephony subprocessor
+ * that legitimately appears in phone-identity fields; its disclosure lives on
+ * the legal/subprocessor pages, not this gate.)
+ */
+const FORBIDDEN_VENDOR_TOKENS = ["deepgram", "elevenlabs", "aws-polly"];
+
+const rawSpec = readFileSync(openapiPath, "utf8");
+const spec = JSON.parse(rawSpec);
 const paths = Object.keys(spec.paths ?? {});
 
 if (paths.length === 0) {
@@ -77,4 +91,19 @@ if (violations.length > 0) {
 	process.exit(1);
 }
 
-console.log(`check-agent-surfaces: ${paths.length} documented paths, no scrapped scope. OK`);
+const vendorHits = FORBIDDEN_VENDOR_TOKENS.filter((token) => rawSpec.toLowerCase().includes(token));
+if (vendorHits.length > 0) {
+	console.error(
+		"check-agent-surfaces: openapi.json names a voice-synthesis vendor.\n" +
+			`  found: ${vendorHits.join(", ")}\n` +
+			"\nThe voice catalog is vendor-neutral — the API never exposes the underlying" +
+			"\nprovider/model. This snapshot renders into the API reference + llms.txt, so a" +
+			"\nvendor name here is taught to every model that reads our docs. Remove it from" +
+			"\ndocs/openapi.json (see README, 'API Reference').",
+	);
+	process.exit(1);
+}
+
+console.log(
+	`check-agent-surfaces: ${paths.length} documented paths, no scrapped scope, no voice-vendor leaks. OK`,
+);

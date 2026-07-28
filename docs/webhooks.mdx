@@ -14,28 +14,64 @@ Configure webhooks in the dashboard, via the API, the CLI, the `webhook_set` MCP
 ```json
 {
   "event": "message.received",
-  "data": {
-    "id": "msg_12345",
-    "agent_id": "agent_abc",
-    "from": "user@example.com",
-    "subject": "Hello",
-    "body": "Hi there...",
-    "timestamp": "2023-10-01T12:00:00Z"
-  }
+  "occurredAt": "2026-07-28T12:00:00.000Z",
+  "messageId": "cme9x2k1p0001s601abcdefgh",
+  "agentId": "cme9x2k1p0000s601ijklmnop",
+  "channel": "email",
+  "direction": "INBOUND",
+  "fromAddress": "user@example.com",
+  "toAddress": "support-agent@agents.useanima.sh",
+  "threadId": "cme9x2k1p0002s601qrstuvwx",
+  "subject": "Hello",
+  "spam": false
 }
 ```
 
 ## Event Types
 
-| Event Name | Description |
-|---|---|
-| `message.received` | Triggered when an agent receives a new email or SMS. |
-| `message.sent` | Triggered when a message is successfully sent. |
-| `message.failed` | Triggered when a message fails to send or bounces. |
-| `agent.created` | Triggered when a new agent mailbox is created. |
-| `call.ended` | Triggered when a voice call completes. |
+Subscribing to a name that isn't on this list is accepted but never fires, so copy them exactly. `GET /webhooks/event-types` returns the same list from the live API.
 
-The full, current list is available from `GET /webhooks/event-types`.
+| Event Name | Fires when |
+|---|---|
+| `message.received` | Email or SMS arrives for one of your agents. |
+| `message.received.auto` | Inbound mail detected as automated (auto-reply, out-of-office). Fired *instead of* `message.received`, so subscribe to it explicitly if you want it. |
+| `message.sent` | An outbound email or SMS is accepted for delivery. |
+| `message.failed` | An outbound message failed to send, or the recipient complained. |
+| `message.bounced` | An outbound email bounced. |
+| `message.loop_detected` | Repeated sends to the same address tripped the velocity breaker; the message is held for approval. |
+| `agent.created` | An agent is created. |
+| `agent.updated` | An agent is updated. |
+| `agent.deleted` | An agent is deleted. |
+| `phone.provisioned` | A number is attached to an agent. |
+| `phone.released` | A number is released from an agent. |
+| `call.started` | A voice call begins. |
+| `call.ended` | A voice call completes. |
+| `call.summary.ready` | The post-call summary finishes processing. |
+| `call.score.ready` | The post-call quality score finishes processing. |
+| `call.security.alert` | A call's security scan raises an alert. |
+| `call.security.scan.ready` | A call's security scan finishes. |
+| `a2a.task.received` | Another agent sent one of your agents an A2A task. |
+| `vault.credential.refresh_failed` | A stored OAuth credential could not be refreshed and is marked `[needs reauth]`. The agent cannot authenticate to that provider until a human re-consents. |
+
+### Subscriptions are org-scoped
+
+A subscription belongs to your **organization**, not to a single agent — one endpoint receives the events for every agent you run. There is no `agentId` on a subscription; use the `agentId` in the payload to tell agents apart.
+
+### Wildcards
+
+A bare `*` matches everything. Otherwise `*` matches exactly **one** dot-separated segment, and `**` matches across segments. This trips people up on the three-segment names:
+
+| Pattern | `call.ended` | `call.security.alert` |
+|---|---|---|
+| `call.*` | matches | **no match** |
+| `call.**` | matches | matches |
+| `*` | matches | matches |
+
+The same applies to `message.*`, which does **not** match `message.received.auto`.
+
+### Payload shape
+
+Flat JSON — there is no `data` envelope to unwrap. Every event carries `event` and `occurredAt`; message events add `messageId`, `agentId`, `channel`, `direction`, `fromAddress`, `toAddress`, `threadId`, and (for email) `subject` and `spam`. That is enough addressing to reply without a second call. The message **body is not included** — fetch `GET /v1/messages/{id}` when you need the content.
 
 ## Signing secret
 

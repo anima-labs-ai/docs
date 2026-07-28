@@ -51,6 +51,7 @@ Subscribing to a name that isn't on this list is accepted but never fires, so co
 | `call.security.alert` | A call's security scan raises an alert. |
 | `call.security.scan.ready` | A call's security scan finishes. |
 | `a2a.task.received` | Another agent sent one of your agents an A2A task. |
+| `vault.credential.refresh_failed` | A stored OAuth credential could not be refreshed and is marked `[needs reauth]`. The agent cannot authenticate to that provider until a human re-consents. |
 
 ### Subscriptions are org-scoped
 

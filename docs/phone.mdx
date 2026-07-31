@@ -190,7 +190,7 @@ For US outbound calls, Anima enforces some guardrails server-side before the dia
 
 **Anima enforces:** your organization's TCPA consent attestation (a missing or incomplete attestation returns a `451` and the call is not placed), per-plan call caps and per-second rate limits, and the voice spend ceiling. On SMS, recipients who reply STOP are suppressed automatically.
 
-**You are responsible for:** scrubbing against the Reassigned Numbers Database, scrubbing against federal and state Do-Not-Call registries, and confining calls to lawful hours in the recipient's local time. Anima does not check any of these and will place the call. See [What is the TCPA?](https://useanima.sh/tcpa) for the full split.
+**You are responsible for:** scrubbing against the Reassigned Numbers Database, scrubbing against federal and state Do-Not-Call registries, and confining calls to lawful hours in the recipient's local time. Anima checks none of these and will place the call — a call placed at 6am local goes through. That is the CPaaS-standard posture: scrub before the list reaches us and keep the evidence, because the TCPA safe harbor is earned by the caller, not by the platform. See [What is the TCPA?](https://useanima.sh/tcpa) for the full split.
 
 ### Enable outbound calling and SMS
 

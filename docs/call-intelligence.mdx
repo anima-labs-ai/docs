@@ -139,7 +139,7 @@ MCP equivalents include `phone_call_get`, `phone_call_transcript_get`, `phone_ca
 
 ## Guardrails
 
-Outbound calls are gated server-side before dialing. The API enforces plan eligibility, your organization's TCPA consent attestation, per-tier call caps, and the voice spend ceiling. If one of those checks fails, the call is rejected before reaching the telephony provider.
+Outbound calls are gated server-side before dialing. The API enforces plan eligibility, your organization's TCPA consent attestation, per-tier and per-second call caps, and the voice spend ceiling. If one of those checks fails, the call is rejected before reaching the telephony provider.
 
 Reassigned-number scrubbing, Do-Not-Call scrubbing, and calling-hour windows are **not** enforced by Anima and remain yours. See [Compliance guardrails](/phone#compliance-guardrails).
 

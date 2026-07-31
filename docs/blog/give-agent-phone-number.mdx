@@ -223,7 +223,7 @@ app.post("/webhooks/anima", (req, res) => {
 
 For US SMS, 10DLC registration may be required depending on your use case and volume. Anima tracks phone identity status and carrier capability flags with the provisioned number.
 
-For US outbound voice calls, Anima enforces plan eligibility, TCPA consent posture, Reassigned Numbers Database checks, time-of-day windows, and per-tier call caps server-side. If a gate fails, the call is rejected before the provider dials.
+For US outbound voice calls, Anima enforces plan eligibility, your organization's TCPA consent attestation, per-tier call caps, and the voice spend ceiling server-side. If a gate fails, the call is rejected before the provider dials. Reassigned-number scrubbing, Do-Not-Call scrubbing, and calling-hour windows are not enforced by Anima and stay with you.
 
 ## What makes this different
 

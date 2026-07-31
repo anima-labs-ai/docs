@@ -7,6 +7,12 @@ description: "Generate compliance reports, handle DSAR requests, and monitor com
 
 Anima provides built-in reporting tools for compliance workflows including SOC 2 audit preparation, DSAR (Data Subject Access Request) fulfillment, and executive compliance dashboards.
 
+<Note>
+These are tools for preparing **your** audit. They do not constitute an
+attestation of Anima's own compliance posture, and generating a report here is
+not evidence that Anima has been audited.
+</Note>
+
 ## Report Templates
 
 Generate pre-built reports for common compliance needs:
@@ -16,41 +22,42 @@ Generate pre-built reports for common compliance needs:
 ```ts
 import { Anima } from "@anima-labs/sdk";
 
-const anima = new Anima({ apiKey: "ak_..." });
+const anima = new Anima({ apiKey: "mk_..." });
 
-// Generate a SOC 2 audit readiness report
-const report = await useanima.shpliance.reports.generate({
-  template: "soc2-readiness",
-  period: {
-    startDate: "2026-01-01",
-    endDate: "2026-03-31",
-  },
-  format: "pdf",  // "pdf" | "html" | "json"
-  includeEvidence: true,
+// Generate a SOC 2 summary. Compliance calls are org-scoped: the org id
+// is the first argument, not a field on the body.
+const report = await anima.compliance.generateReport(orgId, {
+  type: "SOC2_SUMMARY",
+  from: "2026-01-01",
+  to: "2026-03-31",
 });
 
 console.log(`Report: ${report.id}`);
-console.log(`Download: ${report.downloadUrl}`);
+console.log(`Status: ${report.status}`);  // PENDING | GENERATING | COMPLETED | FAILED
+
+// The download URL comes from a separate call once the report completes.
+const download = await anima.compliance.downloadReport(orgId, report.id);
+console.log(`Download: ${download.url}`);
 ```
 </Tab>
 <Tab value="Python">
 ```python
 from anima import Anima
 
-anima = Anima(api_key="ak_...")
+anima = Anima(api_key="mk_...")
 
-report = useanima.shpliance.reports.generate(
-    template="soc2-readiness",
-    period={
-        "start_date": "2026-01-01",
-        "end_date": "2026-03-31",
-    },
-    format="pdf",
-    include_evidence=True,
+report = anima.compliance.generate_report(
+    org_id,
+    type="SOC2_SUMMARY",
+    from_="2026-01-01",
+    to="2026-03-31",
 )
 
 print(f"Report: {report.id}")
-print(f"Download: {report.download_url}")
+print(f"Status: {report.status}")
+
+download = anima.compliance.download_report(org_id, report.id)
+print(f"Download: {download.url}")
 ```
 </Tab>
 <Tab value="Go">
@@ -59,14 +66,10 @@ import "github.com/anima-labs-ai/go"
 
 client := anima.NewClient("ak_...")
 
-report, err := client.Compliance.Reports.Generate(ctx, &anima.GenerateReportParams{
-    Template: "soc2-readiness",
-    Period: anima.ReportPeriod{
-        StartDate: "2026-01-01",
-        EndDate:   "2026-03-31",
-    },
-    Format:          "pdf",
-    IncludeEvidence: true,
+report, err := client.Compliance.GenerateReport(ctx, orgID, &anima.GenerateReportInput{
+    Type: "SOC2_SUMMARY",
+    From: "2026-01-01",
+    To:   "2026-03-31",
 })
 ```
 </Tab>
@@ -74,128 +77,103 @@ report, err := client.Compliance.Reports.Generate(ctx, &anima.GenerateReportPara
 
 ### Available Templates
 
-| Template              | Description                                                    |
-| --------------------- | -------------------------------------------------------------- |
-| `soc2-readiness`      | SOC 2 Type II audit readiness with control status and evidence|
-| `agent-activity`      | Summary of agent actions, emails sent, transactions processed  |
-| `security-posture`    | Anomaly detection results, quarantine events, key rotations   |
-| `access-review`       | API key usage, permission changes, pod access                  |
-| `spending-summary`    | Wallet spending by agent, pod, and time period                |
-| `data-inventory`      | Inventory of data stored across vault, email, and attachments  |
+Template identifiers are the uppercase values below. `GET /v1/orgs/{orgId}/compliance/templates` returns the live list.
+
+| Template          | Description                                                     |
+| ----------------- | --------------------------------------------------------------- |
+| `SOC2_SUMMARY`    | Control status and collected evidence, for your own audit prep   |
+| `ACTIVITY_REPORT` | Agent activity across channels over the period                   |
+| `ACCESS_REVIEW`   | API keys, permission changes, and access grants                  |
+| `AUDIT_EXPORT`    | Raw audit-log export for the period                              |
+| `GDPR_DSAR`       | The data-subject bundle backing a DSAR response                  |
 
 ## DSAR (Data Subject Access Requests)
 
-Handle GDPR and CCPA data subject access requests:
+Handle GDPR and CCPA data subject access requests.
 
-<Tabs items={["Node.js", "Python"]}>
-<Tab value="Node.js">
-```ts
-// Initiate a DSAR
-const dsar = await useanima.shpliance.dsar.create({
-  subjectEmail: "user@example.com",
-  requestType: "access",  // "access" | "deletion" | "portability"
-  notes: "GDPR Article 15 request received via support ticket #4521",
-});
+<Warning>
+The published SDKs currently send `requestType` with lowercase values for this
+endpoint, which the API rejects. Until that is fixed, call the DSAR routes
+directly — the field is `type` and the values are uppercase, as below.
+</Warning>
 
-console.log(`DSAR ID: ${dsar.id}`);
-console.log(`Status: ${dsar.status}`);  // "processing" | "ready" | "completed"
-console.log(`Estimated completion: ${dsar.estimatedCompletionAt}`);
-
-// Check DSAR status and download results
-const result = await useanima.shpliance.dsar.get(dsar.id);
-if (result.status === "ready") {
-  console.log(`Download: ${result.downloadUrl}`);
-  console.log(`Records found: ${result.recordCount}`);
-  console.log(`Data categories: ${result.categories.join(", ")}`);
-}
+```bash
+curl -X POST https://api.useanima.sh/v1/orgs/{orgId}/compliance/dsars \
+  -H "Authorization: Bearer mk_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "ACCESS",
+    "subjectEmail": "user@example.com",
+    "description": "GDPR Article 15 request received via support ticket #4521",
+    "dueInDays": 30
+  }'
 ```
-</Tab>
-<Tab value="Python">
-```python
-dsar = useanima.shpliance.dsar.create(
-    subject_email="user@example.com",
-    request_type="access",
-    notes="GDPR Article 15 request received via support ticket #4521",
-)
 
-print(f"DSAR ID: {dsar.id}")
-print(f"Status: {dsar.status}")
+Then poll it:
 
-# Check status and download
-result = useanima.shpliance.dsar.get(dsar.id)
-if result.status == "ready":
-    print(f"Download: {result.download_url}")
-    print(f"Records found: {result.record_count}")
+```bash
+curl https://api.useanima.sh/v1/orgs/{orgId}/compliance/dsars/{dsarId} \
+  -H "Authorization: Bearer mk_..."
 ```
-</Tab>
-</Tabs>
 
-### DSAR Data Categories
+### Request types
 
-When a DSAR is processed, data is collected across these categories:
+| Value         | Meaning                                        |
+| ------------- | ---------------------------------------------- |
+| `ACCESS`      | Article 15 — give the subject their data       |
+| `DELETE`      | Article 17 — erase the subject's data          |
+| `RECTIFY`     | Article 16 — correct inaccurate data           |
+| `PORTABILITY` | Article 20 — export in a portable format       |
+| `RESTRICT`    | Article 18 — restrict processing               |
 
-| Category           | Data Included                                           |
-| ------------------ | ------------------------------------------------------- |
-| `email_messages`   | Emails sent to or from the subject                     |
-| `a2a_interactions` | A2A tasks involving the subject's agents               |
-| `audit_events`     | Audit log entries referencing the subject              |
-| `agent_metadata`   | Agent profiles associated with the subject             |
+### Status values
+
+`RECEIVED` → `VERIFIED` → `IN_PROGRESS` → `COMPLETED`, or `DENIED`. A request
+past its due date reports `OVERDUE`. `dueInDays` accepts 1–90 and defaults to
+30, the GDPR response window.
 
 ## Compliance Dashboard
 
 Get a real-time view of your compliance posture:
 
 ```ts
-const dashboard = await useanima.shpliance.dashboard.get();
+const dashboard = await anima.compliance.getDashboard(orgId);
 
-console.log("--- Compliance Dashboard ---");
-console.log(`SOC 2 Controls: ${dashboard.soc2.passing}/${dashboard.soc2.total} passing`);
-console.log(`Readiness Score: ${dashboard.soc2.readinessScore}%`);
-console.log(`Open DSARs: ${dashboard.dsar.openCount}`);
-console.log(`Avg DSAR Resolution: ${dashboard.dsar.avgResolutionDays} days`);
-console.log(`Anomalies (30d): ${dashboard.anomalies.last30Days}`);
-console.log(`Quarantined Agents: ${dashboard.anomalies.quarantinedCount}`);
-console.log(`Last Audit Report: ${dashboard.lastReport.generatedAt}`);
-```
+console.log(`Overall score: ${dashboard.overallScore}`);
 
-## Scheduled Reports
+for (const [framework, summary] of Object.entries(dashboard.frameworks)) {
+  console.log(`${framework}: ${summary.implemented}/${summary.totalControls} implemented`);
+  console.log(`  verified ${summary.verified}, failed ${summary.failed}, not started ${summary.notStarted}`);
+  console.log(`  score ${summary.score}`);
+}
 
-Automate report generation on a schedule:
-
-```ts
-await useanima.shpliance.reports.schedule({
-  template: "security-posture",
-  frequency: "weekly",          // "daily" | "weekly" | "monthly" | "quarterly"
-  format: "pdf",
-  recipients: ["compliance@acme.com", "ciso@acme.com"],
-  dayOfWeek: "monday",          // for weekly reports
-});
+// The most recent generated reports, newest first.
+for (const report of dashboard.recentActivity) {
+  console.log(`${report.type} — ${report.status} — ${report.generatedAt}`);
+}
 ```
 
 ## API Reference
 
-| Endpoint                                | Method | Description                          |
-| --------------------------------------- | ------ | ------------------------------------ |
-| `https://api.useanima.sh/api/compliance/reports`               | POST   | Generate a report                    |
-| `https://api.useanima.sh/api/compliance/reports`               | GET    | List generated reports               |
-| `https://api.useanima.sh/api/compliance/reports/:id`           | GET    | Get report status and download URL   |
-| `https://api.useanima.sh/api/compliance/reports/schedule`      | POST   | Schedule recurring reports           |
-| `https://api.useanima.sh/api/compliance/reports/schedule`      | GET    | List scheduled reports               |
-| `https://api.useanima.sh/api/compliance/dsar`                  | POST   | Create a DSAR request                |
-| `https://api.useanima.sh/api/compliance/dsar`                  | GET    | List DSARs                           |
-| `https://api.useanima.sh/api/compliance/dsar/:id`              | GET    | Get DSAR status and results          |
-| `https://api.useanima.sh/api/compliance/dashboard`             | GET    | Get compliance dashboard             |
+Every compliance route is org-scoped and lives under `/v1`. Base URL `https://api.useanima.sh`.
 
-## Configuration
+| Endpoint                                                | Method | Description                        |
+| ------------------------------------------------------- | ------ | ---------------------------------- |
+| `/v1/orgs/{orgId}/compliance/reports`                    | POST   | Generate a report                  |
+| `/v1/orgs/{orgId}/compliance/reports`                    | GET    | List generated reports             |
+| `/v1/orgs/{orgId}/compliance/reports/{reportId}`         | GET    | Get report status and download URL |
+| `/v1/orgs/{orgId}/compliance/reports/{reportId}/export`  | POST   | Export a generated report          |
+| `/v1/orgs/{orgId}/compliance/reports/{reportId}`         | DELETE | Delete a report                    |
+| `/v1/orgs/{orgId}/compliance/templates`                  | GET    | List available report templates    |
+| `/v1/orgs/{orgId}/compliance/dsars`                      | POST   | Create a DSAR request              |
+| `/v1/orgs/{orgId}/compliance/dsars`                      | GET    | List DSARs                         |
+| `/v1/orgs/{orgId}/compliance/dsars/{dsarId}`             | GET    | Get DSAR status and results        |
+| `/v1/orgs/{orgId}/compliance/dsars/{dsarId}`             | PATCH  | Update a DSAR                      |
+| `/v1/orgs/{orgId}/compliance/dashboard`                  | GET    | Get compliance dashboard           |
 
-| Variable                              | Default  | Description                              |
-| ------------------------------------- | -------- | ---------------------------------------- |
-| `ANIMA_COMPLIANCE_DSAR_SLA_DAYS`      | `30`     | DSAR completion SLA in days              |
-| `ANIMA_COMPLIANCE_REPORT_RETENTION`   | `730`    | Report retention in days (2 years)       |
-| `ANIMA_COMPLIANCE_REPORT_STORAGE`     | `s3`     | Storage backend for generated reports    |
+These routes require a master key (`mk_*`).
 
 ## Next Steps
 
-- [SOC 2 Controls](/compliance/soc2-controls) -- Detailed control mappings
 - [Audit Log](/security/audit-log) -- Underlying data for reports
 - [Anomaly Detection](/security/anomaly-detection) -- Security posture data

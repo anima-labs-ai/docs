@@ -28,16 +28,17 @@ const anima = new Anima({ apiKey: "mk_..." });
 // is the first argument, not a field on the body.
 const report = await anima.compliance.generateReport(orgId, {
   type: "SOC2_SUMMARY",
-  from: "2026-01-01",
-  to: "2026-03-31",
+  periodStart: "2026-01-01",
+  periodEnd: "2026-03-31",
 });
 
 console.log(`Report: ${report.id}`);
 console.log(`Status: ${report.status}`);  // PENDING | GENERATING | COMPLETED | FAILED
 
-// The download URL comes from a separate call once the report completes.
-const download = await anima.compliance.downloadReport(orgId, report.id);
-console.log(`Download: ${download.url}`);
+// Once it completes, export it. The bytes come back inline — there is no
+// signed download URL.
+const exported = await anima.compliance.exportReport(orgId, report.id, { format: "PDF" });
+console.log(`${exported.filename} (${exported.contentType})`);
 ```
 </Tab>
 <Tab value="Python">
@@ -47,29 +48,29 @@ from anima import Anima
 anima = Anima(api_key="mk_...")
 
 report = anima.compliance.generate_report(
-    org_id,
+    org_id=org_id,
     type="SOC2_SUMMARY",
-    from_="2026-01-01",
-    to="2026-03-31",
+    period_start="2026-01-01",
+    period_end="2026-03-31",
 )
 
 print(f"Report: {report.id}")
 print(f"Status: {report.status}")
 
-download = anima.compliance.download_report(org_id, report.id)
-print(f"Download: {download.url}")
+exported = anima.compliance.export_report(org_id=org_id, report_id=report.id, format="PDF")
+print(f"{exported.filename} ({exported.content_type})")
 ```
 </Tab>
 <Tab value="Go">
 ```go
 import "github.com/anima-labs-ai/go"
 
-client := anima.NewClient("ak_...")
+client := anima.NewClient("mk_...")
 
-report, err := client.Compliance.GenerateReport(ctx, orgID, &anima.GenerateReportInput{
-    Type: "SOC2_SUMMARY",
-    From: "2026-01-01",
-    To:   "2026-03-31",
+report, err := client.Compliance.GenerateReport(ctx, orgID, anima.GenerateReportInput{
+    Type:        anima.ComplianceReportTypeSOC2Summary,
+    PeriodStart: "2026-01-01",
+    PeriodEnd:   "2026-03-31",
 })
 ```
 </Tab>
@@ -92,9 +93,10 @@ Template identifiers are the uppercase values below. `GET /v1/orgs/{orgId}/compl
 Handle GDPR and CCPA data subject access requests.
 
 <Warning>
-The published SDKs currently send `requestType` with lowercase values for this
-endpoint, which the API rejects. Until that is fixed, call the DSAR routes
-directly — the field is `type` and the values are uppercase, as below.
+Published SDK releases up to and including Node 0.6.0, Python 0.7.0 and the
+current Go tag send `requestType` with lowercase values here, which the API
+rejects. The fix is merged but unreleased. On those versions, call the DSAR
+routes directly as below — the field is `type` and the values are uppercase.
 </Warning>
 
 ```bash
@@ -136,20 +138,23 @@ past its due date reports `OVERDUE`. `dueInDays` accepts 1–90 and defaults to
 
 Get a real-time view of your compliance posture:
 
+The dashboard has three sections: `reports`, `dsars`, and `compliance`.
+
 ```ts
 const dashboard = await anima.compliance.getDashboard(orgId);
 
-console.log(`Overall score: ${dashboard.overallScore}`);
-
-for (const [framework, summary] of Object.entries(dashboard.frameworks)) {
-  console.log(`${framework}: ${summary.implemented}/${summary.totalControls} implemented`);
-  console.log(`  verified ${summary.verified}, failed ${summary.failed}, not started ${summary.notStarted}`);
-  console.log(`  score ${summary.score}`);
+console.log(`Overall progress: ${dashboard.compliance.overallProgress}%`);
+for (const fw of dashboard.compliance.frameworkSummaries) {
+  console.log(`${fw.framework}: ${fw.implementedCount}/${fw.totalControls} (${fw.progress}%)`);
 }
 
-// The most recent generated reports, newest first.
-for (const report of dashboard.recentActivity) {
-  console.log(`${report.type} — ${report.status} — ${report.generatedAt}`);
+// `overdue` is the number that matters — those are blown GDPR deadlines.
+console.log(`DSARs: ${dashboard.dsars.total} total, ${dashboard.dsars.overdue} overdue`);
+console.log(`Average resolution: ${dashboard.dsars.averageResolutionDays ?? "n/a"} days`);
+
+console.log(`Reports: ${dashboard.reports.total}`);
+for (const report of dashboard.reports.recentReports) {
+  console.log(`  ${report.type} — ${report.status} — ${report.createdAt}`);
 }
 ```
 

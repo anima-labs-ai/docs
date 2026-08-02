@@ -44,16 +44,16 @@ US domestic rates. [useanima.sh/pricing](https://useanima.sh/pricing) renders th
 
 ## Voice call caps
 
-Outbound voice calls are limited by both minutes and call count. The count cap exists because a loop of very short calls can rack up per-call exposure long before a minute cap notices.
+Outbound voice calls are limited by both minutes and call count, and these are two different numbers. Included **minutes** are the allowance your plan pays for. The **call cap** is a separate anti-abuse ceiling that sits well above it, because a loop of very short calls can rack up per-call exposure long before a minute cap notices.
 
-| Plan | Monthly outbound-call cap |
-|------|---------------------------|
-| Free | — (voice starts on Starter) |
-| Starter | 50 |
-| Growth | 600 |
-| Enterprise | 20,000 default |
+| Plan | Included voice minutes | Monthly outbound-call cap |
+|------|------------------------|---------------------------|
+| Free | — (voice starts on Starter) | 0 |
+| Starter | 50 | 250 |
+| Growth | 600 | 1,000 |
+| Enterprise | Unmetered | 20,000 default |
 
-Anima also enforces a per-second outbound-call rate limit to stop runaway loops.
+Anima also refuses more than **5 outbound calls per second** per organization. In practice that is the limit which stops a runaway loop — a `429` inside the first second, long before a monthly number matters.
 
 ## Compliance gates
 

@@ -42,7 +42,6 @@ The Anima API returns errors as [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 | `IDEMPOTENCY_BODY_MISMATCH` | 409 | The same `Idempotency-Key` was reused with a different body or path. | Use a fresh key per distinct request; reuse keys only for identical retries. |
 | `IDENTITY_NOT_VERIFIED` | 409 | The sending email identity isn't verified in the send region. | Follow `details.remediation` — verify the identity or attach one on a verified domain ([Custom Domains](/custom-domains)). |
 | `DOMAIN_NOT_VERIFIED` | 409 | Provision-time gate: the email domain isn't added/verified for this workspace. | Add and verify the domain first — see [Custom Domains](/custom-domains). |
-| `RECIPIENT_NOT_VERIFIED` | 409 | The upstream provider (SES sandbox) only delivers to verified recipients. | Verify the recipient at AWS or request SES production access; `details.remediation` explains both. |
 | `RECIPIENT_SUPPRESSED` | 409 | The recipient unsubscribed, hard-bounced, or complained — Anima refuses to send to them. | Remove the address from the recipient list; suppressions are inspectable per workspace. |
 | `RATE_LIMITED`, `RATE_LIMIT` | 429 | Per-minute/per-hour quota exceeded for the channel. | Honor `Retry-After` and the `X-RateLimit-*` headers; back off and retry. |
 | `RATE_LIMIT_PER_SECOND` | 429 | The per-org per-second soft cap was hit. | Smooth the burst; caps scale with tier. |

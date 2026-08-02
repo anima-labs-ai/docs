@@ -23536,6 +23536,246 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "402",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "PAYMENT_REQUIRED"
+                        },
+                        "status": {
+                          "const": 402
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "Creating an inbox without an agentId mints an agent, and the plan's agent limit has been reached."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "FORBIDDEN"
+                        },
+                        "status": {
+                          "const": 403
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "Agents can only create inboxes for themselves."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "NOT_FOUND"
+                        },
+                        "status": {
+                          "const": 404
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "No such agent in this organization."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "CONFLICT"
+                        },
+                        "status": {
+                          "const": 409
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "The agent already has an inbox. Each agent has exactly one."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
@@ -28909,6 +29149,11 @@
                           "minimum": 0,
                           "description": "Total voice call minutes consumed during the period"
                         },
+                        "voice_credit": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Voice credits drawn from the plan allowance this period. 1 credit = 1 US minute; mobile-abroad minutes draw more. This — not call_minute — is what the included voice allowance is measured in."
+                        },
                         "embedding_generated": {
                           "type": "integer",
                           "minimum": 0,
@@ -28921,14 +29166,42 @@
                         "sms_sent",
                         "sms_received",
                         "call_minute",
+                        "voice_credit",
                         "embedding_generated"
                       ],
                       "description": "Breakdown of resource usage by category"
+                    },
+                    "storage": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "bytes": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "Bytes held in object storage"
+                            },
+                            "measuredAt": {
+                              "type": "string",
+                              "description": "ISO timestamp of the measurement"
+                            }
+                          },
+                          "required": [
+                            "bytes",
+                            "measuredAt"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Last measured object-storage usage; null when never measured"
                     }
                   },
                   "required": [
                     "period",
-                    "usage"
+                    "usage",
+                    "storage"
                   ],
                   "description": "Usage metrics for a specific billing period"
                 }
@@ -28987,7 +29260,7 @@
                               "type": "null"
                             }
                           ],
-                          "description": "Maximum messages per month, null for unlimited"
+                          "description": "Included messages per month. Historically a combined pool; it has been identical to the email quota at every tier for some time and is now sourced from it directly. Kept so existing clients do not break."
                         },
                         "agents": {
                           "anyOf": [
@@ -29117,6 +29390,17 @@
                             ],
                             "description": "Monthly price in cents, null for custom-priced tiers"
                           },
+                          "priceAnnual": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Total charged once a year, in cents. null means the tier has no annual SKU (Free, Enterprise) — render the monthly price and hide the annual option."
+                          },
                           "limits": {
                             "type": "object",
                             "properties": {
@@ -29218,6 +29502,17 @@
                                   }
                                 ],
                                 "description": "Included voice minutes per month, null=unlimited"
+                              },
+                              "storageBytes": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Included object storage in BYTES (not GB), null=unlimited"
                               }
                             },
                             "required": [
@@ -29229,7 +29524,8 @@
                               "identities",
                               "phoneNumbers",
                               "credentials",
-                              "voiceMinutes"
+                              "voiceMinutes",
+                              "storageBytes"
                             ],
                             "description": "Included quotas / caps for a tier, projected from the canonical TIERS table"
                           }
@@ -29238,6 +29534,7 @@
                           "tier",
                           "name",
                           "price",
+                          "priceAnnual",
                           "limits"
                         ]
                       },
@@ -29273,6 +29570,15 @@
                     ],
                     "type": "string",
                     "description": "Target subscription tier to upgrade or switch to"
+                  },
+                  "interval": {
+                    "default": "month",
+                    "enum": [
+                      "month",
+                      "year"
+                    ],
+                    "type": "string",
+                    "description": "Billing cadence. Annual is ~17% cheaper; Free has no annual price."
                   },
                   "successUrl": {
                     "type": "string",

@@ -15,7 +15,7 @@ Anima Phone lets you:
 - Provision a dedicated number for an agent
 - Send a real "text me now" SMS from that agent
 - Receive inbound SMS through webhooks
-- Place outbound voice calls with server-side TCPA, RND, and time-of-day gates
+- Place outbound voice calls behind a server-side TCPA consent gate and per-plan call caps
 - Read call records and transcripts from the same identity surface
 
 Use this page when you already have an `agent_id`. If you are starting from zero, create an agent first in the console or through the agent API, then come back here with the agent ID.
@@ -186,7 +186,11 @@ The useful Anima pattern is not "a phone API in isolation." It is one agent iden
 
 ## Compliance guardrails
 
-For US outbound calls, Anima enforces guardrails server-side before the dial reaches the telephony provider. These include TCPA consent attestation, Reassigned Numbers Database checks, time-of-day windows, and per-plan call caps. The platform can reject a call before dialing when those requirements are not satisfied.
+For US outbound calls, Anima enforces some guardrails server-side before the dial reaches the telephony provider, and leaves the rest to you. Knowing which is which matters — TCPA damages are per call.
+
+**Anima enforces:** your organization's TCPA consent attestation (a missing or incomplete attestation returns a `451` and the call is not placed), per-plan call caps and per-second rate limits, and the voice spend ceiling. On SMS, recipients who reply STOP are suppressed automatically.
+
+**You are responsible for:** scrubbing against the Reassigned Numbers Database, scrubbing against federal and state Do-Not-Call registries, and confining calls to lawful hours in the recipient's local time. Anima does not check any of these and will place the call. See [What is the TCPA?](https://useanima.sh/tcpa) for the full split.
 
 ### Enable outbound calling and SMS
 

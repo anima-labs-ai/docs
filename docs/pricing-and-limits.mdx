@@ -26,43 +26,47 @@ Notes:
 
 ## Usage rate card
 
+US domestic rates. [useanima.sh/pricing](https://useanima.sh/pricing) renders the same numbers straight from the billing rate card and is authoritative if this table ever disagrees; [international rates](https://useanima.sh/pricing/international) are priced per destination country.
+
 | Meter | Rate | Notes |
 |-------|------|-------|
 | Email sent | `$0.50 / 1,000` | Above the included monthly quota. Inbound email is included. |
-| SMS sent, US 10DLC | `$0.015 / message` | Carrier and registration handling included in the published US rate. |
-| SMS received, US 10DLC | `$0.010 / message` | Applies to inbound replies. |
-| SMS sent, US toll-free | `$0.020 / message` | Toll-free numbers have separate carrier treatment. |
-| Voice | `$0.10 / min` | One voice tier — every agent uses the same high-quality pipeline. |
-| Phone number, US local | `$2 / mo each` | Above included quota. |
-| Phone number, US toll-free | `$3 / mo each` | Above included quota. |
-| Outbound voice calls | `$0.03 / call above included` | Includes the RND check cost. |
+| SMS sent, US 10DLC | `$0.02 / message` | Carrier and registration handling included in the published US rate. |
+| SMS received, US 10DLC | `$0.012 / message` | Applies to inbound replies. |
+| SMS sent, US toll-free | `$0.025 / message` | Toll-free numbers have separate carrier treatment. |
+| Voice | `$0.13 / min` | One voice tier — every agent uses the same high-quality pipeline. Calls to a mobile abroad add a per-country surcharge. |
+| Phone number, US local | `$3 / mo each` | Above included quota. |
+| Phone number, US toll-free | `$4 / mo each` | Above included quota. |
+| Outbound voice calls | `$0.03 / call above included` | An anti-abuse charge on call count, alongside the per-minute rate. |
 | Vault stored credentials | `$0.001 / credential / mo` | Above tier cap. |
 | MCP tool calls | Included | No per-tool-call charge. |
 | Webhook deliveries | Included | Includes retry budget. |
 
 ## Voice call caps
 
-Outbound voice calls are limited by both minutes and call count. The count cap exists because short-call loops can burn compliance checks before minute caps catch them.
+Outbound voice calls are limited by both minutes and call count, and these are two different numbers. Included **minutes** are the allowance your plan pays for. The **call cap** is a separate anti-abuse ceiling that sits well above it, because a loop of very short calls can rack up per-call exposure long before a minute cap notices.
 
-| Plan | Monthly outbound-call cap |
-|------|---------------------------|
-| Free | — (voice starts on Starter) |
-| Starter | 50 |
-| Growth | 600 |
-| Enterprise | 20,000 default |
+| Plan | Included voice minutes | Monthly outbound-call cap |
+|------|------------------------|---------------------------|
+| Free | — (voice starts on Starter) | 0 |
+| Starter | 50 | 250 |
+| Growth | 600 | 1,000 |
+| Enterprise | Unmetered | 20,000 default |
 
-Anima also enforces a per-second outbound-call rate limit to stop runaway loops.
+Anima also refuses more than **5 outbound calls per second** per organization. In practice that is the limit which stops a runaway loop — a `429` inside the first second, long before a monthly number matters.
 
 ## Compliance gates
 
 Outbound calls run through server-side gates before dialing:
 
-- TCPA consent attestation
-- Reassigned Numbers Database checks
-- Time-of-day windows
+- TCPA consent attestation — fails closed with a `451` until your organization records a consent basis
 - Plan and monthly call caps
+- Per-second outbound-call rate limit
+- Voice spend ceiling, once metered overage is enabled
 
 If a gate blocks the call, the API rejects it before the telephony provider dials.
+
+Reassigned-number scrubbing, Do-Not-Call scrubbing, and calling-hour windows are **not** enforced by Anima. Those remain your responsibility — see [What is the TCPA?](https://useanima.sh/tcpa).
 
 ## MCP pricing
 

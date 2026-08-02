@@ -133,7 +133,7 @@
 					{
 						"group": "Compliance",
 						"icon": "clipboard-check",
-						"pages": ["compliance/soc2-controls", "compliance/reporting"]
+						"pages": ["compliance/reporting"]
 					},
 					{
 						"group": "Protocols",

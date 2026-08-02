@@ -57,7 +57,7 @@ The WebSocket path is the right choice when you need custom memory, custom tool 
 
 - Number ownership and call placement
 - The voice pipeline (speech-to-text, speech, barge-in)
-- TCPA, RND, time-of-day, and plan-cap gates
+- TCPA consent attestation, plan-cap, and spend-ceiling gates
 - Call lifecycle records
 - Transcripts and post-call artifacts
 - Webhooks for call lifecycle events
@@ -65,6 +65,9 @@ The WebSocket path is the right choice when you need custom memory, custom tool 
 ## What your app still owns
 
 - The lawful basis and consent record for contacting the recipient
+- Reassigned Numbers Database scrubbing — Anima does not query it for you
+- Do-Not-Call registry scrubbing, federal and state
+- Calling hours in the recipient's local time — Anima does not check the clock
 - Agent behavior and escalation policy
 - Any business-specific data used during the call
 - Follow-up workflows after the call ends

@@ -57,16 +57,36 @@ Anima also refuses more than **5 outbound calls per second** per organization. I
 
 ## Compliance gates
 
-Outbound calls run through server-side gates before dialing:
+Outbound calls run through these server-side gates before dialing:
 
-- TCPA consent attestation — fails closed with a `451` until your organization records a consent basis
-- Plan and monthly call caps
-- Per-second outbound-call rate limit
-- Voice spend ceiling, once metered overage is enabled
+- TCPA consent attestation (a one-time attestation your org completes in the console — there is no per-call consent field); fails closed with a `451` until your organization records a consent basis
+- Per-plan and per-second call caps
+- The voice spend ceiling: calls stop at your included minutes unless you opt in to metered overage and name a dollar limit
 
 If a gate blocks the call, the API rejects it before the telephony provider dials.
 
-Reassigned-number scrubbing, Do-Not-Call scrubbing, and calling-hour windows are **not** enforced by Anima. Those remain your responsibility — see [What is the TCPA?](https://useanima.sh/tcpa).
+Three things Anima does **not** do, which are commonly assumed:
+
+- **Reassigned Numbers Database scrubbing.** The lookup exists in the codebase but is disabled in production and has never run on a real call.
+- **Do-Not-Call scrubbing.** We do not check federal or state DNC registries. The `telemarketing_with_dnc_scrub` consent basis records that *you* scrubbed; it does not run a scrub.
+- **Calling-hour windows.** We do not compute the destination's local time. A call placed at 6am goes through.
+
+All three stay with you — see [What is the TCPA?](https://useanima.sh/tcpa).
+
+## Metered overage
+
+By default your plan is a hard wall. Outbound voice stops when the included minutes are used up and the API returns a 402. Nothing is billed above your plan unless you ask for it.
+
+Asking for it is one setting in the console, under **Billing → Metered overage**. Turn it on, name a dollar limit, and voice keeps working above the included allowance and is billed at the rates above — up to that limit and no further.
+
+What to know before you enable it:
+
+- **A payment method is required.** Enabling without a card on file is refused, because authorizing spend we cannot collect is not a control.
+- **Your plan bounds the limit.** Free $100, Starter $5,000, Growth $25,000. Enterprise is uncapped.
+- **It is a ceiling on new spend, not a wallet.** The limit is checked before each call against what you have already accrued this period. Lowering it stops the next call immediately, and you are still billed for what you already used.
+- **A failed invoice suspends it.** If a payment fails, the ceiling drops to zero and you are back to the hard wall until the payment clears. Stripe retries automatically and emails you.
+- **The check runs before a call, not during one.** A call already connected is not cut off mid-sentence — it finishes, and the next one is refused. The ceiling binds within about one call's length, not to the cent.
+- **Voice only, today.** Email, SMS, storage and the rest are bounded by their own per-tier quotas, which return a 402 at the limit.
 
 ## MCP pricing
 

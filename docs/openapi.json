@@ -3101,6 +3101,17 @@
                             "type": "boolean",
                             "description": "Whether this is the agent's primary phone identity"
                           },
+                          "voiceId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time",
@@ -3115,6 +3126,7 @@
                           "capabilities",
                           "tenDlcStatus",
                           "isPrimary",
+                          "voiceId",
                           "createdAt"
                         ],
                         "description": "Phone identity associated with an agent"
@@ -3479,6 +3491,17 @@
                                   "type": "boolean",
                                   "description": "Whether this is the agent's primary phone identity"
                                 },
+                                "voiceId": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "format": "date-time",
@@ -3493,6 +3516,7 @@
                                 "capabilities",
                                 "tenDlcStatus",
                                 "isPrimary",
+                                "voiceId",
                                 "createdAt"
                               ],
                               "description": "Phone identity associated with an agent"
@@ -3837,6 +3861,17 @@
                             "type": "boolean",
                             "description": "Whether this is the agent's primary phone identity"
                           },
+                          "voiceId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time",
@@ -3851,6 +3886,7 @@
                           "capabilities",
                           "tenDlcStatus",
                           "isPrimary",
+                          "voiceId",
                           "createdAt"
                         ],
                         "description": "Phone identity associated with an agent"
@@ -4210,6 +4246,17 @@
                             "type": "boolean",
                             "description": "Whether this is the agent's primary phone identity"
                           },
+                          "voiceId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time",
@@ -4224,6 +4271,7 @@
                           "capabilities",
                           "tenDlcStatus",
                           "isPrimary",
+                          "voiceId",
                           "createdAt"
                         ],
                         "description": "Phone identity associated with an agent"
@@ -6805,6 +6853,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -6941,6 +7001,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -7190,6 +7251,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -7326,6 +7399,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -7536,6 +7610,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -7672,6 +7758,377 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
+                    "sentAt",
+                    "receivedAt",
+                    "attachments",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "description": "Full message resource representation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "message.delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "description": "ID of the message to move to Trash"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "description": "Message deletion parameters"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Unique identifier of the message"
+                    },
+                    "agentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "ID of the agent that sent or received the message"
+                    },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
+                    "channel": {
+                      "enum": [
+                        "EMAIL",
+                        "SMS",
+                        "MMS",
+                        "VOICE"
+                      ],
+                      "type": "string",
+                      "description": "Communication channel used"
+                    },
+                    "direction": {
+                      "enum": [
+                        "INBOUND",
+                        "OUTBOUND"
+                      ],
+                      "type": "string",
+                      "description": "Whether the message was inbound or outbound"
+                    },
+                    "status": {
+                      "enum": [
+                        "QUEUED",
+                        "SENT",
+                        "DELIVERED",
+                        "FAILED",
+                        "BOUNCED",
+                        "BLOCKED",
+                        "PENDING_APPROVAL"
+                      ],
+                      "type": "string",
+                      "description": "Current delivery status"
+                    },
+                    "fromAddress": {
+                      "type": "string",
+                      "description": "Sender address (email or phone number)"
+                    },
+                    "toAddress": {
+                      "type": "string",
+                      "description": "Recipient address (email or phone number)"
+                    },
+                    "subject": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Message subject line, or null for channels that do not support subjects"
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "Plain-text content of the message"
+                    },
+                    "bodyHtml": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "HTML content of the message, or null if not available"
+                    },
+                    "extractedText": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Plain-text body with the quoted reply chain and signature stripped — just what this sender actually wrote. Read this instead of `body` to avoid re-reading (and paying for) the whole thread on every message. Null when nothing was extracted: non-email channels, messages your agent sent, and mail received before this field existed — so `extractedText ?? body` is always correct. Best-effort and heuristic; `body` remains the verbatim source of truth. Known weak cases: forwards and bottom-posted replies have no separable 'new' part, so this returns the full body rather than nothing."
+                    },
+                    "extractedHtml": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "HTML body with quoted reply chains removed. Same semantics as `extractedText`; `bodyHtml` stays verbatim. Quoting styles that mark the chain with a sibling element rather than wrapping it (Outlook) are not stripped here — `extractedText` still is."
+                    },
+                    "headers": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Raw message headers as key-value pairs, or null"
+                    },
+                    "metadata": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Arbitrary metadata attached to the message, or null"
+                    },
+                    "threadId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Thread identifier for conversation grouping, or null"
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Workflow labels on this message. Always contains exactly one of the system labels `unread` or `read`; may also contain `archived`, `spam` (the inbound spam verdict — see `includeSpam` on list/search), and any labels you add yourself. Stored lowercase, deduped, and sorted. Change them with PATCH /messages/{id}/labels."
+                    },
+                    "inReplyTo": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Message ID this message is replying to, or null"
+                    },
+                    "externalId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
+                    "sentAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Timestamp when the message was sent, or null if not yet sent"
+                    },
+                    "receivedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Timestamp when the message was received, or null for outbound messages"
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                            "description": "Unique identifier of the attachment"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "Original filename of the attachment"
+                          },
+                          "mimeType": {
+                            "type": "string",
+                            "description": "MIME type of the attachment (e.g. application/pdf)"
+                          },
+                          "sizeBytes": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "File size in bytes"
+                          },
+                          "storageKey": {
+                            "type": "string",
+                            "description": "Internal storage key for retrieving the file"
+                          },
+                          "url": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Pre-signed download URL, or null if not yet generated"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Timestamp when the attachment was created"
+                          },
+                          "scanStatus": {
+                            "enum": [
+                              "PENDING",
+                              "CLEAN",
+                              "FLAGGED",
+                              "BLOCKED"
+                            ],
+                            "type": "string",
+                            "description": "Content-scan verdict. BLOCKED attachments cannot be downloaded — inspect before fetching bytes."
+                          },
+                          "detectedMimeType": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "MIME type inferred from magic bytes; may differ from the declared mimeType"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "filename",
+                          "mimeType",
+                          "sizeBytes",
+                          "storageKey",
+                          "url",
+                          "createdAt",
+                          "scanStatus",
+                          "detectedMimeType"
+                        ],
+                        "description": "File attachment associated with a message"
+                      },
+                      "description": "File attachments associated with this message"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the message record was created"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the message record was last updated"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "agentId",
+                    "inboxId",
+                    "channel",
+                    "direction",
+                    "status",
+                    "fromAddress",
+                    "toAddress",
+                    "subject",
+                    "body",
+                    "bodyHtml",
+                    "extractedText",
+                    "extractedHtml",
+                    "headers",
+                    "metadata",
+                    "threadId",
+                    "labels",
+                    "inReplyTo",
+                    "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -7891,6 +8348,33 @@
             },
             "allowEmptyValue": true,
             "allowReserved": true
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean",
+              "description": "Include messages carrying the `archived` label. They are excluded by default, so archiving actually removes mail from a listing rather than only tagging it. Naming `archived` in `labels` also counts as asking for it (and returns ONLY archived mail); use this flag instead to see archived mail mixed in with the rest."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "deleted",
+            "in": "query",
+            "schema": {
+              "default": "exclude",
+              "enum": [
+                "exclude",
+                "include",
+                "only"
+              ],
+              "type": "string",
+              "description": "How to treat messages moved to Trash. `exclude` (default) hides them, so deleted mail disappears from every ordinary listing. `only` returns nothing but Trash. `include` ignores the distinction. Deletion is reversible — see DELETE /messages/{id} and POST /messages/{id}/restore."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
           }
         ],
         "responses": {
@@ -8079,6 +8563,18 @@
                             ],
                             "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                           },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                          },
                           "sentAt": {
                             "anyOf": [
                               {
@@ -8215,6 +8711,7 @@
                           "labels",
                           "inReplyTo",
                           "externalId",
+                          "deletedAt",
                           "sentAt",
                           "receivedAt",
                           "attachments",
@@ -8362,6 +8859,21 @@
                         "default": false,
                         "type": "boolean",
                         "description": "Include messages classified as spam on arrival. They are excluded by default. Naming `spam` in `labels` also counts as asking for it, so a deliberate spam query is never silently emptied by this default."
+                      },
+                      "includeArchived": {
+                        "default": false,
+                        "type": "boolean",
+                        "description": "Include messages carrying the `archived` label. They are excluded by default, so archiving actually removes mail from a listing rather than only tagging it. Naming `archived` in `labels` also counts as asking for it (and returns ONLY archived mail); use this flag instead to see archived mail mixed in with the rest."
+                      },
+                      "deleted": {
+                        "default": "exclude",
+                        "enum": [
+                          "exclude",
+                          "include",
+                          "only"
+                        ],
+                        "type": "string",
+                        "description": "How to treat messages moved to Trash. `exclude` (default) hides them, so deleted mail disappears from every ordinary listing. `only` returns nothing but Trash. `include` ignores the distinction. Deletion is reversible — see DELETE /messages/{id} and POST /messages/{id}/restore."
                       }
                     },
                     "description": "Optional filters to narrow search results"
@@ -8582,6 +9094,18 @@
                             ],
                             "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                           },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                          },
                           "sentAt": {
                             "anyOf": [
                               {
@@ -8733,6 +9257,7 @@
                           "labels",
                           "inReplyTo",
                           "externalId",
+                          "deletedAt",
                           "sentAt",
                           "receivedAt",
                           "attachments",
@@ -9014,6 +9539,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -9150,6 +9687,379 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
+                    "sentAt",
+                    "receivedAt",
+                    "attachments",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "description": "Full message resource representation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/{id}/restore": {
+      "post": {
+        "operationId": "message.restore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "description": "ID of the message to restore from Trash"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "description": "Message restore parameters"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Unique identifier of the message"
+                    },
+                    "agentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "ID of the agent that sent or received the message"
+                    },
+                    "inboxId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ID of the inbox this message belongs to — the inbox it was delivered to (inbound) or sent from (outbound). Null when no inbox backs the address: SMS/MMS/voice messages, and email sent from an email identity that has no inbox (such as a custom-domain identity added to an agent). Pass it to GET /messages?inboxId= to list one inbox's mail."
+                    },
+                    "channel": {
+                      "enum": [
+                        "EMAIL",
+                        "SMS",
+                        "MMS",
+                        "VOICE"
+                      ],
+                      "type": "string",
+                      "description": "Communication channel used"
+                    },
+                    "direction": {
+                      "enum": [
+                        "INBOUND",
+                        "OUTBOUND"
+                      ],
+                      "type": "string",
+                      "description": "Whether the message was inbound or outbound"
+                    },
+                    "status": {
+                      "enum": [
+                        "QUEUED",
+                        "SENT",
+                        "DELIVERED",
+                        "FAILED",
+                        "BOUNCED",
+                        "BLOCKED",
+                        "PENDING_APPROVAL"
+                      ],
+                      "type": "string",
+                      "description": "Current delivery status"
+                    },
+                    "fromAddress": {
+                      "type": "string",
+                      "description": "Sender address (email or phone number)"
+                    },
+                    "toAddress": {
+                      "type": "string",
+                      "description": "Recipient address (email or phone number)"
+                    },
+                    "subject": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Message subject line, or null for channels that do not support subjects"
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "Plain-text content of the message"
+                    },
+                    "bodyHtml": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "HTML content of the message, or null if not available"
+                    },
+                    "extractedText": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Plain-text body with the quoted reply chain and signature stripped — just what this sender actually wrote. Read this instead of `body` to avoid re-reading (and paying for) the whole thread on every message. Null when nothing was extracted: non-email channels, messages your agent sent, and mail received before this field existed — so `extractedText ?? body` is always correct. Best-effort and heuristic; `body` remains the verbatim source of truth. Known weak cases: forwards and bottom-posted replies have no separable 'new' part, so this returns the full body rather than nothing."
+                    },
+                    "extractedHtml": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "HTML body with quoted reply chains removed. Same semantics as `extractedText`; `bodyHtml` stays verbatim. Quoting styles that mark the chain with a sibling element rather than wrapping it (Outlook) are not stripped here — `extractedText` still is."
+                    },
+                    "headers": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Raw message headers as key-value pairs, or null"
+                    },
+                    "metadata": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Arbitrary metadata attached to the message, or null"
+                    },
+                    "threadId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Thread identifier for conversation grouping, or null"
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Workflow labels on this message. Always contains exactly one of the system labels `unread` or `read`; may also contain `archived`, `spam` (the inbound spam verdict — see `includeSpam` on list/search), and any labels you add yourself. Stored lowercase, deduped, and sorted. Change them with PATCH /messages/{id}/labels."
+                    },
+                    "inReplyTo": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Message ID this message is replying to, or null"
+                    },
+                    "externalId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
+                    "sentAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Timestamp when the message was sent, or null if not yet sent"
+                    },
+                    "receivedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Timestamp when the message was received, or null for outbound messages"
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                            "description": "Unique identifier of the attachment"
+                          },
+                          "filename": {
+                            "type": "string",
+                            "description": "Original filename of the attachment"
+                          },
+                          "mimeType": {
+                            "type": "string",
+                            "description": "MIME type of the attachment (e.g. application/pdf)"
+                          },
+                          "sizeBytes": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "File size in bytes"
+                          },
+                          "storageKey": {
+                            "type": "string",
+                            "description": "Internal storage key for retrieving the file"
+                          },
+                          "url": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Pre-signed download URL, or null if not yet generated"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Timestamp when the attachment was created"
+                          },
+                          "scanStatus": {
+                            "enum": [
+                              "PENDING",
+                              "CLEAN",
+                              "FLAGGED",
+                              "BLOCKED"
+                            ],
+                            "type": "string",
+                            "description": "Content-scan verdict. BLOCKED attachments cannot be downloaded — inspect before fetching bytes."
+                          },
+                          "detectedMimeType": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "MIME type inferred from magic bytes; may differ from the declared mimeType"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "filename",
+                          "mimeType",
+                          "sizeBytes",
+                          "storageKey",
+                          "url",
+                          "createdAt",
+                          "scanStatus",
+                          "detectedMimeType"
+                        ],
+                        "description": "File attachment associated with a message"
+                      },
+                      "description": "File attachments associated with this message"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the message record was created"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the message record was last updated"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "agentId",
+                    "inboxId",
+                    "channel",
+                    "direction",
+                    "status",
+                    "fromAddress",
+                    "toAddress",
+                    "subject",
+                    "body",
+                    "bodyHtml",
+                    "extractedText",
+                    "extractedHtml",
+                    "headers",
+                    "metadata",
+                    "threadId",
+                    "labels",
+                    "inReplyTo",
+                    "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -10332,6 +11242,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -10468,6 +11390,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -10571,6 +11494,10 @@
                           "messageCount": {
                             "type": "integer",
                             "description": "Total messages in the conversation"
+                          },
+                          "unreadCount": {
+                            "type": "integer",
+                            "description": "How many of them still carry the `unread` label. Inbound texts start unread, so this is what a conversation list needs to be triageable at all."
                           }
                         },
                         "required": [
@@ -10581,7 +11508,8 @@
                           "lastMessageAt",
                           "lastMessageSnippet",
                           "lastMessageDirection",
-                          "messageCount"
+                          "messageCount",
+                          "unreadCount"
                         ],
                         "description": "Summary of one SMS/MMS conversation between an agent and a phone number"
                       },
@@ -10839,6 +11767,18 @@
                             ],
                             "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                           },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                          },
                           "sentAt": {
                             "anyOf": [
                               {
@@ -10975,6 +11915,7 @@
                           "labels",
                           "inReplyTo",
                           "externalId",
+                          "deletedAt",
                           "sentAt",
                           "receivedAt",
                           "attachments",
@@ -11310,6 +12251,17 @@
                             "type": "boolean",
                             "description": "Whether this is the agent's primary phone identity"
                           },
+                          "voiceId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time",
@@ -11324,6 +12276,7 @@
                           "capabilities",
                           "tenDlcStatus",
                           "isPrimary",
+                          "voiceId",
                           "createdAt"
                         ],
                         "description": "Phone identity associated with an agent"
@@ -11335,6 +12288,151 @@
                     "items"
                   ],
                   "description": "List of phone numbers assigned to an agent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/numbers/{phoneIdentityId}": {
+      "patch": {
+        "operationId": "phone.updateNumber",
+        "parameters": [
+          {
+            "name": "phoneIdentityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The number to update"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "voiceId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Voice id from the catalog, or null to fall back to the agent's voice. Rejected if the id is not in the catalog."
+                  }
+                },
+                "required": [
+                  "voiceId"
+                ],
+                "description": "Update one phone number's settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Unique identifier of the phone identity"
+                    },
+                    "phoneNumber": {
+                      "type": "string",
+                      "description": "Phone number in E.164 format"
+                    },
+                    "provider": {
+                      "const": "TELNYX",
+                      "description": "Telephony provider managing this number"
+                    },
+                    "providerId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Provider-specific identifier for this phone number"
+                    },
+                    "capabilities": {
+                      "type": "object",
+                      "properties": {
+                        "sms": {
+                          "default": false,
+                          "type": "boolean",
+                          "description": "Whether the number supports SMS messaging"
+                        },
+                        "mms": {
+                          "default": false,
+                          "type": "boolean",
+                          "description": "Whether the number supports MMS messaging"
+                        },
+                        "voice": {
+                          "default": false,
+                          "type": "boolean",
+                          "description": "Whether the number supports voice calls"
+                        }
+                      },
+                      "description": "Communication capabilities supported by this phone number"
+                    },
+                    "tenDlcStatus": {
+                      "enum": [
+                        "PENDING",
+                        "REGISTERED",
+                        "REJECTED",
+                        "NOT_REQUIRED",
+                        "UNREGISTERED"
+                      ],
+                      "type": "string",
+                      "description": "10DLC campaign registration status"
+                    },
+                    "isPrimary": {
+                      "type": "boolean",
+                      "description": "Whether this is the agent's primary phone identity"
+                    },
+                    "voiceId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the phone identity was created"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "phoneNumber",
+                    "provider",
+                    "providerId",
+                    "capabilities",
+                    "tenDlcStatus",
+                    "isPrimary",
+                    "voiceId",
+                    "createdAt"
+                  ],
+                  "description": "Phone identity associated with an agent"
                 }
               }
             }
@@ -18405,6 +19503,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -18541,6 +19651,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -19040,6 +20151,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -19176,6 +20299,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -19479,6 +20603,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -19615,6 +20751,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -19825,6 +20962,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -19961,6 +21110,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -20106,6 +21256,17 @@
               "default": false,
               "type": "boolean",
               "description": "Include messages classified as spam on arrival. They are excluded by default. Naming `spam` in `labels` also counts as asking for it, so a deliberate spam query is never silently emptied by this default."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean",
+              "description": "Include messages carrying the `archived` label. They are excluded by default, so archiving actually removes mail from a listing rather than only tagging it. Naming `archived` in `labels` also counts as asking for it (and returns ONLY archived mail); use this flag instead to see archived mail mixed in with the rest."
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -20297,6 +21458,18 @@
                             ],
                             "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                           },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                          },
                           "sentAt": {
                             "anyOf": [
                               {
@@ -20433,6 +21606,7 @@
                           "labels",
                           "inReplyTo",
                           "externalId",
+                          "deletedAt",
                           "sentAt",
                           "receivedAt",
                           "attachments",
@@ -20512,6 +21686,87 @@
             "allowReserved": true
           },
           {
+            "name": "inboxId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "description": "Filter conversations to one inbox — the precise way to read a single mailbox."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "INBOUND",
+                "OUTBOUND"
+              ],
+              "type": "string",
+              "description": "Only conversations containing a message in this direction. `OUTBOUND` is a Sent view. Note that the returned counts then describe the MATCHING messages, not the thread's full length."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "labels",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "maxItems": 50,
+              "description": "Filter to messages carrying ALL of these labels (e.g. `urgent` + `unread` means urgent AND still unread). Case-insensitive. System labels: `unread`, `read`, `archived`, `spam`."
+            },
+            "style": "deepObject",
+            "explode": true,
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "includeSpam",
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean",
+              "description": "Include messages classified as spam on arrival. They are excluded by default. Naming `spam` in `labels` also counts as asking for it, so a deliberate spam query is never silently emptied by this default."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean",
+              "description": "Include messages carrying the `archived` label. They are excluded by default, so archiving actually removes mail from a listing rather than only tagging it. Naming `archived` in `labels` also counts as asking for it (and returns ONLY archived mail); use this flag instead to see archived mail mixed in with the rest."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "deleted",
+            "in": "query",
+            "schema": {
+              "default": "exclude",
+              "enum": [
+                "exclude",
+                "include",
+                "only"
+              ],
+              "type": "string",
+              "description": "How to treat messages moved to Trash. `exclude` (default) hides them, so deleted mail disappears from every ordinary listing. `only` returns nothing but Trash. `include` ignores the distinction. Deletion is reversible — see DELETE /messages/{id} and POST /messages/{id}/restore."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
             "name": "limit",
             "in": "query",
             "schema": {
@@ -20578,7 +21833,11 @@
                           },
                           "messageCount": {
                             "type": "integer",
-                            "description": "Total messages in the thread"
+                            "description": "Messages in the thread matching this query. Equals the thread's full length for an unfiltered listing; under a `direction` or label filter it counts only the matching messages, since a thread is listed when ANY of its messages matches."
+                          },
+                          "unreadCount": {
+                            "type": "integer",
+                            "description": "How many of those messages still carry the `unread` label — what a thread list needs to be worth scanning."
                           },
                           "lastMessageAt": {
                             "type": "string",
@@ -20604,6 +21863,7 @@
                           "subject",
                           "participants",
                           "messageCount",
+                          "unreadCount",
                           "lastMessageAt",
                           "lastMessageSnippet",
                           "lastMessageDirection"
@@ -20627,6 +21887,83 @@
                     "hasMore"
                   ],
                   "description": "Paginated list of email conversations"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads/{threadId}/labels": {
+      "patch": {
+        "operationId": "thread.updateLabels",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Conversation to relabel — every message in it is updated"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "addLabels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "maxItems": 50,
+                    "description": "Labels to add to every message in the thread. Adding `read` removes `unread` and vice versa, per message, exactly as the single-message route does."
+                  },
+                  "removeLabels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "maxItems": 50,
+                    "description": "Labels to remove from every message in the thread."
+                  }
+                },
+                "required": [],
+                "description": "Add and/or remove labels across a whole conversation in one atomic write. Supply at least one of addLabels/removeLabels. Use this rather than looping over PATCH /messages/{id}/labels: a loop that fails partway leaves the thread in two folders at once."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "threadId": {
+                      "type": "string",
+                      "description": "The conversation that was relabelled"
+                    },
+                    "updatedCount": {
+                      "type": "integer",
+                      "description": "How many messages were written. Zero means the thread does not exist or is not yours — it is never a silent success."
+                    }
+                  },
+                  "required": [
+                    "threadId",
+                    "updatedCount"
+                  ],
+                  "description": "Result of relabelling a conversation"
                 }
               }
             }
@@ -21664,6 +23001,18 @@
                       ],
                       "description": "External identifier, or null. For email: the RFC 5322 Message-ID (bare, no angle brackets) — pass it as inReplyTo to reply in-thread. For SMS: the provider-assigned message id."
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When this message was moved to Trash, or null if it is live. Deleted messages are hidden from listings unless `deleted` is set to `include` or `only`, and can be brought back with POST /messages/{id}/restore. Nothing purges them."
+                    },
                     "sentAt": {
                       "anyOf": [
                         {
@@ -21800,6 +23149,7 @@
                     "labels",
                     "inReplyTo",
                     "externalId",
+                    "deletedAt",
                     "sentAt",
                     "receivedAt",
                     "attachments",
@@ -23815,6 +25165,17 @@
             },
             "allowEmptyValue": true,
             "allowReserved": true
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "description": "Filter to the inboxes belonging to one agent. Omit for every inbox in the org, including unassigned ones — an inbox's agent is nullable, and deleting an agent leaves its inboxes behind rather than removing them."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
           }
         ],
         "responses": {
@@ -23875,6 +25236,23 @@
                             "type": "string",
                             "format": "date-time",
                             "description": "Timestamp when the inbox was created"
+                          },
+                          "unreadCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Unread messages in this inbox — inbound mail carrying the `unread` label, excluding spam, archived and trashed. The number a mailbox list has to show to be worth reading at all."
+                          },
+                          "lastMessageAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When this inbox last sent or received anything, or null if it never has"
                           }
                         },
                         "required": [
@@ -23884,9 +25262,11 @@
                           "localPart",
                           "displayName",
                           "agentId",
-                          "createdAt"
+                          "createdAt",
+                          "unreadCount",
+                          "lastMessageAt"
                         ],
-                        "description": "Inbox resource representation"
+                        "description": "An inbox with its unread count, as returned in a list"
                       },
                       "description": "Array of inbox resources matching the query"
                     },
@@ -24182,1068 +25562,6 @@
                     "success"
                   ],
                   "description": "Deletion confirmation"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/{invoiceId}": {
-      "get": {
-        "operationId": "invoice.get",
-        "parameters": [
-          {
-            "name": "invoiceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier of the invoice to retrieve."
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Unique invoice identifier"
-                    },
-                    "orgId": {
-                      "type": "string",
-                      "description": "Organization the invoice belongs to"
-                    },
-                    "agentId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Agent that detected the invoice, if applicable"
-                    },
-                    "messageId": {
-                      "type": "string",
-                      "description": "Source message identifier the invoice was extracted from"
-                    },
-                    "vendor": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Vendor or supplier name"
-                    },
-                    "invoiceNumber": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Vendor-assigned invoice number"
-                    },
-                    "amountCents": {
-                      "anyOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Invoice amount in cents"
-                    },
-                    "currency": {
-                      "type": "string",
-                      "description": "ISO 4217 currency code"
-                    },
-                    "dueDate": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Payment due date"
-                    },
-                    "paymentLink": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "URL for online payment, if available"
-                    },
-                    "confidence": {
-                      "type": "number",
-                      "description": "Detection confidence between 0 and 1. Heuristic, not a probability: it is a weighted score over which fields were found. Treat invoices as suggestions to review, not as verified accounting data"
-                    },
-                    "evidence": {
-                      "type": "object",
-                      "additionalProperties": {},
-                      "description": "Structured evidence for the detection, including `method`: 'regex' for the default keyword/pattern extractor (English-only), or 'llm' when LLM-backed extraction is enabled for this deployment"
-                    },
-                    "status": {
-                      "enum": [
-                        "detected",
-                        "confirmed",
-                        "rejected",
-                        "paid",
-                        "reconciled"
-                      ],
-                      "type": "string",
-                      "description": "Current invoice processing status"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "additionalProperties": {},
-                      "description": "Additional metadata and extracted fields"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the invoice was first detected"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the invoice was last updated"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "orgId",
-                    "agentId",
-                    "messageId",
-                    "vendor",
-                    "invoiceNumber",
-                    "amountCents",
-                    "currency",
-                    "dueDate",
-                    "paymentLink",
-                    "confidence",
-                    "evidence",
-                    "status",
-                    "metadata",
-                    "createdAt",
-                    "updatedAt"
-                  ],
-                  "description": "Detected invoice record with extraction details"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "invoice.update",
-        "parameters": [
-          {
-            "name": "invoiceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Invoice identifier to update"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "enum": [
-                      "detected",
-                      "confirmed",
-                      "rejected",
-                      "paid",
-                      "reconciled"
-                    ],
-                    "type": "string",
-                    "description": "New processing status for the invoice"
-                  },
-                  "metadata": {
-                    "type": "object",
-                    "additionalProperties": {},
-                    "description": "Metadata fields to merge into the invoice record"
-                  }
-                },
-                "required": [],
-                "description": "Input for updating an invoice status or metadata"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Unique invoice identifier"
-                    },
-                    "orgId": {
-                      "type": "string",
-                      "description": "Organization the invoice belongs to"
-                    },
-                    "agentId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Agent that detected the invoice, if applicable"
-                    },
-                    "messageId": {
-                      "type": "string",
-                      "description": "Source message identifier the invoice was extracted from"
-                    },
-                    "vendor": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Vendor or supplier name"
-                    },
-                    "invoiceNumber": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Vendor-assigned invoice number"
-                    },
-                    "amountCents": {
-                      "anyOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Invoice amount in cents"
-                    },
-                    "currency": {
-                      "type": "string",
-                      "description": "ISO 4217 currency code"
-                    },
-                    "dueDate": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Payment due date"
-                    },
-                    "paymentLink": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "URL for online payment, if available"
-                    },
-                    "confidence": {
-                      "type": "number",
-                      "description": "Detection confidence between 0 and 1. Heuristic, not a probability: it is a weighted score over which fields were found. Treat invoices as suggestions to review, not as verified accounting data"
-                    },
-                    "evidence": {
-                      "type": "object",
-                      "additionalProperties": {},
-                      "description": "Structured evidence for the detection, including `method`: 'regex' for the default keyword/pattern extractor (English-only), or 'llm' when LLM-backed extraction is enabled for this deployment"
-                    },
-                    "status": {
-                      "enum": [
-                        "detected",
-                        "confirmed",
-                        "rejected",
-                        "paid",
-                        "reconciled"
-                      ],
-                      "type": "string",
-                      "description": "Current invoice processing status"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "additionalProperties": {},
-                      "description": "Additional metadata and extracted fields"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the invoice was first detected"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the invoice was last updated"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "orgId",
-                    "agentId",
-                    "messageId",
-                    "vendor",
-                    "invoiceNumber",
-                    "amountCents",
-                    "currency",
-                    "dueDate",
-                    "paymentLink",
-                    "confidence",
-                    "evidence",
-                    "status",
-                    "metadata",
-                    "createdAt",
-                    "updatedAt"
-                  ],
-                  "description": "Detected invoice record with extraction details"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices": {
-      "get": {
-        "operationId": "invoice.list",
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "enum": [
-                "detected",
-                "confirmed",
-                "rejected",
-                "paid",
-                "reconciled"
-              ],
-              "type": "string",
-              "description": "Filter invoices by processing status"
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "agentId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "description": "Filter invoices by detecting agent"
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "default": 20,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "description": "Maximum number of invoices to return per page"
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "description": "Pagination cursor for fetching the next page"
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "Unique invoice identifier"
-                          },
-                          "orgId": {
-                            "type": "string",
-                            "description": "Organization the invoice belongs to"
-                          },
-                          "agentId": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "Agent that detected the invoice, if applicable"
-                          },
-                          "messageId": {
-                            "type": "string",
-                            "description": "Source message identifier the invoice was extracted from"
-                          },
-                          "vendor": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "Vendor or supplier name"
-                          },
-                          "invoiceNumber": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "Vendor-assigned invoice number"
-                          },
-                          "amountCents": {
-                            "anyOf": [
-                              {
-                                "type": "integer"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "Invoice amount in cents"
-                          },
-                          "currency": {
-                            "type": "string",
-                            "description": "ISO 4217 currency code"
-                          },
-                          "dueDate": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "Payment due date"
-                          },
-                          "paymentLink": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "URL for online payment, if available"
-                          },
-                          "confidence": {
-                            "type": "number",
-                            "description": "Detection confidence between 0 and 1. Heuristic, not a probability: it is a weighted score over which fields were found. Treat invoices as suggestions to review, not as verified accounting data"
-                          },
-                          "evidence": {
-                            "type": "object",
-                            "additionalProperties": {},
-                            "description": "Structured evidence for the detection, including `method`: 'regex' for the default keyword/pattern extractor (English-only), or 'llm' when LLM-backed extraction is enabled for this deployment"
-                          },
-                          "status": {
-                            "enum": [
-                              "detected",
-                              "confirmed",
-                              "rejected",
-                              "paid",
-                              "reconciled"
-                            ],
-                            "type": "string",
-                            "description": "Current invoice processing status"
-                          },
-                          "metadata": {
-                            "type": "object",
-                            "additionalProperties": {},
-                            "description": "Additional metadata and extracted fields"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "Timestamp when the invoice was first detected"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "Timestamp when the invoice was last updated"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "orgId",
-                          "agentId",
-                          "messageId",
-                          "vendor",
-                          "invoiceNumber",
-                          "amountCents",
-                          "currency",
-                          "dueDate",
-                          "paymentLink",
-                          "confidence",
-                          "evidence",
-                          "status",
-                          "metadata",
-                          "createdAt",
-                          "updatedAt"
-                        ],
-                        "description": "Detected invoice record with extraction details"
-                      },
-                      "description": "Array of invoices matching the query."
-                    },
-                    "nextCursor": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Cursor for fetching the next page of results, or null if no more pages."
-                    }
-                  },
-                  "required": [
-                    "items",
-                    "nextCursor"
-                  ],
-                  "description": "Paginated list of invoices."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/match-receipts": {
-      "post": {
-        "operationId": "invoice.matchReceipt",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "receipts": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "receiptId": {
-                          "type": "string",
-                          "description": "Unique identifier of the receipt."
-                        },
-                        "amountCents": {
-                          "anyOf": [
-                            {
-                              "type": "integer"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Receipt total in cents, or null if unavailable."
-                        },
-                        "currency": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "ISO 4217 currency code, or null if unavailable."
-                        },
-                        "merchant": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Merchant name from the receipt, or null if unavailable."
-                        },
-                        "orderId": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Order ID printed on the receipt, or null if absent."
-                        },
-                        "confirmationNumber": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Confirmation or reference number, or null if absent."
-                        },
-                        "capturedAt": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "ISO 8601 timestamp when the receipt was captured."
-                        },
-                        "transactionId": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "Associated payment transaction ID, or null if unknown."
-                        }
-                      },
-                      "required": [
-                        "receiptId",
-                        "amountCents",
-                        "currency",
-                        "merchant",
-                        "orderId",
-                        "confirmationNumber",
-                        "capturedAt",
-                        "transactionId"
-                      ],
-                      "description": "Receipt data to match against invoices."
-                    },
-                    "description": "Array of receipts to evaluate for matching."
-                  },
-                  "invoiceIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Optional subset of invoice IDs to match against; omit to match against all open invoices."
-                  }
-                },
-                "required": [
-                  "receipts"
-                ],
-                "description": "Input for bulk receipt-to-invoice matching."
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "matches": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "receiptId": {
-                            "type": "string",
-                            "description": "Unique identifier of the matched receipt."
-                          },
-                          "invoiceId": {
-                            "type": "string",
-                            "description": "Unique identifier of the matched invoice."
-                          },
-                          "confidence": {
-                            "type": "number",
-                            "description": "Overall match confidence score, from 0 to 1."
-                          },
-                          "signals": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "field": {
-                                  "enum": [
-                                    "amount",
-                                    "time",
-                                    "vendor",
-                                    "orderId"
-                                  ],
-                                  "type": "string",
-                                  "description": "The receipt field evaluated for matching."
-                                },
-                                "score": {
-                                  "type": "number",
-                                  "description": "Confidence score for this signal, from 0 to 1."
-                                },
-                                "matched": {
-                                  "type": "boolean",
-                                  "description": "Whether this signal indicates a positive match."
-                                },
-                                "detail": {
-                                  "type": "string",
-                                  "description": "Human-readable explanation of the match evaluation."
-                                }
-                              },
-                              "required": [
-                                "field",
-                                "score",
-                                "matched",
-                                "detail"
-                              ],
-                              "description": "Individual matching signal used to evaluate receipt-to-invoice correspondence."
-                            },
-                            "description": "Individual signals contributing to the match evaluation."
-                          },
-                          "autoLinked": {
-                            "type": "boolean",
-                            "description": "Whether the receipt was automatically linked without manual review."
-                          }
-                        },
-                        "required": [
-                          "receiptId",
-                          "invoiceId",
-                          "confidence",
-                          "signals",
-                          "autoLinked"
-                        ],
-                        "description": "Result of matching a receipt against an invoice."
-                      },
-                      "description": "Receipts that matched an invoice above the confidence threshold."
-                    },
-                    "exceptions": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "receiptId": {
-                            "type": "string",
-                            "description": "Unique identifier of the matched receipt."
-                          },
-                          "invoiceId": {
-                            "type": "string",
-                            "description": "Unique identifier of the matched invoice."
-                          },
-                          "confidence": {
-                            "type": "number",
-                            "description": "Overall match confidence score, from 0 to 1."
-                          },
-                          "signals": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "field": {
-                                  "enum": [
-                                    "amount",
-                                    "time",
-                                    "vendor",
-                                    "orderId"
-                                  ],
-                                  "type": "string",
-                                  "description": "The receipt field evaluated for matching."
-                                },
-                                "score": {
-                                  "type": "number",
-                                  "description": "Confidence score for this signal, from 0 to 1."
-                                },
-                                "matched": {
-                                  "type": "boolean",
-                                  "description": "Whether this signal indicates a positive match."
-                                },
-                                "detail": {
-                                  "type": "string",
-                                  "description": "Human-readable explanation of the match evaluation."
-                                }
-                              },
-                              "required": [
-                                "field",
-                                "score",
-                                "matched",
-                                "detail"
-                              ],
-                              "description": "Individual matching signal used to evaluate receipt-to-invoice correspondence."
-                            },
-                            "description": "Individual signals contributing to the match evaluation."
-                          },
-                          "autoLinked": {
-                            "type": "boolean",
-                            "description": "Whether the receipt was automatically linked without manual review."
-                          }
-                        },
-                        "required": [
-                          "receiptId",
-                          "invoiceId",
-                          "confidence",
-                          "signals",
-                          "autoLinked"
-                        ],
-                        "description": "Result of matching a receipt against an invoice."
-                      },
-                      "description": "Receipts with ambiguous matches requiring manual review."
-                    },
-                    "unmatched": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Receipt IDs that could not be matched to any invoice."
-                    }
-                  },
-                  "required": [
-                    "matches",
-                    "exceptions",
-                    "unmatched"
-                  ],
-                  "description": "Results of receipt-to-invoice matching."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/reconciliation-summary": {
-      "get": {
-        "operationId": "invoice.reconciliationSummary",
-        "parameters": [
-          {
-            "name": "from",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "ISO 8601 start of the reporting period; omit for unbounded start."
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "ISO 8601 end of the reporting period; omit for unbounded end."
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "description": "Total number of invoices in the period."
-                    },
-                    "byStatus": {
-                      "type": "object",
-                      "propertyNames": {
-                        "enum": [
-                          "detected",
-                          "confirmed",
-                          "rejected",
-                          "paid",
-                          "reconciled"
-                        ],
-                        "type": "string",
-                        "description": "Current processing status of a detected invoice"
-                      },
-                      "additionalProperties": {
-                        "type": "integer"
-                      },
-                      "description": "Invoice count grouped by status."
-                    },
-                    "totalAmountCents": {
-                      "type": "integer",
-                      "description": "Sum of all invoice amounts in cents."
-                    },
-                    "reconciledAmountCents": {
-                      "type": "integer",
-                      "description": "Sum of reconciled invoice amounts in cents."
-                    },
-                    "exceptionCount": {
-                      "type": "integer",
-                      "description": "Number of invoices flagged as exceptions."
-                    },
-                    "averageAgingDays": {
-                      "type": "number",
-                      "description": "Mean number of days invoices have been outstanding."
-                    },
-                    "oldestUnreconciledDays": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "Age in days of the oldest unreconciled invoice, or null if all are reconciled."
-                    }
-                  },
-                  "required": [
-                    "total",
-                    "byStatus",
-                    "totalAmountCents",
-                    "reconciledAmountCents",
-                    "exceptionCount",
-                    "averageAgingDays",
-                    "oldestUnreconciledDays"
-                  ],
-                  "description": "Aggregated reconciliation metrics for the requested period."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/export": {
-      "get": {
-        "operationId": "invoice.exportCsv",
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "enum": [
-                "detected",
-                "confirmed",
-                "rejected",
-                "paid",
-                "reconciled"
-              ],
-              "type": "string",
-              "description": "Filter exported invoices by status; omit to include all statuses."
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "ISO 8601 start of the export date range."
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "ISO 8601 end of the export date range."
-            },
-            "allowEmptyValue": true,
-            "allowReserved": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "csv": {
-                      "type": "string",
-                      "description": "RFC 4180 compliant CSV content of the exported invoices."
-                    },
-                    "count": {
-                      "type": "integer",
-                      "description": "Number of invoices included in the export."
-                    }
-                  },
-                  "required": [
-                    "csv",
-                    "count"
-                  ],
-                  "description": "CSV export result."
                 }
               }
             }
@@ -39536,10 +39854,19 @@
                           "language"
                         ]
                       }
+                    },
+                    "source": {
+                      "enum": [
+                        "live",
+                        "fallback"
+                      ],
+                      "type": "string",
+                      "description": "Where this list came from. `live` is the upstream catalog. `fallback` is the small committed set served when the upstream is not configured or unreachable — treat it as incomplete, not as the full range of available voices."
                     }
                   },
                   "required": [
-                    "voices"
+                    "voices",
+                    "source"
                   ]
                 }
               }
@@ -39602,6 +39929,16 @@
             "in": "query",
             "schema": {
               "type": "string"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "counterparty",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Filter to calls with one phone number, in either direction — the call history with that contact. Matched against `to` on outbound calls and `from` on inbound ones."
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -39782,6 +40119,123 @@
                     "from",
                     "to",
                     "direction"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice/calls/contacts": {
+      "get": {
+        "operationId": "voice.listCallContacts",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Filter to one agent. Optional for master keys (omit for every agent in the org); ignored for agent keys, which always see only their own."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "default": 50,
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "default": 0,
+              "type": "number",
+              "minimum": 0
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contacts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "counterparty": {
+                            "type": "string",
+                            "description": "The other party's phone number (E.164)"
+                          },
+                          "agentId": {
+                            "type": "string",
+                            "description": "Agent that owns these calls"
+                          },
+                          "callCount": {
+                            "type": "integer",
+                            "description": "Total calls exchanged with this number"
+                          },
+                          "missedCount": {
+                            "type": "integer",
+                            "description": "Calls that were never answered. Counted from a missing answer timestamp rather than an end-reason, so declined, timed-out and failed calls all count as nobody picked up."
+                          },
+                          "lastCallAt": {
+                            "type": "string",
+                            "description": "When the most recent call started — the sort key for this list"
+                          },
+                          "lastCallDirection": {
+                            "enum": [
+                              "INBOUND",
+                              "OUTBOUND"
+                            ],
+                            "type": "string",
+                            "description": "Whether the most recent call came in or went out"
+                          },
+                          "totalDurationSeconds": {
+                            "type": "integer",
+                            "description": "Seconds of connected time across every answered call with this number"
+                          }
+                        },
+                        "required": [
+                          "counterparty",
+                          "agentId",
+                          "callCount",
+                          "missedCount",
+                          "lastCallAt",
+                          "lastCallDirection",
+                          "totalDurationSeconds"
+                        ]
+                      },
+                      "description": "Contacts, most recent call first"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Total contacts matching the query"
+                    },
+                    "hasMore": {
+                      "type": "boolean",
+                      "description": "Whether more contacts exist past this page"
+                    }
+                  },
+                  "required": [
+                    "contacts",
+                    "total",
+                    "hasMore"
                   ]
                 }
               }
@@ -42483,6 +42937,17 @@
                                   "type": "boolean",
                                   "description": "Whether this is the agent's primary phone identity"
                                 },
+                                "voiceId": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                                },
                                 "createdAt": {
                                   "type": "string",
                                   "format": "date-time",
@@ -42497,6 +42962,7 @@
                                 "capabilities",
                                 "tenDlcStatus",
                                 "isPrimary",
+                                "voiceId",
                                 "createdAt"
                               ],
                               "description": "Phone identity associated with an agent"
@@ -44887,10 +45353,6 @@
     {
       "name": "Phone",
       "description": "Manage phone numbers and SMS/voice capabilities"
-    },
-    {
-      "name": "Invoices",
-      "description": "Track invoices, match receipts, and reconcile payments"
     },
     {
       "name": "Billing",

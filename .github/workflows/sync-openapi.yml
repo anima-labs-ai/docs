@@ -85,8 +85,21 @@ jobs:
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --body "$body"
             echo "updated PR #$existing"
-          else
-            gh pr create --head "$BRANCH" --base main \
-              --title "docs: sync openapi.json from the deployed API" \
-              --body "$body"
+            exit 0
+          fi
+
+          # The branch is pushed by this point, so the sync itself has already
+          # succeeded — only the PR is missing. Creating one needs a repo/org
+          # setting that is OFF BY DEFAULT, and its raw error ("GitHub Actions
+          # is not permitted to create or approve pull requests") does not say
+          # where to go. Say it here, once, instead of leaving the next person
+          # to search for it.
+          if ! gh pr create --head "$BRANCH" --base main \
+                --title "docs: sync openapi.json from the deployed API" \
+                --body "$body"; then
+            {
+              echo "::error::Could not open the PR. The spec change IS pushed to '$BRANCH' — open it by hand at https://github.com/${GITHUB_REPOSITORY}/pull/new/${BRANCH}"
+              echo "::error::To make this automatic: Settings -> Actions -> General -> Workflow permissions -> tick 'Allow GitHub Actions to create and approve pull requests'."
+            } >&2
+            exit 1
           fi

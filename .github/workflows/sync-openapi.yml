@@ -1,0 +1,92 @@
+name: Sync OpenAPI
+
+# `docs/openapi.json` is generated in the anima monorepo from the oRPC
+# contracts and used to be copied here by hand. Nothing failed when the copy
+# was skipped, so the spec integrators read went stale twice — most recently
+# while annual billing was purchasable and the published checkout had no
+# `interval` field to ask for it with. anima#470 added a canary that NOTICES
+# the drift; this closes the loop by doing the copy.
+#
+# The source is the deployed API's own GET /openapi.json, which server.ts
+# builds from the same contracts and the same openapi-metadata.ts as the static
+# generator — verified identical as parsed JSON. It is a PUBLIC endpoint, so
+# this needs no cross-repo token: the job writes only to its own repository,
+# with the built-in GITHUB_TOKEN.
+#
+# It opens a PR rather than pushing to main. A human still approves what the
+# public docs say, which is the right bar for a docs site — what was manual and
+# skippable was the fetching, diffing and PR-authoring, and that is what is
+# automated here.
+on:
+  # Every three hours: a deploy has to land before the live spec changes, so
+  # polling beats reacting. The lag is bounded by this interval, not by whether
+  # someone remembered.
+  schedule:
+    - cron: "40 */3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sync-openapi
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Pull the live spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare against the live spec
+        id: sync
+        run: |
+          set +e
+          python3 scripts/sync-openapi.py
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 10 ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            # Guard tripped (unreachable, not JSON, wrong title, too few paths).
+            # Fail loudly: "could not check" must never read as "in sync".
+            exit "$code"
+          fi
+
+      - name: Open or update the sync PR
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: chore/sync-openapi
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # One long-lived branch, force-updated. Re-running must refresh the
+          # open PR rather than pile up a new one every three hours.
+          git checkout -B "$BRANCH"
+          git add docs/openapi.json
+          # Separate -m flags: a multi-line string inside an indented YAML
+          # block scalar carries its indentation into the commit message.
+          git commit \
+            -m "docs: sync openapi.json from the deployed API" \
+            -m "Generated from the oRPC contracts and pulled from GET /openapi.json. Not hand-edited — see scripts/sync-openapi.py."
+          git push --force origin "$BRANCH"
+
+          body=$(printf '%s\n\n%s\n' \
+            "The published spec had drifted from the deployed API. Pulled from \`GET /openapi.json\`, which is generated from the oRPC contracts — **not hand-edited**." \
+            "$(cat /tmp/openapi-sync-summary.md)")
+
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --body "$body"
+            echo "updated PR #$existing"
+          else
+            gh pr create --head "$BRANCH" --base main \
+              --title "docs: sync openapi.json from the deployed API" \
+              --body "$body"
+          fi

@@ -81,12 +81,28 @@ jobs:
             "The published spec had drifted from the deployed API. Pulled from \`GET /openapi.json\`, which is generated from the oRPC contracts — **not hand-edited**." \
             "$(cat /tmp/openapi-sync-summary.md)")
 
-          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          # The push above already landed the spec change, so every failure from
+          # here on is the SAME situation however it is reached: the sync worked
+          # and only the handoff to a human did not. One situation, one handler
+          # — listing, editing and creating all route to it, because "pushed but
+          # nobody was told" is the exact failure this mechanism exists to
+          # prevent and it must never exit 0.
+          #
+          # Written to stdout, not stderr: workflow commands are documented as a
+          # stdout protocol, and the resulting annotation is the only part of a
+          # red run a person sees without opening the log.
+          handoff_failed() {
+            echo "::error title=OpenAPI sync needs a human::The spec change is pushed to '${BRANCH}' but no pull request is open for it. Open one: https://github.com/${GITHUB_REPOSITORY}/pull/new/${BRANCH}"
+            echo "::error title=Check this setting first::If the log above says GitHub Actions is not permitted to create or approve pull requests, tick Settings -> Actions -> General -> Workflow permissions -> 'Allow GitHub Actions to create and approve pull requests'. It is off by default."
+            exit 1
+          }
+
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty') || handoff_failed
           if [ -n "$existing" ]; then
-            gh pr edit "$existing" --body "$body"
+            gh pr edit "$existing" --body "$body" || handoff_failed
             echo "updated PR #$existing"
           else
             gh pr create --head "$BRANCH" --base main \
               --title "docs: sync openapi.json from the deployed API" \
-              --body "$body"
+              --body "$body" || handoff_failed
           fi

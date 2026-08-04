@@ -5008,102 +5008,6 @@
       }
     },
     "/agents/{agentId}/email-identities": {
-      "post": {
-        "operationId": "agent.addEmailIdentity",
-        "parameters": [
-          {
-            "name": "agentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-              "description": "Agent that will own the new identity"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "Full email address to attach. The parent domain MUST be verified for the workspace, or be the platform-managed default `agents.useanima.sh`. Otherwise rejected with DOMAIN_NOT_VERIFIED."
-                  },
-                  "setAsPrimary": {
-                    "default": false,
-                    "type": "boolean",
-                    "description": "If true, this identity becomes the agent's primary on attach (the existing primary is demoted). Default false: attached as a secondary identity."
-                  }
-                },
-                "required": [
-                  "email"
-                ],
-                "description": "Attach a new email identity to an existing agent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-                      "description": "Unique identifier of the email identity"
-                    },
-                    "email": {
-                      "type": "string",
-                      "format": "email",
-                      "description": "Full email address"
-                    },
-                    "domain": {
-                      "type": "string",
-                      "description": "Domain portion of the email address"
-                    },
-                    "localPart": {
-                      "type": "string",
-                      "description": "Local part (before the @) of the email address"
-                    },
-                    "isPrimary": {
-                      "type": "boolean",
-                      "description": "Whether this is the agent's primary email identity"
-                    },
-                    "verified": {
-                      "type": "boolean",
-                      "description": "Whether the email address has been verified"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the email identity was created"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "email",
-                    "domain",
-                    "localPart",
-                    "isPrimary",
-                    "verified",
-                    "createdAt"
-                  ],
-                  "description": "Email identity associated with an agent"
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "operationId": "agent.listEmailIdentities",
         "parameters": [
@@ -5181,101 +5085,6 @@
                     "items"
                   ],
                   "description": "List of agent email identities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/agents/{agentId}/email-identities/{identityId}/set-primary": {
-      "post": {
-        "operationId": "agent.setPrimaryEmailIdentity",
-        "parameters": [
-          {
-            "name": "agentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-              "description": "Owning agent ID"
-            }
-          },
-          {
-            "name": "identityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-              "description": "Email identity ID being acted on"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-                "description": "Identifies a specific email identity for a per-identity action"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-                      "description": "Unique identifier of the email identity"
-                    },
-                    "email": {
-                      "type": "string",
-                      "format": "email",
-                      "description": "Full email address"
-                    },
-                    "domain": {
-                      "type": "string",
-                      "description": "Domain portion of the email address"
-                    },
-                    "localPart": {
-                      "type": "string",
-                      "description": "Local part (before the @) of the email address"
-                    },
-                    "isPrimary": {
-                      "type": "boolean",
-                      "description": "Whether this is the agent's primary email identity"
-                    },
-                    "verified": {
-                      "type": "boolean",
-                      "description": "Whether the email address has been verified"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the email identity was created"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "email",
-                    "domain",
-                    "localPart",
-                    "isPrimary",
-                    "verified",
-                    "createdAt"
-                  ],
-                  "description": "Email identity associated with an agent"
                 }
               }
             }
@@ -5371,68 +5180,6 @@
                     "createdAt"
                   ],
                   "description": "Email identity associated with an agent"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/agents/{agentId}/email-identities/{identityId}": {
-      "delete": {
-        "operationId": "agent.deleteEmailIdentity",
-        "parameters": [
-          {
-            "name": "agentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-              "description": "Owning agent ID"
-            }
-          },
-          {
-            "name": "identityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-              "description": "Email identity ID being acted on"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-                "description": "Identifies a specific email identity for a per-identity action"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "const": true,
-                      "description": "Always true on successful deletion"
-                    }
-                  },
-                  "required": [
-                    "success"
-                  ],
-                  "description": "Identity deletion confirmation"
                 }
               }
             }
@@ -6554,7 +6301,7 @@
                   "fromIdentityId": {
                     "type": "string",
                     "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-                    "description": "Optional EmailIdentity ID to send from. Must belong to this agent and be verified. If omitted, the agent's primary identity is used. Use this to route different message types through different identities (e.g. transactional from @brawz.ai, support from @support.brawz.ai). Discover available IDs via GET /agents/{agentId}/email-identities."
+                    "description": "Optional EmailIdentity ID to send from. An agent has exactly one email identity, so the only valid value is that one — supply it to assert which address you expect to send as, or omit it and the agent's identity is used. Discover the ID via GET /agents/{agentId}/email-identities."
                   },
                   "to": {
                     "type": "array",
@@ -19204,7 +18951,7 @@
                   "fromIdentityId": {
                     "type": "string",
                     "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
-                    "description": "Optional EmailIdentity ID to send from. Must belong to this agent and be verified. If omitted, the agent's primary identity is used. Use this to route different message types through different identities (e.g. transactional from @brawz.ai, support from @support.brawz.ai). Discover available IDs via GET /agents/{agentId}/email-identities."
+                    "description": "Optional EmailIdentity ID to send from. An agent has exactly one email identity, so the only valid value is that one — supply it to assert which address you expect to send as, or omit it and the agent's identity is used. Discover the ID via GET /agents/{agentId}/email-identities."
                   },
                   "to": {
                     "type": "array",
@@ -25429,16 +25176,9 @@
                     "description": "Updated human-readable display name (set to null to clear)"
                   },
                   "agentId": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Updated agent association (set to null to unlink)"
+                    "type": "string",
+                    "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                    "description": "Move the inbox to a different agent. Not nullable: an inbox belongs to exactly one agent, so there is no unlinked state to set it to. Fails with 409 if the target agent already has an inbox."
                   }
                 },
                 "required": [],

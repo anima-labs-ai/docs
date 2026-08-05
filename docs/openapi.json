@@ -1136,7 +1136,7 @@
                           "country"
                         ]
                       },
-                      "description": "Reserved: alternative address suggestions. Currently ALWAYS an empty array — the built-in validator is structural only (provider `anima_lite`) and does not generate alternatives. Populated only if/when a postal-data provider (e.g. USPS/Smarty) is integrated."
+                      "description": "Reserved: alternative address suggestions. Currently ALWAYS an empty array — the built-in validator is structural only (provider `anima_lite`) and does not generate alternatives. Populated only if/when a postal-data provider is integrated."
                     }
                   },
                   "required": [
@@ -3050,10 +3050,6 @@
                             "type": "string",
                             "description": "Phone number in E.164 format"
                           },
-                          "provider": {
-                            "const": "TELNYX",
-                            "description": "Telephony provider managing this number"
-                          },
                           "providerId": {
                             "anyOf": [
                               {
@@ -3063,7 +3059,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Provider-specific identifier for this phone number"
+                            "description": "Opaque carrier-side identifier for this phone number"
                           },
                           "capabilities": {
                             "type": "object",
@@ -3121,7 +3117,6 @@
                         "required": [
                           "id",
                           "phoneNumber",
-                          "provider",
                           "providerId",
                           "capabilities",
                           "tenDlcStatus",
@@ -3440,10 +3435,6 @@
                                   "type": "string",
                                   "description": "Phone number in E.164 format"
                                 },
-                                "provider": {
-                                  "const": "TELNYX",
-                                  "description": "Telephony provider managing this number"
-                                },
                                 "providerId": {
                                   "anyOf": [
                                     {
@@ -3453,7 +3444,7 @@
                                       "type": "null"
                                     }
                                   ],
-                                  "description": "Provider-specific identifier for this phone number"
+                                  "description": "Opaque carrier-side identifier for this phone number"
                                 },
                                 "capabilities": {
                                   "type": "object",
@@ -3511,7 +3502,6 @@
                               "required": [
                                 "id",
                                 "phoneNumber",
-                                "provider",
                                 "providerId",
                                 "capabilities",
                                 "tenDlcStatus",
@@ -3810,10 +3800,6 @@
                             "type": "string",
                             "description": "Phone number in E.164 format"
                           },
-                          "provider": {
-                            "const": "TELNYX",
-                            "description": "Telephony provider managing this number"
-                          },
                           "providerId": {
                             "anyOf": [
                               {
@@ -3823,7 +3809,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Provider-specific identifier for this phone number"
+                            "description": "Opaque carrier-side identifier for this phone number"
                           },
                           "capabilities": {
                             "type": "object",
@@ -3881,7 +3867,6 @@
                         "required": [
                           "id",
                           "phoneNumber",
-                          "provider",
                           "providerId",
                           "capabilities",
                           "tenDlcStatus",
@@ -4195,10 +4180,6 @@
                             "type": "string",
                             "description": "Phone number in E.164 format"
                           },
-                          "provider": {
-                            "const": "TELNYX",
-                            "description": "Telephony provider managing this number"
-                          },
                           "providerId": {
                             "anyOf": [
                               {
@@ -4208,7 +4189,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Provider-specific identifier for this phone number"
+                            "description": "Opaque carrier-side identifier for this phone number"
                           },
                           "capabilities": {
                             "type": "object",
@@ -4266,7 +4247,6 @@
                         "required": [
                           "id",
                           "phoneNumber",
-                          "provider",
                           "providerId",
                           "capabilities",
                           "tenDlcStatus",
@@ -10616,10 +10596,6 @@
                       "type": "string",
                       "description": "E.164 formatted phone number that was provisioned"
                     },
-                    "provider": {
-                      "const": "TELNYX",
-                      "description": "Telephony provider managing this number"
-                    },
                     "providerId": {
                       "anyOf": [
                         {
@@ -10629,7 +10605,7 @@
                           "type": "null"
                         }
                       ],
-                      "description": "Provider-specific identifier for the number"
+                      "description": "Opaque carrier-side identifier for the number"
                     },
                     "capabilities": {
                       "type": "object",
@@ -10678,7 +10654,6 @@
                   "required": [
                     "id",
                     "phoneNumber",
-                    "provider",
                     "providerId",
                     "capabilities",
                     "tenDlcStatus",
@@ -11947,10 +11922,6 @@
                             "type": "string",
                             "description": "Phone number in E.164 format"
                           },
-                          "provider": {
-                            "const": "TELNYX",
-                            "description": "Telephony provider managing this number"
-                          },
                           "providerId": {
                             "anyOf": [
                               {
@@ -11960,7 +11931,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Provider-specific identifier for this phone number"
+                            "description": "Opaque carrier-side identifier for this phone number"
                           },
                           "capabilities": {
                             "type": "object",
@@ -12018,7 +11989,6 @@
                         "required": [
                           "id",
                           "phoneNumber",
-                          "provider",
                           "providerId",
                           "capabilities",
                           "tenDlcStatus",
@@ -12100,10 +12070,6 @@
                       "type": "string",
                       "description": "Phone number in E.164 format"
                     },
-                    "provider": {
-                      "const": "TELNYX",
-                      "description": "Telephony provider managing this number"
-                    },
                     "providerId": {
                       "anyOf": [
                         {
@@ -12113,7 +12079,7 @@
                           "type": "null"
                         }
                       ],
-                      "description": "Provider-specific identifier for this phone number"
+                      "description": "Opaque carrier-side identifier for this phone number"
                     },
                     "capabilities": {
                       "type": "object",
@@ -12171,7 +12137,6 @@
                   "required": [
                     "id",
                     "phoneNumber",
-                    "provider",
                     "providerId",
                     "capabilities",
                     "tenDlcStatus",
@@ -30931,11 +30896,6 @@
                     "maxLength": 20,
                     "description": "Phone number to provision for the agent"
                   },
-                  "phoneProvider": {
-                    "default": "TELNYX",
-                    "const": "TELNYX",
-                    "description": "Telephony provider for the phone number"
-                  },
                   "metadata": {
                     "type": "object",
                     "additionalProperties": {},
@@ -41342,9 +41302,6 @@
                             "phoneNumber": {
                               "type": "string"
                             },
-                            "provider": {
-                              "type": "string"
-                            },
                             "capabilities": {
                               "type": "object",
                               "properties": {
@@ -41371,7 +41328,6 @@
                           "required": [
                             "id",
                             "phoneNumber",
-                            "provider",
                             "capabilities",
                             "isPrimary"
                           ]
@@ -44888,10 +44844,6 @@
                                   "type": "string",
                                   "description": "Phone number in E.164 format"
                                 },
-                                "provider": {
-                                  "const": "TELNYX",
-                                  "description": "Telephony provider managing this number"
-                                },
                                 "providerId": {
                                   "anyOf": [
                                     {
@@ -44901,7 +44853,7 @@
                                       "type": "null"
                                     }
                                   ],
-                                  "description": "Provider-specific identifier for this phone number"
+                                  "description": "Opaque carrier-side identifier for this phone number"
                                 },
                                 "capabilities": {
                                   "type": "object",
@@ -44959,7 +44911,6 @@
                               "required": [
                                 "id",
                                 "phoneNumber",
-                                "provider",
                                 "providerId",
                                 "capabilities",
                                 "tenDlcStatus",

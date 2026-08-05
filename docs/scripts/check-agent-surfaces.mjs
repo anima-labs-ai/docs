@@ -47,17 +47,28 @@ const FORBIDDEN_SEGMENTS = new Map([
 ]);
 
 /**
- * Voice-synthesis vendor names that must NEVER appear anywhere in the spec.
- * The customer-facing voice catalog is deliberately vendor-neutral — the API
- * strips the underlying provider/model. A snapshot refresh once re-added a
- * voice `provider` enum (`telnyx | elevenlabs | aws-polly`), which then rendered
- * on the API-reference tab and in llms.txt: every model ingesting our docs was
+ * Supplier names that must NEVER appear anywhere in the spec.
+ * The customer-facing catalog is deliberately vendor-neutral — the API strips
+ * the underlying provider/model. A snapshot refresh once re-added a voice
+ * `provider` enum (`telnyx | elevenlabs | aws-polly`), which then rendered on
+ * the API-reference tab and in llms.txt: every model ingesting our docs was
  * taught our voice vendors. These tokens have no legitimate place in customer
- * docs. (Telnyx is intentionally NOT here: it is a real telephony subprocessor
- * that legitimately appears in phone-identity fields; its disclosure lives on
- * the legal/subprocessor pages, not this gate.)
+ * docs.
+ *
+ * `telnyx` was previously excluded here, on the grounds that it "legitimately
+ * appears in phone-identity fields". That is no longer true and was the last
+ * thing keeping this gate open: anima-labs-ai/anima#495 removed the
+ * `provider` literal from PhoneIdentityOutput and PhoneProvisionOutput, and
+ * the resync that came with it dropped the last ten `"const": "TELNYX"`
+ * entries from this snapshot. Its disclosure still lives on the
+ * legal/subprocessor pages, where it is required — but it has no remaining
+ * reason to be in the published spec.
+ *
+ * Closing it matters because deleting the entries once does not hold. The next
+ * refresh from the monorepo re-adds whatever the contracts contain, which is
+ * exactly how the voice enum came back. The fix is the gate, not the edit.
  */
-const FORBIDDEN_VENDOR_TOKENS = ["deepgram", "elevenlabs", "aws-polly"];
+const FORBIDDEN_VENDOR_TOKENS = ["deepgram", "elevenlabs", "aws-polly", "telnyx"];
 
 const rawSpec = readFileSync(openapiPath, "utf8");
 const spec = JSON.parse(rawSpec);
@@ -94,12 +105,13 @@ if (violations.length > 0) {
 const vendorHits = FORBIDDEN_VENDOR_TOKENS.filter((token) => rawSpec.toLowerCase().includes(token));
 if (vendorHits.length > 0) {
 	console.error(
-		"check-agent-surfaces: openapi.json names a voice-synthesis vendor.\n" +
+		"check-agent-surfaces: openapi.json names one of our suppliers.\n" +
 			`  found: ${vendorHits.join(", ")}\n` +
-			"\nThe voice catalog is vendor-neutral — the API never exposes the underlying" +
-			"\nprovider/model. This snapshot renders into the API reference + llms.txt, so a" +
-			"\nvendor name here is taught to every model that reads our docs. Remove it from" +
-			"\ndocs/openapi.json (see README, 'API Reference').",
+			"\nThe published catalog is vendor-neutral — the API never exposes the underlying" +
+			"\ncarrier, provider or model. This snapshot renders into the API reference +" +
+			"\nllms.txt, so a supplier name here is taught to every model that reads our docs." +
+			"\nRemove it from docs/openapi.json (see README, 'API Reference'). Supplier" +
+			"\ndisclosure belongs on the legal/subprocessor pages, not in the spec.",
 	);
 	process.exit(1);
 }

@@ -31,7 +31,7 @@ A `MASTER_KEY_REQUIRED` (403) means the operation needs org-admin authority and 
 | Master key | Copy your `mk_` key from the [console](https://console.useanima.sh) and send it as the bearer token. | Server-side only. Never ship it to a browser, and never hand it to an agent. |
 | Console session | Sign in as an organization owner or admin. | Vault reveals additionally require a recent first-factor check — see [Vault reveal policy](/vault-reveal-policy). |
 | OAuth | Request the `admin:full` scope during `/oauth/authorize`. | Anima Connect applications. |
-| CLI | Just run the command — it steps up on its own. | See below. |
+| CLI | Just run the command — it steps up on its own. | Prompts for your OS login password. Enrolment is macOS-only and needs an interactive terminal once — see below. |
 
 ### Admin access from the CLI
 

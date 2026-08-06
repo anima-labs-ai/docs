@@ -41443,10 +41443,11 @@
                     "resource": {
                       "enum": [
                         "VAULT",
-                        "PHONE_NUMBER"
+                        "PHONE_NUMBER",
+                        "GENERIC"
                       ],
                       "type": "string",
-                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                     },
                     "reason": {
                       "type": "string",
@@ -41808,7 +41809,8 @@
             "schema": {
               "enum": [
                 "VAULT",
-                "PHONE_NUMBER"
+                "PHONE_NUMBER",
+                "GENERIC"
               ],
               "type": "string",
               "description": "Filter by requested resource"
@@ -41845,10 +41847,11 @@
                           "resource": {
                             "enum": [
                               "VAULT",
-                              "PHONE_NUMBER"
+                              "PHONE_NUMBER",
+                              "GENERIC"
                             ],
                             "type": "string",
-                            "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                            "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                           },
                           "reason": {
                             "type": "string",
@@ -42029,10 +42032,11 @@
                     "resource": {
                       "enum": [
                         "VAULT",
-                        "PHONE_NUMBER"
+                        "PHONE_NUMBER",
+                        "GENERIC"
                       ],
                       "type": "string",
-                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                     },
                     "reason": {
                       "type": "string",
@@ -42258,10 +42262,11 @@
                     "resource": {
                       "enum": [
                         "VAULT",
-                        "PHONE_NUMBER"
+                        "PHONE_NUMBER",
+                        "GENERIC"
                       ],
                       "type": "string",
-                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                     },
                     "reason": {
                       "type": "string",
@@ -42667,10 +42672,11 @@
                     "resource": {
                       "enum": [
                         "VAULT",
-                        "PHONE_NUMBER"
+                        "PHONE_NUMBER",
+                        "GENERIC"
                       ],
                       "type": "string",
-                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                     },
                     "reason": {
                       "type": "string",
@@ -43010,10 +43016,11 @@
                     "resource": {
                       "enum": [
                         "VAULT",
-                        "PHONE_NUMBER"
+                        "PHONE_NUMBER",
+                        "GENERIC"
                       ],
                       "type": "string",
-                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent) or PHONE_NUMBER (a provisioned number, Starter+ only)."
+                      "description": "Resource being requested: VAULT (encrypted secret storage for this agent), PHONE_NUMBER (a provisioned number, Starter+ only), or GENERIC (a master-gated operation the agent tried to perform; approving grants permission rather than provisioning anything)."
                     },
                     "reason": {
                       "type": "string",

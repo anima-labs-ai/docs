@@ -31324,59 +31324,6 @@
         }
       }
     },
-    "/demo/inbox/{token}/self-test": {
-      "post": {
-        "operationId": "demo.selfTest",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 512,
-              "description": "The opaque read token returned by the create endpoint"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {},
-                "required": [],
-                "description": "Deliver a canned test message into a demo inbox"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "const": true,
-                      "description": "The test message was delivered to the inbox"
-                    }
-                  },
-                  "required": [
-                    "ok"
-                  ],
-                  "description": "Result of a demo self-test send"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/registry/agents": {
       "post": {
         "operationId": "registry.register",

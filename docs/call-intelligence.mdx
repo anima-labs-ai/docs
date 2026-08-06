@@ -17,7 +17,6 @@ anima = Anima(api_key="ak_...")
 call = anima.calls.create(
     agent_id="AGENT_ID",
     to="+15551234567",
-    tier="basic",
     greeting="Hi, this is my Anima agent. I am calling from my own number.",
 )
 
@@ -32,7 +31,6 @@ const anima = new Anima({ apiKey: "ak_..." });
 const call = await anima.calls.create({
   agentId: "AGENT_ID",
   to: "+15551234567",
-  tier: "basic",
   greeting: "Hi, this is my Anima agent. I am calling from my own number.",
 });
 
@@ -54,7 +52,6 @@ def on_message(message: dict):
 conn.on_message(on_message)
 conn.create_call(
     "+15551234567",
-    tier="basic",
     greeting="Hi, this is my Anima agent.",
 )
 ```
@@ -69,7 +66,6 @@ conn.on("message", (message) => {
 });
 
 conn.createCall("+15551234567", {
-  tier: "basic",
   greeting: "Hi, this is my Anima agent.",
 });
 ```
@@ -145,6 +141,6 @@ Reassigned-number scrubbing, Do-Not-Call scrubbing, and calling-hour windows are
 
 ## Next steps
 
-- [Voice Catalog](/voice-catalog) - List available voice tiers and catalog entries
+- [Voice Catalog](/voice-catalog) - Browse the multilingual voice catalog and preview a voice
 - [Voice WebSocket Protocol](/protocols/voice-websocket) - Full real-time protocol reference
 - [Phone & Voice](/phone) - Provision numbers, send SMS, and place calls

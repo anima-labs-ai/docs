@@ -22,6 +22,31 @@ Scans with both deterministic regex heuristics and AI classification.
 | Master Key | `mk_` | Full access. Create agents, manage billing, view logs. | Store in server-only environment variables and rotate on schedule. |
 | Agent Key | `ak_` | Scoped access. Send/receive for one specific agent. | Issue least-privilege keys per service and revoke unused keys. |
 
+## Reaching master authority
+
+A `MASTER_KEY_REQUIRED` (403) means the operation needs org-admin authority and the credential you used does not carry it — around a hundred endpoints sit behind that gate, including agent creation, key management, billing, and the event stream. Which route out is open depends on how you authenticated:
+
+| Route | How | Notes |
+|---|---|---|
+| Master key | Copy your `mk_` key from the [console](https://console.useanima.sh) and send it as the bearer token. | Server-side only. Never ship it to a browser, and never hand it to an agent. |
+| Console session | Sign in as an organization owner or admin. | Vault reveals additionally require a recent first-factor check — see [Vault reveal policy](/vault-reveal-policy). |
+| OAuth | Request the `admin:full` scope during `/oauth/authorize`. | Anima Connect applications. |
+| CLI | Just run the command — it steps up on its own. | Prompts for your OS login password. Enrolment is macOS-only and needs an interactive terminal once — see below. |
+
+### Admin access from the CLI
+
+There is no command to run first. A command that needs admin rights — `anima agent create`, key rotation, `anima tail` — asks for it itself, and your OS prompts for your login password.
+
+The first time on a given machine, the CLI emails a code to the organization owner and enrols that machine inline, at the moment you need it. Enrolment stores a grant in the OS keychain behind a human-presence gate, so later commands need only the password prompt rather than another email.
+
+Admin access lasts for the single command that asked for it and is never written to disk, so each admin command prompts.
+
+<Note>
+An agent driving the CLI holds your API key and can run every command, but it cannot answer a system password dialog. That is the boundary, and it is deliberate. The gate is local: it governs release of the grant on this machine, and the server cannot verify that a human was present — so treat it as narrowing who can obtain admin authority here, not as a guarantee about what that authority can do once obtained.
+</Note>
+
+Enrolment is macOS-only. On other platforms the CLI refuses to store a grant rather than pretend it is protected, so every step-up uses the emailed code. Enrolment also needs an interactive terminal once, because the code has to be typed back in — a CI job or an agent driving the CLI fails with that explanation instead of blocking on a prompt nothing will answer.
+
 ## Content Scanning Overview (Regex + AI)
 
 - **Regex Layer:** Fast checks for known injection markers, secret patterns, and risky payload signatures.

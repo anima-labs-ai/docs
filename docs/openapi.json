@@ -48067,51 +48067,5 @@
         "description": "API key for programmatic access. Pass as: X-API-Key: <your-key>"
       }
     }
-  },
-  "tags": [
-    {
-      "name": "Agents",
-      "description": "Create and manage AI agents with email and phone capabilities"
-    },
-    {
-      "name": "Inboxes",
-      "description": "Manage email inboxes and their configurations"
-    },
-    {
-      "name": "Messages",
-      "description": "Send, receive, and search email messages"
-    },
-    {
-      "name": "Webhooks",
-      "description": "Register and manage webhook subscriptions for real-time events"
-    },
-    {
-      "name": "Organizations",
-      "description": "Manage organizations and team settings"
-    },
-    {
-      "name": "Domains",
-      "description": "Configure and verify custom email domains"
-    },
-    {
-      "name": "Phone",
-      "description": "Manage phone numbers and SMS/voice capabilities"
-    },
-    {
-      "name": "Billing",
-      "description": "View usage, tiers, and billing information"
-    },
-    {
-      "name": "Security",
-      "description": "Configure security policies and access controls"
-    },
-    {
-      "name": "Vault",
-      "description": "Store and retrieve encrypted secrets"
-    },
-    {
-      "name": "API Keys",
-      "description": "Create and manage API keys for programmatic access"
-    }
-  ]
+  }
 }

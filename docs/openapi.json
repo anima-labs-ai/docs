@@ -41489,6 +41489,47 @@
                       ],
                       "description": "Resource-specific options, if any"
                     },
+                    "permission": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "procedurePath": {
+                              "type": "string",
+                              "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                            },
+                            "readOnly": {
+                              "type": "boolean",
+                              "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                            },
+                            "argumentPreview": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                            }
+                          },
+                          "required": [
+                            "procedurePath",
+                            "readOnly",
+                            "argumentPreview"
+                          ],
+                          "description": "Present only on a permission request; null on a resource provisioning request"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "What the agent was refused, when this request records a permission rather than a resource"
+                    },
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time",
@@ -41546,6 +41587,7 @@
                     "reason",
                     "status",
                     "options",
+                    "permission",
                     "expiresAt",
                     "decidedAt",
                     "decidedNote",
@@ -41893,6 +41935,47 @@
                             ],
                             "description": "Resource-specific options, if any"
                           },
+                          "permission": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "procedurePath": {
+                                    "type": "string",
+                                    "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                                  },
+                                  "readOnly": {
+                                    "type": "boolean",
+                                    "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                                  },
+                                  "argumentPreview": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                                  }
+                                },
+                                "required": [
+                                  "procedurePath",
+                                  "readOnly",
+                                  "argumentPreview"
+                                ],
+                                "description": "Present only on a permission request; null on a resource provisioning request"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "What the agent was refused, when this request records a permission rather than a resource"
+                          },
                           "expiresAt": {
                             "type": "string",
                             "format": "date-time",
@@ -41946,6 +42029,7 @@
                           "reason",
                           "status",
                           "options",
+                          "permission",
                           "expiresAt",
                           "decidedAt",
                           "decidedNote",
@@ -42078,6 +42162,47 @@
                       ],
                       "description": "Resource-specific options, if any"
                     },
+                    "permission": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "procedurePath": {
+                              "type": "string",
+                              "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                            },
+                            "readOnly": {
+                              "type": "boolean",
+                              "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                            },
+                            "argumentPreview": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                            }
+                          },
+                          "required": [
+                            "procedurePath",
+                            "readOnly",
+                            "argumentPreview"
+                          ],
+                          "description": "Present only on a permission request; null on a resource provisioning request"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "What the agent was refused, when this request records a permission rather than a resource"
+                    },
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time",
@@ -42131,6 +42256,7 @@
                     "reason",
                     "status",
                     "options",
+                    "permission",
                     "expiresAt",
                     "decidedAt",
                     "decidedNote",
@@ -42231,6 +42357,15 @@
                     "type": "string",
                     "maxLength": 500,
                     "description": "Optional note for the agent, typically why a request was declined"
+                  },
+                  "grant": {
+                    "enum": [
+                      "once",
+                      "always",
+                      "reads"
+                    ],
+                    "type": "string",
+                    "description": "Required when approving a permission request; rejected on a resource provisioning request"
                   }
                 },
                 "required": [],
@@ -42308,6 +42443,47 @@
                       ],
                       "description": "Resource-specific options, if any"
                     },
+                    "permission": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "procedurePath": {
+                              "type": "string",
+                              "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                            },
+                            "readOnly": {
+                              "type": "boolean",
+                              "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                            },
+                            "argumentPreview": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                            }
+                          },
+                          "required": [
+                            "procedurePath",
+                            "readOnly",
+                            "argumentPreview"
+                          ],
+                          "description": "Present only on a permission request; null on a resource provisioning request"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "What the agent was refused, when this request records a permission rather than a resource"
+                    },
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time",
@@ -42361,6 +42537,7 @@
                     "reason",
                     "status",
                     "options",
+                    "permission",
                     "expiresAt",
                     "decidedAt",
                     "decidedNote",
@@ -42611,6 +42788,66 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "UNPROCESSABLE_CONTENT"
+                        },
+                        "status": {
+                          "const": 422
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "This grant does not apply to this request."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -42641,6 +42878,15 @@
                     "type": "string",
                     "maxLength": 500,
                     "description": "Optional note for the agent, typically why a request was declined"
+                  },
+                  "grant": {
+                    "enum": [
+                      "once",
+                      "always",
+                      "reads"
+                    ],
+                    "type": "string",
+                    "description": "Required when approving a permission request; rejected on a resource provisioning request"
                   }
                 },
                 "required": [],
@@ -42718,6 +42964,47 @@
                       ],
                       "description": "Resource-specific options, if any"
                     },
+                    "permission": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "procedurePath": {
+                              "type": "string",
+                              "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                            },
+                            "readOnly": {
+                              "type": "boolean",
+                              "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                            },
+                            "argumentPreview": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                            }
+                          },
+                          "required": [
+                            "procedurePath",
+                            "readOnly",
+                            "argumentPreview"
+                          ],
+                          "description": "Present only on a permission request; null on a resource provisioning request"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "What the agent was refused, when this request records a permission rather than a resource"
+                    },
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time",
@@ -42771,6 +43058,7 @@
                     "reason",
                     "status",
                     "options",
+                    "permission",
                     "expiresAt",
                     "decidedAt",
                     "decidedNote",
@@ -43062,6 +43350,47 @@
                       ],
                       "description": "Resource-specific options, if any"
                     },
+                    "permission": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "procedurePath": {
+                              "type": "string",
+                              "description": "The master-gated procedure the agent tried to run, dotted — 'agent.delete'"
+                            },
+                            "readOnly": {
+                              "type": "boolean",
+                              "description": "Whether the procedure is read-only. Derived from the contract's HTTP method on the server so a client never re-derives it, and it is what makes Bypass applicable."
+                            },
+                            "argumentPreview": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Redacted sketch of the call's arguments. Null — rather than empty — when the input was not an object, so 'nothing to show' stays distinguishable from 'shown and empty'."
+                            }
+                          },
+                          "required": [
+                            "procedurePath",
+                            "readOnly",
+                            "argumentPreview"
+                          ],
+                          "description": "Present only on a permission request; null on a resource provisioning request"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "What the agent was refused, when this request records a permission rather than a resource"
+                    },
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time",
@@ -43115,6 +43444,7 @@
                     "reason",
                     "status",
                     "options",
+                    "permission",
                     "expiresAt",
                     "decidedAt",
                     "decidedNote",
@@ -43207,6 +43537,512 @@
                         "message": {
                           "type": "string",
                           "default": "This request is no longer pending."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{agentId}/permissions": {
+      "get": {
+        "operationId": "agentPermission.list",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Agent whose permissions to read"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "agentId": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "procedurePath": {
+                            "type": "string",
+                            "description": "Dotted procedure path — 'agent.delete'"
+                          },
+                          "group": {
+                            "enum": [
+                              "read",
+                              "write",
+                              "destructive"
+                            ],
+                            "type": "string",
+                            "description": "Derived from the procedure's HTTP method: read (GET), destructive (DELETE), write (everything else). Destructive is separated from write so 'may delete without asking' is a deliberate decision rather than one made in passing."
+                          },
+                          "state": {
+                            "enum": [
+                              "ASK",
+                              "ALWAYS_ALLOW",
+                              "NEVER"
+                            ],
+                            "type": "string",
+                            "description": "ASK (file a request and wait for the owner), ALWAYS_ALLOW (proceed without asking), NEVER (refuse outright and do not queue a request)."
+                          },
+                          "grantedBy": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Who last set this, when it came from an approval; null if never set"
+                          },
+                          "updatedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When it was last set; null while it has never been set"
+                          }
+                        },
+                        "required": [
+                          "procedurePath",
+                          "group",
+                          "state",
+                          "grantedBy",
+                          "updatedAt"
+                        ],
+                        "description": "One master-gated procedure and the owner's standing decision about it"
+                      }
+                    },
+                    "bypassReads": {
+                      "type": "boolean",
+                      "description": "Whether a blanket READS grant is live: the agent stops asking about read-only procedures entirely. The group-level control for the read group."
+                    }
+                  },
+                  "required": [
+                    "agentId",
+                    "items",
+                    "bypassReads"
+                  ],
+                  "description": "An agent's standing permissions, one row per master-gated procedure"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "FORBIDDEN"
+                        },
+                        "status": {
+                          "const": 403
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "Reading an agent's permissions requires master authority."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "NOT_FOUND"
+                        },
+                        "status": {
+                          "const": 404
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "No such agent in this organization."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "agentPermission.set",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Agent to change"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "procedurePath": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Procedure to set. Omit when setting bypassReads."
+                  },
+                  "state": {
+                    "enum": [
+                      "ASK",
+                      "ALWAYS_ALLOW",
+                      "NEVER"
+                    ],
+                    "type": "string",
+                    "description": "Required with procedurePath"
+                  },
+                  "bypassReads": {
+                    "type": "boolean",
+                    "description": "Turn the blanket read-only grant on or off. Omit when setting a procedure."
+                  }
+                },
+                "required": [],
+                "description": "Set one standing decision for an agent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "agentId": {
+                      "type": "string"
+                    },
+                    "procedurePath": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "state": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "ASK",
+                            "ALWAYS_ALLOW",
+                            "NEVER"
+                          ],
+                          "type": "string",
+                          "description": "ASK (file a request and wait for the owner), ALWAYS_ALLOW (proceed without asking), NEVER (refuse outright and do not queue a request)."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "ASK (file a request and wait for the owner), ALWAYS_ALLOW (proceed without asking), NEVER (refuse outright and do not queue a request)."
+                    },
+                    "bypassReads": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "agentId",
+                    "procedurePath",
+                    "state",
+                    "bypassReads"
+                  ],
+                  "description": "The decision as it now stands"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "FORBIDDEN"
+                        },
+                        "status": {
+                          "const": 403
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "Changing an agent's permissions requires master authority."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "NOT_FOUND"
+                        },
+                        "status": {
+                          "const": 404
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "No such agent in this organization."
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": false
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "number"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "data": {}
+                      },
+                      "required": [
+                        "defined",
+                        "code",
+                        "status",
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "defined": {
+                          "const": true
+                        },
+                        "code": {
+                          "const": "UNPROCESSABLE_CONTENT"
+                        },
+                        "status": {
+                          "const": 422
+                        },
+                        "message": {
+                          "type": "string",
+                          "default": "Set exactly one of procedurePath (with state) or bypassReads."
                         },
                         "data": {}
                       },

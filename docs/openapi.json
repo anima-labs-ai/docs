@@ -11165,6 +11165,16 @@
             },
             "allowEmptyValue": true,
             "allowReserved": true
+          },
+          {
+            "name": "unread",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "description": "When true, return only conversations with at least one unread message"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
           }
         ],
         "responses": {
@@ -11252,6 +11262,79 @@
                     "hasMore"
                   ],
                   "description": "Paginated list of SMS conversations"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/sms/stats": {
+      "get": {
+        "operationId": "phone.smsThreadStats",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Restrict to one agent. Omit for every agent in the org; ignored for agent keys, which always see only their own."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agentId": {
+                            "type": "string",
+                            "description": "Agent these totals belong to"
+                          },
+                          "conversations": {
+                            "type": "integer",
+                            "description": "Distinct SMS conversations"
+                          },
+                          "unread": {
+                            "type": "integer",
+                            "description": "Unread inbound messages across those conversations"
+                          },
+                          "lastMessageAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Most recent message across those conversations, or null if none"
+                          }
+                        },
+                        "required": [
+                          "agentId",
+                          "conversations",
+                          "unread",
+                          "lastMessageAt"
+                        ]
+                      },
+                      "description": "One entry per agent that has at least one SMS conversation"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "description": "Per-agent SMS conversation totals"
                 }
               }
             }
@@ -12012,6 +12095,220 @@
         }
       }
     },
+    "/phone/identities": {
+      "get": {
+        "operationId": "phone.listIdentities",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[cC][^\\s-]{8,}$",
+              "description": "Opaque cursor from a previous response to fetch the next page"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum number of items to return per page (1–100, default 20)"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Free-text search. Digits match the number itself, ignoring punctuation and spacing; the raw term also matches the owning agent's name or slug."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-z]+$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[cC][^\\s-]{8,}$"
+                }
+              ],
+              "description": "Restrict to one agent's numbers. Omit to list every number in the organization. An agent key is confined to its own numbers whether or not this is set."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[cC][^\\s-]{8,}$",
+                            "description": "Unique identifier of the phone identity"
+                          },
+                          "phoneNumber": {
+                            "type": "string",
+                            "description": "Phone number in E.164 format"
+                          },
+                          "providerId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Opaque carrier-side identifier for this phone number"
+                          },
+                          "capabilities": {
+                            "type": "object",
+                            "properties": {
+                              "sms": {
+                                "default": false,
+                                "type": "boolean",
+                                "description": "Whether the number supports SMS messaging"
+                              },
+                              "mms": {
+                                "default": false,
+                                "type": "boolean",
+                                "description": "Whether the number supports MMS messaging"
+                              },
+                              "voice": {
+                                "default": false,
+                                "type": "boolean",
+                                "description": "Whether the number supports voice calls"
+                              }
+                            },
+                            "description": "Communication capabilities supported by this phone number"
+                          },
+                          "tenDlcStatus": {
+                            "enum": [
+                              "PENDING",
+                              "REGISTERED",
+                              "REJECTED",
+                              "NOT_REQUIRED",
+                              "UNREGISTERED"
+                            ],
+                            "type": "string",
+                            "description": "10DLC campaign registration status"
+                          },
+                          "isPrimary": {
+                            "type": "boolean",
+                            "description": "Whether this is the agent's primary phone identity"
+                          },
+                          "voiceId": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The voice this number answers with, from the voice catalog. Null means it uses the agent's voice, and then the system default. Set it per number so one agent's support line and sales line can sound different."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Timestamp when the phone identity was created"
+                          },
+                          "agentId": {
+                            "type": "string",
+                            "description": "Agent that owns the number"
+                          },
+                          "agentName": {
+                            "type": "string",
+                            "description": "Name of the agent that owns the number"
+                          },
+                          "agentSlug": {
+                            "type": "string",
+                            "description": "Slug of the agent that owns the number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "phoneNumber",
+                          "providerId",
+                          "capabilities",
+                          "tenDlcStatus",
+                          "isPrimary",
+                          "voiceId",
+                          "createdAt",
+                          "agentId",
+                          "agentName",
+                          "agentSlug"
+                        ],
+                        "description": "Phone identity associated with an agent"
+                      },
+                      "description": "Phone identities matching the query, with their owning agent"
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "nextCursor": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[cC][^\\s-]{8,}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Cursor to pass as the `cursor` parameter to retrieve the next page, or null if no more results"
+                        },
+                        "hasMore": {
+                          "type": "boolean",
+                          "description": "Whether additional pages of results are available"
+                        }
+                      },
+                      "required": [
+                        "nextCursor",
+                        "hasMore"
+                      ],
+                      "description": "Cursor-based pagination metadata"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "pagination"
+                  ],
+                  "description": "Paginated list of phone numbers across an organization"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/phone/numbers/{phoneIdentityId}": {
       "patch": {
         "operationId": "phone.updateNumber",
@@ -12191,6 +12488,18 @@
               ],
               "type": "string",
               "description": "Filter vault identities by status"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Free-text search over the owning agent's name and slug"
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -24568,16 +24877,9 @@
                       "description": "Human-readable display name, or null if not set"
                     },
                     "agentId": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[cC][^\\s-]{8,}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "ID of the associated agent, or null if unassigned"
+                      "type": "string",
+                      "pattern": "^[cC][^\\s-]{8,}$",
+                      "description": "ID of the agent this inbox belongs to"
                     },
                     "createdAt": {
                       "type": "string",
@@ -24933,21 +25235,18 @@
                             "description": "Human-readable display name, or null if not set"
                           },
                           "agentId": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "pattern": "^[cC][^\\s-]{8,}$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "ID of the associated agent, or null if unassigned"
+                            "type": "string",
+                            "pattern": "^[cC][^\\s-]{8,}$",
+                            "description": "ID of the agent this inbox belongs to"
                           },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time",
                             "description": "Timestamp when the inbox was created"
+                          },
+                          "agentName": {
+                            "type": "string",
+                            "description": "Name of the agent that owns this inbox"
                           },
                           "unreadCount": {
                             "type": "integer",
@@ -24975,6 +25274,7 @@
                           "displayName",
                           "agentId",
                           "createdAt",
+                          "agentName",
                           "unreadCount",
                           "lastMessageAt"
                         ],
@@ -25074,16 +25374,9 @@
                       "description": "Human-readable display name, or null if not set"
                     },
                     "agentId": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[cC][^\\s-]{8,}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "ID of the associated agent, or null if unassigned"
+                      "type": "string",
+                      "pattern": "^[cC][^\\s-]{8,}$",
+                      "description": "ID of the agent this inbox belongs to"
                     },
                     "createdAt": {
                       "type": "string",
@@ -25250,16 +25543,9 @@
                       "description": "Human-readable display name, or null if not set"
                     },
                     "agentId": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "pattern": "^[cC][^\\s-]{8,}$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "ID of the associated agent, or null if unassigned"
+                      "type": "string",
+                      "pattern": "^[cC][^\\s-]{8,}$",
+                      "description": "ID of the agent this inbox belongs to"
                     },
                     "createdAt": {
                       "type": "string",
@@ -33481,6 +33767,19 @@
             "allowReserved": true
           },
           {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Free-text search matched against action, actor id, resource type and resource id. Combines with the exact-match filters rather than replacing them."
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
+          },
+          {
             "name": "startDate",
             "in": "query",
             "required": false,
@@ -33860,6 +34159,12 @@
                   "resourceType": {
                     "type": "string",
                     "description": "Filter by resource type"
+                  },
+                  "query": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "Free-text search matched against action, actor id, resource type and resource id, as on the list endpoint."
                   }
                 },
                 "required": [],

@@ -44438,7 +44438,7 @@
                     "minLength": 2,
                     "maxLength": 64,
                     "pattern": "^[a-z0-9-]+$",
-                    "description": "Preferred inbox username (e.g. 'my-agent' → 'my-agent@anima.email')"
+                    "description": "Preferred inbox username (e.g. 'my-agent' → 'my-agent@agents.useanima.sh')"
                   },
                   "name": {
                     "type": "string",
@@ -44449,6 +44449,21 @@
                   "provision_vault": {
                     "type": "boolean",
                     "description": "Provision an encrypted vault for the new agent as part of sign-up. This is the only way a self-service agent can obtain a first vault: `vault.provision` is master-gated, and sign-up never discloses the master key. Safe here precisely because the org is being created by this same call — there is no existing privilege to escalate from."
+                  },
+                  "source": {
+                    "default": "unknown",
+                    "enum": [
+                      "smithery",
+                      "cline",
+                      "dxt",
+                      "open-mcp",
+                      "cli",
+                      "skill-md",
+                      "web",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "description": "Channel that produced this sign-up (e.g. 'smithery'). Optional; defaults to 'unknown'. Unrecognised values coerce rather than fail."
                   }
                 },
                 "required": [
@@ -44478,7 +44493,7 @@
                     },
                     "inbox_id": {
                       "type": "string",
-                      "description": "Your email address (e.g. 'my-agent@anima.email')"
+                      "description": "Your email address (e.g. 'my-agent@agents.useanima.sh')"
                     },
                     "api_key": {
                       "type": "string",

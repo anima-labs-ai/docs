@@ -6385,7 +6385,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Explicit References chain (RFC 5322 Message-IDs, oldest first) emitted on the wire. If omitted on a reply, the chain is derived from the replied-to message automatically."
+                    "description": "Explicit References chain, oldest first: one RFC 5322 Message-ID per entry (an email's externalId). Anything else, such as an Anima message id, is ignored. On a reply, this chain is used only if it includes the replied-to message's Message-ID; otherwise, or if omitted, the chain is derived from the replied-to message automatically (its References plus its Message-ID)."
                   }
                 },
                 "required": [
@@ -19329,7 +19329,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Explicit References chain (RFC 5322 Message-IDs, oldest first) emitted on the wire. If omitted on a reply, the chain is derived from the replied-to message automatically."
+                    "description": "Explicit References chain, oldest first: one RFC 5322 Message-ID per entry (an email's externalId). Anything else, such as an Anima message id, is ignored. On a reply, this chain is used only if it includes the replied-to message's Message-ID; otherwise, or if omitted, the chain is derived from the replied-to message automatically (its References plus its Message-ID)."
                   }
                 },
                 "required": [
@@ -44438,7 +44438,7 @@
                     "minLength": 2,
                     "maxLength": 64,
                     "pattern": "^[a-z0-9-]+$",
-                    "description": "Preferred inbox username (e.g. 'my-agent' → 'my-agent@anima.email')"
+                    "description": "Preferred inbox username (e.g. 'my-agent' → 'my-agent@agents.useanima.sh')"
                   },
                   "name": {
                     "type": "string",
@@ -44449,6 +44449,21 @@
                   "provision_vault": {
                     "type": "boolean",
                     "description": "Provision an encrypted vault for the new agent as part of sign-up. This is the only way a self-service agent can obtain a first vault: `vault.provision` is master-gated, and sign-up never discloses the master key. Safe here precisely because the org is being created by this same call — there is no existing privilege to escalate from."
+                  },
+                  "source": {
+                    "default": "unknown",
+                    "enum": [
+                      "smithery",
+                      "cline",
+                      "dxt",
+                      "open-mcp",
+                      "cli",
+                      "skill-md",
+                      "web",
+                      "unknown"
+                    ],
+                    "type": "string",
+                    "description": "Channel that produced this sign-up (e.g. 'smithery'). Optional; defaults to 'unknown'. Unrecognised values coerce rather than fail."
                   }
                 },
                 "required": [
@@ -44478,7 +44493,7 @@
                     },
                     "inbox_id": {
                       "type": "string",
-                      "description": "Your email address (e.g. 'my-agent@anima.email')"
+                      "description": "Your email address (e.g. 'my-agent@agents.useanima.sh')"
                     },
                     "api_key": {
                       "type": "string",
@@ -47193,6 +47208,17 @@
               "type": "string",
               "minLength": 1
             }
+          },
+          {
+            "name": "redirectUri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "If set, the response says whether this exact URI is registered for the app, so the consent screen can refuse before redirecting anywhere"
+            },
+            "allowEmptyValue": true,
+            "allowReserved": true
           }
         ],
         "responses": {
@@ -47276,6 +47302,19 @@
                     },
                     "approved": {
                       "type": "boolean"
+                    },
+                    "status": {
+                      "enum": [
+                        "PENDING_REVIEW",
+                        "APPROVED",
+                        "SUSPENDED"
+                      ],
+                      "type": "string",
+                      "description": "APPROVED: vetted by Anima. PENDING_REVIEW: not vetted, which every self-registered client starts as. SUSPENDED: refused everywhere: no new codes, no refreshes, and its live access tokens stop working."
+                    },
+                    "redirectUriRegistered": {
+                      "type": "boolean",
+                      "description": "Present when redirectUri was passed: whether it exactly matches one of the app's registered redirect URIs"
                     }
                   },
                   "required": [
@@ -47287,7 +47326,8 @@
                     "privacyPolicyUrl",
                     "termsOfServiceUrl",
                     "ownerOrgName",
-                    "approved"
+                    "approved",
+                    "status"
                   ],
                   "description": "Public-safe OAuth app metadata for the consent screen"
                 }

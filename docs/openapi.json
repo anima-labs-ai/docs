@@ -6434,7 +6434,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -6616,6 +6618,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -6731,6 +6745,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -6832,7 +6847,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -7014,6 +7031,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -7129,6 +7158,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -7191,7 +7221,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -7373,6 +7405,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -7488,6 +7532,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -7561,7 +7606,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -7743,6 +7790,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -7858,6 +7917,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -7928,7 +7988,9 @@
                 "EMAIL",
                 "SMS",
                 "MMS",
-                "VOICE"
+                "VOICE",
+                "WHATSAPP",
+                "RCS"
               ],
               "type": "string",
               "description": "Filter messages by communication channel"
@@ -7946,7 +8008,9 @@
                   "EMAIL",
                   "SMS",
                   "MMS",
-                  "VOICE"
+                  "VOICE",
+                  "WHATSAPP",
+                  "RCS"
                 ],
                 "type": "string",
                 "description": "Communication channel used for the message"
@@ -8144,7 +8208,9 @@
                               "EMAIL",
                               "SMS",
                               "MMS",
-                              "VOICE"
+                              "VOICE",
+                              "WHATSAPP",
+                              "RCS"
                             ],
                             "type": "string",
                             "description": "Communication channel used"
@@ -8326,6 +8392,18 @@
                             ],
                             "description": "Timestamp when the message was received, or null for outbound messages"
                           },
+                          "readAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                          },
                           "attachments": {
                             "type": "array",
                             "items": {
@@ -8441,6 +8519,7 @@
                           "deletedAt",
                           "sentAt",
                           "receivedAt",
+                          "readAt",
                           "attachments",
                           "createdAt",
                           "updatedAt"
@@ -8517,7 +8596,9 @@
                           "EMAIL",
                           "SMS",
                           "MMS",
-                          "VOICE"
+                          "VOICE",
+                          "WHATSAPP",
+                          "RCS"
                         ],
                         "type": "string",
                         "description": "Filter results by communication channel"
@@ -8675,7 +8756,9 @@
                               "EMAIL",
                               "SMS",
                               "MMS",
-                              "VOICE"
+                              "VOICE",
+                              "WHATSAPP",
+                              "RCS"
                             ],
                             "type": "string",
                             "description": "Communication channel used"
@@ -8857,6 +8940,18 @@
                             ],
                             "description": "Timestamp when the message was received, or null for outbound messages"
                           },
+                          "readAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                          },
                           "attachments": {
                             "type": "array",
                             "items": {
@@ -8987,6 +9082,7 @@
                           "deletedAt",
                           "sentAt",
                           "receivedAt",
+                          "readAt",
                           "attachments",
                           "createdAt",
                           "updatedAt",
@@ -9120,7 +9216,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -9302,6 +9400,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -9417,6 +9527,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -9492,7 +9603,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -9674,6 +9787,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -9789,6 +9914,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -10818,7 +10944,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -11000,6 +11128,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -11115,6 +11255,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -11426,7 +11567,9 @@
                               "EMAIL",
                               "SMS",
                               "MMS",
-                              "VOICE"
+                              "VOICE",
+                              "WHATSAPP",
+                              "RCS"
                             ],
                             "type": "string",
                             "description": "Communication channel used"
@@ -11608,6 +11751,18 @@
                             ],
                             "description": "Timestamp when the message was received, or null for outbound messages"
                           },
+                          "readAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                          },
                           "attachments": {
                             "type": "array",
                             "items": {
@@ -11723,6 +11878,7 @@
                           "deletedAt",
                           "sentAt",
                           "receivedAt",
+                          "readAt",
                           "attachments",
                           "createdAt",
                           "updatedAt"
@@ -11790,7 +11946,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Filter to a single recipient phone number (E.164 or close; normalized server-side)"
+              "description": "Filter to a single recipient (a phone number is normalized to E.164; anything else is matched as given)"
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -11918,7 +12074,7 @@
                     "type": "string",
                     "minLength": 7,
                     "maxLength": 20,
-                    "description": "Recipient phone number to unsuppress (E.164 or close; normalized server-side)"
+                    "description": "Recipient phone number to unsuppress (normalized to E.164; anything else is matched as given)"
                   }
                 },
                 "required": [
@@ -11939,7 +12095,7 @@
                   "properties": {
                     "phoneNumber": {
                       "type": "string",
-                      "description": "The normalized phone number that was unsuppressed"
+                      "description": "The recipient that was unsuppressed, as stored (a phone number normalized to E.164; anything else matched as given)"
                     },
                     "removed": {
                       "type": "integer",
@@ -19378,7 +19534,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -19560,6 +19718,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -19675,6 +19845,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -20026,7 +20197,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -20208,6 +20381,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -20323,6 +20508,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -20478,7 +20664,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -20660,6 +20848,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -20775,6 +20975,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -20837,7 +21038,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -21019,6 +21222,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -21134,6 +21349,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
@@ -21333,7 +21549,9 @@
                               "EMAIL",
                               "SMS",
                               "MMS",
-                              "VOICE"
+                              "VOICE",
+                              "WHATSAPP",
+                              "RCS"
                             ],
                             "type": "string",
                             "description": "Communication channel used"
@@ -21515,6 +21733,18 @@
                             ],
                             "description": "Timestamp when the message was received, or null for outbound messages"
                           },
+                          "readAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                          },
                           "attachments": {
                             "type": "array",
                             "items": {
@@ -21630,6 +21860,7 @@
                           "deletedAt",
                           "sentAt",
                           "receivedAt",
+                          "readAt",
                           "attachments",
                           "createdAt",
                           "updatedAt"
@@ -22876,7 +23107,9 @@
                         "EMAIL",
                         "SMS",
                         "MMS",
-                        "VOICE"
+                        "VOICE",
+                        "WHATSAPP",
+                        "RCS"
                       ],
                       "type": "string",
                       "description": "Communication channel used"
@@ -23058,6 +23291,18 @@
                       ],
                       "description": "Timestamp when the message was received, or null for outbound messages"
                     },
+                    "readAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Outbound WhatsApp and RCS messages only: when the recipient's device reported the message as read. Null for inbound messages and for every other channel. Unrelated to the read and unread labels, which record whether the agent has handled a message."
+                    },
                     "attachments": {
                       "type": "array",
                       "items": {
@@ -23173,6 +23418,7 @@
                     "deletedAt",
                     "sentAt",
                     "receivedAt",
+                    "readAt",
                     "attachments",
                     "createdAt",
                     "updatedAt"
